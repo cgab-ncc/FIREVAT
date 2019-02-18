@@ -1,7 +1,19 @@
+# FIREVAT Configure Functions
+#
+# Last revised date:
+#   February 18, 2019
+#
+# Authors:
+#   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
+#   Hyunbin Kim (khb7840@ncc.re.kr)
+#   Bioinformatics Analysis Team, National Cancer Center Korea
+
+
 #' @title ParseConfigFile
-#' @description This function returns config.obj from JSON or YAML config file.
-#'   - Check if the config file is in JSON format or YAML format
-#'   - Return config.obj 
+#' @description 
+#' This function returns config.obj from JSON or YAML config file.
+#' - Check if the config file is in JSON format or YAML format
+#' - Return config.obj 
 #'
 #' @param config.path A string for config file path
 #' @param verbose If true, provides process detail
@@ -26,7 +38,8 @@ ParseConfigFile <- function(config.path, verbose=TRUE){
     # Check if config file is in json format
     if (jsonlite::validate(config.string)==TRUE){
         config.obj <- read_json(config.path)
-    }else{
+    }
+    else{
         tryCatch({
             config.obj <- read_yaml(config.path)
         }, error = function(e){

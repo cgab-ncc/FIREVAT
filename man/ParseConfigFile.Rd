@@ -16,8 +16,8 @@ config.obj: list of parameters
 }
 \description{
 This function returns config.obj from JSON or YAML config file.
-  - Check if the config file is in JSON format or YAML format
-  - Return config.obj
+- Check if the config file is in JSON format or YAML format
+- Return config.obj
 }
 \examples{
 \dontrun{

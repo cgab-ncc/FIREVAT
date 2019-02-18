@@ -1,7 +1,7 @@
 # FIREVAT Utility Functions
 #
 # Last revised date:
-#   February 15, 2019
+#   February 18, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -9,9 +9,7 @@
 #   Bioinformatics Analysis Team, National Cancer Center Korea
 
 #' @title GetPCAWGMutSigs
-#'
 #' @description Returns the PCAWG mutational signatures data
-#'
 #' @return a data.frame of the PCAWG mutatioanl signatures
 #' @export
 #' @importFrom utils read.csv
@@ -30,11 +28,8 @@ GetPCAWGMutSigs <- function()  {
     return(df.pcawg.mut.sigs)
 }
 
-
 #' @title GetPCAWGMutSigsNames
-#'
 #' @description Returns the PCAWG mutational signatures names
-#'
 #' @return a character vector of the PCAWG mutational signatures names
 #' @export
 GetPCAWGMutSigsNames <- function()  {
@@ -43,14 +38,11 @@ GetPCAWGMutSigsNames <- function()  {
     return(pcawg.mut.sig.names)
 }
 
-
 #' @title GetPCAWGMutSigsEtiologiesColors
-#'
 #' @description Returns the PCAWG mutational signatures etiologies and colors
-#'
-#' @return a data.frame with the columns 'signature', 'group', 'color'
 #' @export
 #' @importFrom utils read.csv
+#' @return a data.frame with the columns 'signature', 'group', 'color'
 GetPCAWGMutSigsEtiologiesColors <- function()  {
     f <- "../data/reference/mutational_signatures/PCAWG_Signatures_Groups_Colors.csv"
     df.pcawg.mut.sigs <- read.csv(f, 
@@ -60,15 +52,12 @@ GetPCAWGMutSigsEtiologiesColors <- function()  {
     return(df.pcawg.mut.sigs)
 }
 
-
 #' @title GetCOSMICMutSigs
-#'
 #' @description Returns a data.frame of the COSMIC mutational signature reference file 
-#'   from the data directory
-#'
-#' @return a data.frame of the COSMIC reference mutational signatures
+#' from the data directory
 #' @export
 #' @importFrom utils read.csv
+#' @return a data.frame of the COSMIC reference mutational signatures
 GetCOSMICMutSigs <- function()  {
    
     f <- "../data/reference/mutational_signatures/COSMIC_Signatures_Probabilities.csv"
@@ -86,11 +75,8 @@ GetCOSMICMutSigs <- function()  {
     return(df.cosmic.mut.sigs)
 }
 
-
 #' @title GetCOSMICMutSigsNames
-#'
 #' @description Returns all COSMIC mutational signature names
-#'
 #' @return a character vector
 #' @export
 GetCOSMICMutSigsNames <- function()  {
@@ -108,11 +94,8 @@ GetCOSMICMutSigsNames <- function()  {
     return(cosmic.mut.sig.names)
 }
 
-
 #' @title GetCOSMICMutSigsNames
-#'
 #' @description Returns all COSMIC mutational signature etiologies and colors
-#'
 #' @return data.frame with following columns: signature, group and color.
 #' @export
 #' @importFrom utils read.csv
@@ -125,9 +108,7 @@ GetCOSMICMutSigsEtiologiesColors <- function()  {
     return(df.cosmic.mut.sigs)
 }
 
-
 #' @title EnumerateTriNucCounts
-#'
 #' @description Returns C>A, C>G, C>T, T>A, T>C, T>G counts
 #'
 #' @param spectrum a numeric vector with 96 numeric values

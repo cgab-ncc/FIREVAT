@@ -1,16 +1,14 @@
-Package: FIREVAT
 Type: Package
-Title: What the Package Does (Title Case)
+Title: FIREVAT, FInding REliable Variants without ArTifacts
+Description: FIREVAT is a variant filtering tool for cancer sequencing data, 
+    which uses mutational signatures to identify sequencing artifacts and 
+    low-quality variants.
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: GPL-2
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 6.1.1
+Authors: Andy Jinseok Lee, Hyunbin Kim
+Maintainer: Andy Jinseok Lee <jinseok.lee@ncc.re.kr>, Hyunbin Kim <khb7840@ncc.re.kr>
 Imports: 
+    data.table,
+    stringi,
     bedr,
     GA,
     jsonlite,
@@ -21,13 +19,25 @@ Imports:
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38,
     ggpubr,
-    data.table,
     caTools,
     ggrepel,
     gridExtra,
-    stringi,
-    ggplot2
+    ggplot2,
+    reshape2,
+    rmarkdown,
+    gtable
+Package: FIREVAT
+Authors@R: c(
+    person("Andy Jinseok", "Lee", email="jinseok.lee@ncc.re.kr",
+    role=c("aut","cre")),
+    person("Hyunbin", "Kim", email="khb7840@ncc.re.kr",
+    role="aut")
+    )
+URL: https://github.com/cgab-ncc/FIREVAT
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
 Suggests: 
-    knitr,
-    rmarkdown
+    knitr
 VignetteBuilder: knitr

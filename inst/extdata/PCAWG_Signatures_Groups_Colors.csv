@@ -1,0 +1,66 @@
+signature,group,color
+SBS1,Age,#FCC201
+SBS5,Age,#FCC201
+SBS2,APOBEC Activity,#F99D4D
+SBS13,APOBEC Activity,#F99D4D
+SBS3,Homologous Recombination Deficiency,#FF555E
+SBS4,Tobacco Smoking/Chewing,#00C891
+SBS29,Tobacco Smoking/Chewing,#00C891
+SBS6,Defective DNA Mismatch Repair,#FF8650
+SBS14,Defective DNA Mismatch Repair,#FF8650
+SBS15,Defective DNA Mismatch Repair,#FF8650
+SBS20,Defective DNA Mismatch Repair,#FF8650
+SBS21,Defective DNA Mismatch Repair,#FF8650
+SBS26,Defective DNA Mismatch Repair,#FF8650
+SBS44,Defective DNA Mismatch Repair,#FF8650
+SBS7a,Ultraviolet Light Exposure,#8BF18B
+SBS7b,Ultraviolet Light Exposure,#8BF18B
+SBS7c,Ultraviolet Light Exposure,#8BF18B
+SBS7d,Ultraviolet Light Exposure,#8BF18B
+SBS38,Possible Ultraviolet Light Exposure,#8BF18B
+SBS9,Somatic Hypermutation,#E98C1C
+SBS36,MUTYH Mutations,#B5EAD7
+SBS10a,POLE Mutations,#FFDAC1
+SBS10b,POLE Mutations,#FFDAC1
+SBS30,NTHL1 Mutations,#FFE981
+SBS11,Alkylating Agent Temozolomide,#DA9101
+SBS18,Damage by Reactive Oxygen Species,#ABE7F4
+SBS22,Exposure to Aristolochic Acid,#C7CEEA
+SBS24,Aflatoxin,#9B6EF3
+SBS42,Exposure to Haloalkanes,#006FFF
+SBS31,Prior Treatment with Platinum Drugs,#CCCCCC
+SBS35,Prior Treatment with Platinum Drugs,#CCCCCC
+SBS32,Prior Treatment with Azathioprine,#83B2FF
+SBS8,Unknown,#808080
+SBS12,Unknown,#808080
+SBS16,Unknown,#808080
+SBS17a,Unknown,#808080
+SBS17b,Unknown,#808080
+SBS19,Unknown,#808080
+SBS23,Unknown,#808080
+SBS25,Unknown,#808080
+SBS28,Unknown,#808080
+SBS33,Unknown,#808080
+SBS34,Unknown,#808080
+SBS37,Unknown,#808080
+SBS39,Unknown,#808080
+SBS40,Unknown,#808080
+SBS41,Unknown,#808080
+SBS60,Known Sequencing Artifact,#CA302F
+SBS45,OxoG Sequencing Artifact,#CA302F
+SBS27,Possible Sequencing Artifact,#D10161
+SBS43,Possible Sequencing Artifact,#D10161
+SBS49,Possible Sequencing Artifact,#D10161
+SBS51,Possible Sequencing Artifact,#D10161
+SBS52,Possible Sequencing Artifact,#D10161
+SBS46,Likely Sequencing Artifact,#D10161
+SBS47,Likely Sequencing Artifact,#D10161
+SBS48,Likely Sequencing Artifact,#D10161
+SBS50,Likely Sequencing Artifact,#D10161
+SBS53,Likely Sequencing Artifact,#D10161
+SBS54,Potential Sequencing Artifact,#D10161
+SBS55,Potential Sequencing Artifact,#D10161
+SBS56,Potential Sequencing Artifact,#D10161
+SBS57,Potential Sequencing Artifact,#D10161
+SBS58,Potential Sequencing Artifact,#D10161
+SBS59,Potential Sequencing Artifact,#D10161

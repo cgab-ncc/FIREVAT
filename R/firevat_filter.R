@@ -1,3 +1,14 @@
+# FIREVAT Filtering Functions
+#
+# Last revised date:
+#   February 18, 2019
+#
+# Authors:
+#   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
+#   Hyunbin Kim (khb7840@ncc.re.kr)
+#   Bioinformatics Analysis Team, National Cancer Center Korea
+
+
 #' @title MakeFilterFromConfig
 #' @description Creates a vcf filter from config.obj
 #'

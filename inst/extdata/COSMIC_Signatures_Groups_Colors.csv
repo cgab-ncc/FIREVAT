@@ -1,0 +1,31 @@
+signature,group,color
+Signature 1,Age,#FF0000
+Signature 5,Age,#FF0000
+Signature 2,APOBEC Activity,#FF9900
+Signature 13,APOBEC Activity,#FF9900
+Signature 3,Homologous Recombination Defiency,#00B050
+Signature 6,Defective DNA Mismatch Repair,#00B0F0
+Signature 15,Defective DNA Mismatch Repair,#00B0F0
+Signature 20,Defective DNA Mismatch Repair,#00B0F0
+Signature 26,Defective DNA Mismatch Repair,#00B0F0
+Signature 4,Tobacco Smoking/Chewing,#0070C0
+Signature 29,Tobacco Smoking/Chewing,#0070C0
+Signature 7,Ultraviolet Light Exposure,#FF00FF
+Signature 10,POLE Mutations,#9900FF
+Signature 22,Exposure to Aristolochic Acid,#666666
+Signature 11,Alkylating Agent Temozolomide,#38761D
+Signature 24,Aflatoxin,#F1C232
+Signature 9,Somatic Hypermutation,#990033
+Signature 8,Unknown,#808080
+Signature 12,Unknown,#808080
+Signature 14,Unknown,#808080
+Signature 16,Unknown,#808080
+Signature 17,Unknown,#808080
+Signature 18,Unknown,#808080
+Signature 19,Unknown,#808080
+Signature 21,Unknown,#808080
+Signature 23,Unknown,#808080
+Signature 25,Unknown,#808080
+Signature 27,Unknown,#808080
+Signature 28,Unknown,#808080
+Signature 30,Unknown,#808080

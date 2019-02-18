@@ -1,12 +1,13 @@
 # FIREVAT Constants
 #
 # Last revised date:
-#   February 15, 2019
+#   February 18, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.kr)
 #   Bioinformatics Analysis Team, National Cancer Center Korea
+
 
 # PCAWG Target Mutational Signatures Reported to be Unrelated to Sequencing Artifacts)
 PCAWG.Target.Mutational.Signatures <- c("SBS1","SBS2","SBS3","SBS4","SBS5","SBS6",

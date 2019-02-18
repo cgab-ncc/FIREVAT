@@ -1,7 +1,7 @@
 # FIREVAT Main Functions
 #
 # Last revised date:
-#   February 15, 2019
+#   February 18, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -9,19 +9,44 @@
 #   Bioinformatics Analysis Team, National Cancer Center of Korea
 
 
-RunFIREVATfromConfig <- function(vcf.file, 
-                                 config.file,
-                                 vcf.file.genome, 
-                                 df.ref.mut.sigs, 
-                                 target.mut.sigs, 
-                                 sequencing.artifact.mut.sigs,
-                                 num.cores, 
-                                 output.dir, 
-                                 pop.size = 200,
-                                 max.iter = 200,
-                                 run = 50, 
-                                 pmutation = 0.25,
-                                 verbose = TRUE)  {
+#' @title RunFIREVAT
+#' @description
+#' Runs FIREVAT using configuration data
+#'
+#' @param vcf.file String value corresponding to input .vcf file (full path)
+#' @param vcf.file.genome Genome assembly of the input .vcf file
+#' @param config.file String value corresponding to input configuration file (refer to ...)
+#' @param df.ref.mut.sigs A data.frame of the reference mutational signatures
+#' @param target.mut.sigs A character vector of the target mutational signatures (from reference mutational signatures)
+#' @param sequencing.artifact.mut.sigs A character vector of the sequencing artifact mutational signatures (from reference mutational signatures)
+#' @param num.cores Number of cores to allocate
+#' @param output.dir String value of the desired output directory
+#' @param pop.size Integer value of the Genetic Algorithm 'population size' parameter 
+#' @param max.iter Integer value of the Genetic Algorithm 'maximum iterations' parameter
+#' @param run Integer value of the Genetic Algorithm 'run' parameter
+#' @param pmutation Float value of the Genetic Algorithm 'mutation probability' parameter
+#' @param verbose If true, provides process detail 
+#'
+#' @export 
+#' @importFrom GA ga
+#' @return A list with the following elements
+#' \itemize{
+#'  \item{x.solution.decimal}{A numeric vector of optimized parameter values}
+#'  \item{data}{}
+#' }
+RunFIREVAT <- function(vcf.file,
+                       vcf.file.genome,
+                       config.file,
+                       df.ref.mut.sigs, 
+                       target.mut.sigs, 
+                       sequencing.artifact.mut.sigs,
+                       num.cores, 
+                       output.dir,
+                       pop.size = 200,
+                       max.iter = 200,
+                       run = 50, 
+                       pmutation = 0.25,
+                       verbose = TRUE)  {
     # Filters point mutations in the specified vcf.file based on mutational signature 
     # decomposition and outputs the filtered vcf data and metadata related to the
     # filtering process
@@ -41,7 +66,20 @@ RunFIREVATfromConfig <- function(vcf.file,
     # Returns:
     #
 
-    # 
+    # Check input parameters
+    if (is.character(vcf.file) == F)  {
+        stop("The parameter 'vcf.file' must be a string")
+    }
+    if (vcf.file.genome != 'hg19' && vcf.file.genome != 'hg38')  {
+        stop("The parameter 'vcf.file.genome' must be either 'hg19' or 'hg38'")
+    }
+    if (is.character(config.file) == F)  {
+        stop("The parameter 'config.file' must be a string")
+    }
+    if (is.data.frame(df.ref.mut.sigs) == F)  {
+        stop("The parameter 'df.ref.mut.sigs' must be a data.frame")
+    }
+
     start.datetime <- Sys.time()
     if (verbose) {
         print(start.datetime)
@@ -57,22 +95,23 @@ RunFIREVATfromConfig <- function(vcf.file,
     }
     
     # Read the vcf file
-    vcf.obj <- ReadVCF(vcf.file = vcf.file,
-                       genome = vcf.file.genome)
+    vcf.obj <- ReadVCF(vcf.file = vcf.file, genome = vcf.file.genome)
 
+    # Read the config file
     config.obj <- ParseConfigFile(config.file, verbose = verbose)
     
-    # Initially select point mutations with all 7 FORMAT parameters and consider
-    # this the initial set of mutations
+    # Initially select point mutations that satisfy the config file and 
+    # consider these the initial set of mutations
     vcf.objs <- InitializeVCFFromConfig(vcf.obj = vcf.obj,
                                         config.obj = config.obj,
                                         verbose = verbose)
-
     vcf.obj <- vcf.objs$vcf.obj.filtered
 
-
+    # Make filter from config file
     vcf.filter <- MakeFilterFromConfig(config.obj)
 
+    # FIREVAT can only be run if there are more than 50 point mutations
+    # in the initial vcf file
     if (nrow(vcf.obj$data) <= 50)  {
         print("FIREVAT must have at least 50 mutations to run.")
         return()
@@ -118,21 +157,20 @@ RunFIREVATfromConfig <- function(vcf.file,
                      pmutation = pmutation,
                      monitor = function(obj) GAMonitorFn(obj, data),
                      keepBest = T)
-    # parallel = num.cores,
-    
-    print(summary(ga.results))
     print("Finished running optimization part")
-    
+
+    # Parse optimized results
     x.solution.binary <- as.numeric(ga.results@solution[1,]) 
-    
-    x.solution.decimal <- GADecodeBinaryString(
-        string = x.solution.binary, data = data
-    )
-    
-    print("Optimized binary solution")
+    x.solution.decimal <- GADecodeBinaryString(string = x.solution.binary, 
+                                               data = data)
+
+    print("FIREVAT results")    
+    print(summary(ga.results))
+
+    print("FIREVAT optimized binary values of filter parameters")
     print(x.solution.binary)
     
-    print("Optimized decimal solution")
+    print("FIREVAT Optimized decimal values of filter parameters")
     print(x.solution.decimal)
     
     data$end.datetime <- Sys.time()
