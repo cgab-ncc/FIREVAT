@@ -3,12 +3,12 @@
 # FIREVAT Run
 #
 # Last revised date:
-#   February 18, 2019
+#   February 19, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.kr)
-#   Clincial Genomics Analysis Branch, National Cancer Center of Korea
+#   Bioinformatics Analysis Team, National Cancer Center Korea
 
 ## Scripts for FIREVAT command line usage
 ## $FIREVAT_path/firevat_run.R --configure-file example.json --vcf query.vcf --output output.vcf --report

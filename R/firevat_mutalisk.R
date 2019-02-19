@@ -2,21 +2,23 @@
 # Adapted from Mutalisk (Lee et al., Nucleic Acids Research 2018; PMID 29790943)
 #
 # Last revised date:
-#   February 18, 2019
+#   February 19, 2019
 #
-# Authors: 
+# Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.kr)
-#   Clincial Genomics Analysis Branch, National Cancer Center of Korea
+#   Bioinformatics Analysis Team, National Cancer Center Korea
+
 
 #' @title MutaliskParseVCFObj
 #' @description Parses a vcf.obj and prepares it to run Mutalisk.
-#' 
+#'
 #' @param vcf.obj A list from ReadVCF
+#'
+#' @return A data.frame
 #'
 #' @export
 #' @importFrom deconstructSigs mut.to.sigs.input
-#' @return A data.frame
 MutaliskParseVCFObj <- function(vcf.obj)  {
     if (vcf.obj$genome == "hg19")  {
         bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
@@ -24,7 +26,7 @@ MutaliskParseVCFObj <- function(vcf.obj)  {
     if (vcf.obj$genome == "hg38")  {
         bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
     }
-    
+
     vcf.obj$data$Sample <- rep("sample", nrow(vcf.obj$data))
     df.deconstructsigs.sigs.input <- mut.to.sigs.input(mut.ref = vcf.obj$data,
                                                        sample.id = "Sample",
@@ -33,9 +35,9 @@ MutaliskParseVCFObj <- function(vcf.obj)  {
                                                        ref = "REF",
                                                        alt = "ALT",
                                                        bsg = bsg)
-    
+
     df.temp <- t(df.deconstructsigs.sigs.input)
-    
+
     mutation.types <- rownames(df.temp)
     context.both.strand <- c()
     for (curr.mutation.type in mutation.types)  {
@@ -47,12 +49,13 @@ MutaliskParseVCFObj <- function(vcf.obj)  {
     }
     context.both.strand <- c(context.both.strand, "TOTAL")
     freq <- c(as.numeric(df.temp), sum(as.numeric(df.temp)))
-    
+
     df.mutalisk.input <- data.frame(list(context_both_strand = context.both.strand,
                                          freq = freq),
                                     stringsAsFactors = F)
     return(df.mutalisk.input)
 }
+
 
 #' @title MutaliskSigNamesToIndices
 #' @description Converts target.mut.sigs to an integer vector corresponding to the indices in df.ref.mut.sigs
@@ -60,41 +63,42 @@ MutaliskParseVCFObj <- function(vcf.obj)  {
 #' @param df.ref.mut.sigs A data.frame of reference mutational signatures
 #' @param target.mut.sigs A character vector of target mutational signatures names
 #'
-#' @keywords internal
-#' @return An integer vector of target mutational signatures indices 
+#' @return An integer vector of target mutational signatures indices
 #' (the first target mutational signature (e.g. 'SBS1') gets assigned a value of 1)
-MutaliskSigNamesToIndices <- function(df.ref.mut.sigs, 
+#'
+#' @keywords internal
+MutaliskSigNamesToIndices <- function(df.ref.mut.sigs,
                                       target.mut.sigs)  {
     target.mut.sigs.indices <- which(colnames(df.ref.mut.sigs) %in% target.mut.sigs)
     return(target.mut.sigs.indices - 3)
 }
 
+
 #' @title MutaliskSigIndicesToNames
-#' @description Converts target mutational signatures indices to the corresponding target 
+#' @description Converts target mutational signatures indices to the corresponding target
 #' mutational signatures integer vector corresponding to the indices in df.ref.mut.sigs
 #'
 #' @param df.ref.mut.sigs A data.frame of reference mutational signatures
 #' @param target.mut.sigs.indices An integer vector of target mutational signatures indices
 #' (the first PCAWG signature, SBS1, has a value of 1)
 #'
-#' @keywords internal
 #' @return A character vector of target mutational signatures names
+#'
+#' @keywords internal
 MutaliskSigIndicesToNames <- function(df.ref.mut.sigs,
                                       target.mut.sigs.indices)  {
     target.mut.sigs.indices <- target.mut.sigs.indices + 3
     return(colnames(df.ref.mut.sigs)[target.mut.sigs.indices])
 }
 
+
 #' @title RunMutaliskHelper
 #' @description Helper function for RunMutalisk
-#' 
+#'
 #' @param vcf.trinucleotide.data A data.frame (from firevat_mutalisk::MutaliskParseVCFObj)
 #' @param df.ref.mut.sigs A data.frame of reference mutational signatures
 #' @param target.mut.sigs A character vector of target mutational signatures names
 #'
-#' @export
-#' @import lsa
-#' @importFrom caTools combs
 #' @return A list with the following elements
 #' \itemize{
 #'  \item{num.point.mutations}{An integer value - count of total point mutations}
@@ -107,12 +111,16 @@ MutaliskSigIndicesToNames <- function(df.ref.mut.sigs,
 #'  \item{identified.mut.sigs.spectrum}{A numeric vector of length 96}
 #'  \item{residuals}{A numeric vector of length 96}
 #'  \item{rss}{A numeric value (residual sum of squares)}
-#'  \item{cos.sim.score}{A numeric value (cosine similarity score between observed mutational spectrum and 
+#'  \item{cos.sim.score}{A numeric value (cosine similarity score between observed mutational spectrum and
 #'   reconstructed mutational signatures)}
 #'  \item{all.models.sigs}{A list where each element is a model; a model is a list of signatures identified)}
 #'  \item{all.models.sigs.probs}{A list where each element is a model; a model is a list of contribution probabilities}
 #'  \item{all.models.cos.sim.scores}{A list where each element is a model; a model is a list of cosine similarity socres}
 #' }
+#'
+#' @export
+#' @import lsa
+#' @importFrom caTools combs
 RunMutaliskHelper <- function(vcf.trinucleotide.data,
                               df.ref.mut.sigs,
                               target.mut.sigs)  {
@@ -120,23 +128,23 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                                                   target.mut.sigs = target.mut.sigs)
     num_rounds <- length(target_signature)
     if(num_rounds > 7) { num_rounds <- 7 } # get up to 7 models
-    
+
     min_prop = 0.01
     zeta_value = 1e-10
-    
+
     spec1 <- as.matrix(vcf.trinucleotide.data)
     sigdata <- df.ref.mut.sigs
-    
+
     sigdata <- sigdata[order(sigdata$`Type`),]
     data1 <- cbind(spec = as.integer(spec1[1:96,2]),sigdata[1:96,4:ncol(sigdata)])
-    
+
     num_mut = sum(data1[,1])
     this_subclass = spec1[1:96,1]
     this_spectrum = data1$spec/num_mut
-    
+
     zero <- which(data1[,1]==0)
     data1 <- data1[data1[,1]!=0,]
-    
+
     total_num <- as.integer(spec1[97,2])
     total_CA <- sum(as.integer(spec1[1:16,2] ))
     total_CG <- sum(as.integer(spec1[17:32,2] ))
@@ -150,7 +158,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
     prop_TA = round(total_TA/total_num, 3)
     prop_TC = round(total_TC/total_num, 3)
     prop_TG = round(total_TG/total_num, 3)
-    
+
     LIK <- c()
     bdb <- c()
     sdb <- list()
@@ -161,10 +169,10 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
     stopIdx <- 0
     stopVal <- 0
     farr = c()
-    
+
     for (nrs in 1:num_rounds) {
         min_value = 1000000000000000
-        
+
         if (nrs == 1) {
             all_comb <- combs(target_signature,1)
             length_all <- length(all_comb[,1])
@@ -190,7 +198,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
             }
             str <- paste0(str," - data[,sigs[",nrs,"]]*max(0,num_mut-",str2,"))^2) }")
             min.RSS <- eval(parse(text = str))		## Linear Regression
-            
+
             # FAST VERSION
             if ( nrs >= 4 ) {
                 tmp = min_sig
@@ -245,7 +253,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                 all_comb <- combs(target_signature, nrs)
                 length_all <- length(all_comb[,1])
             }
-            
+
             for (this_n in 1:length_all)  {
                 result <- optim(par = rep(1, (nrs-1)),
                                 fn = min.RSS,
@@ -263,18 +271,18 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
             }
             min_par = c(min_result$par,max(0,num_mut-sum(min_result$par)))
             min_par = min_par/sum(min_par)
-            
+
             sss <- ""
             for (i in 1:nrs) {
                 sss <- paste0(sss,"data1[,min_sig[",i,"]+1]*min_par[",i,"]+")
             }
             sss <- paste0(sss,"zeta_value")
-            
+
             background <- eval(parse(text = sss))
-            
+
             ## BIC: Bayesian Information Criterion
             LIK[nrs] <- sum(log(background)*data1[,1])*-2+log(num_mut)*nrs
-            
+
             if ( nrs == 1 ) {
                 stopVal <- LIK[nrs]
             } else {
@@ -287,11 +295,11 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                 }
             }
         }
-        
+
         sdb[nrs] <- list(min_sig)
         pdb[nrs] <- list(min_par)
         bdb <- cbind(bdb,background)
-        
+
         if ( stopIdx == 2 ) {
             if ( nrs < 4 ) {
                 stopIdx <- 0
@@ -302,7 +310,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
             }
         }
     }
-    
+
     for (idx in num_rounds:1) {
         if (min(LIK) == LIK[idx]) {
             final_signum = idx
@@ -327,7 +335,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
             eval(parse(text = str))
         }
     }
-    
+
     # Get cosine similarity for all models considered
     all.models.cos.sim.scores <- c()
     for (idx in 1:num_rounds)  {
@@ -347,12 +355,12 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                 eval(parse(text = str))
             }
         }
-        
+
         curr.residuals = this_spectrum - curr.background
         curr.cos.similarity <- lsa::cosine(this_spectrum, curr.background)
         all.models.cos.sim.scores <- c(all.models.cos.sim.scores, curr.cos.similarity)
     }
-    
+
     # Get signature names
     all.models.signatures <- list()
     curr.model.idx <- 1
@@ -361,13 +369,13 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                                                                              target.mut.sigs.indices = curr.model)
         curr.model.idx <- curr.model.idx + 1
     }
-    
+
     final_residuals = this_spectrum - final_background
     cosine_similarity <- lsa::cosine(this_spectrum, final_background)
-    
+
     rss <- final_residuals * final_residuals
     rss <- sum(rss)
-    
+
     return(list(num.point.mutations = num_mut,
                 sub.types = this_subclass,
                 sub.types.spectrum = this_spectrum,
@@ -385,9 +393,10 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                 all.models.cos.sim.scores = all.models.cos.sim.scores))
 }
 
+
 #' @title RunMutalisk
 #' @description Identifies mutational signatures using Mutalisk
-#' 
+#'
 #' @param vcf.obj A list (from firevat_vcf::ReadVCF)
 #' @param df.ref.mut.sigs A data.frame of reference mutational signatures
 #' @param target.mut.sigs A character vector of target mutational signatures names to identify from
@@ -395,7 +404,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
 #' that gets appended to the list of candidate mutational signatures so that these are
 #' always considered.
 #' @param method A string value (must be either 'random.sampling' or 'all').
-#' The method 'random.sampling' samples (without replacement) 'n.sample' number of signatures 
+#' The method 'random.sampling' samples (without replacement) 'n.sample' number of signatures
 #' 'n.iter' number of times and runs the candidate signatures one last time.
 #' The method 'all' uses all target.mut.sigs
 #' @param n.sample An integer value ('random.sampling' method parameter)
@@ -404,8 +413,6 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
 #' Number of iterations to perform random sampling.
 #' @param verbose If true, provides process details
 #'
-#' @export
-#' @import lsa
 #' @return A list with the following elements
 #' \itemize{
 #'  \item{num.point.mutations}{An integer value - count of total point mutations}
@@ -418,12 +425,15 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
 #'  \item{identified.mut.sigs.spectrum}{A numeric vector of length 96}
 #'  \item{residuals}{A numeric vector of length 96}
 #'  \item{rss}{A numeric value (residual sum of squares)}
-#'  \item{cos.sim.score}{A numeric value (cosine similarity score between observed mutational spectrum and 
+#'  \item{cos.sim.score}{A numeric value (cosine similarity score between observed mutational spectrum and
 #'   reconstructed mutational signatures)}
 #'  \item{all.models.sigs}{A list where each element is a model; a model is a list of signatures identified)}
 #'  \item{all.models.sigs.probs}{A list where each element is a model; a model is a list of contribution probabilities}
 #'  \item{all.models.cos.sim.scores}{A list where each element is a model; a model is a list of cosine similarity socres}
 #' }
+#'
+#' @export
+#' @import lsa
 RunMutalisk <- function(vcf.obj,
                         df.ref.mut.sigs,
                         target.mut.sigs,
@@ -431,14 +441,14 @@ RunMutalisk <- function(vcf.obj,
                         method = "random.sampling",
                         n.sample = 20,
                         n.iter = 10,
-                        verbose = T)  {    
+                        verbose = T)  {
     if (method != "all" && method != "random.sampling")  {
         stop("The parameter 'method' must be either 'all' or 'random.sampling'")
     }
 
-    # Parse vcf.obj and get trinucleotide data    
+    # Parse vcf.obj and get trinucleotide data
     vcf.trinucleotide.data <- MutaliskParseVCFObj(vcf.obj = vcf.obj)
-    
+
     # Identify mutational signatures among the target signatures
     if (verbose) print(paste0("Started running Mutalisk with ", length(target.mut.sigs),
                               " target signatures using ", method, " method"))
@@ -452,21 +462,21 @@ RunMutalisk <- function(vcf.obj,
             candidateresults <- RunMutaliskHelper(vcf.trinucleotide.data = vcf.trinucleotide.data,
                                                   df.ref.mut.sigs = df.ref.mut.sigs,
                                                   target.mut.sigs = candidate.mut.sigs)
-            target.mut.sigs.sampled <- c(target.mut.sigs.sampled, 
+            target.mut.sigs.sampled <- c(target.mut.sigs.sampled,
                                          candidateresults$identified.mut.sigs)
         }
         target.mut.sigs.sampled <- unique(c(target.mut.sigs.sampled, random.sampling.candidate.mut.sigs))
         if (verbose) print(paste0("Running Mutalisk with ", length(target.mut.sigs.sampled), " candidate signatures"))
         results <- RunMutaliskHelper(vcf.trinucleotide.data = vcf.trinucleotide.data,
                                      df.ref.mut.sigs = df.ref.mut.sigs,
-                                     target.mut.sigs = target.mut.sigs.sampled)        
+                                     target.mut.sigs = target.mut.sigs.sampled)
     }
     if (method == "all")  {
         results <- RunMutaliskHelper(vcf.trinucleotide.data = vcf.trinucleotide.data,
                                      df.ref.mut.sigs = df.ref.mut.sigs,
                                      target.mut.sigs = target.mut.sigs)
     }
-    
+
     if (verbose) print(paste0("Finished running Mutalisk with ", length(target.mut.sigs),
                               " target signatures using ", method, " method"))
 

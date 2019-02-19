@@ -1,9 +1,9 @@
 # FIREVAT Report Functions
 #
 # Last revised date:
-#   February 18, 2019
+#   February 19, 2019
 #
-# Authors: 
+# Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.kr)
 #   Bioinformatics Analysis Team, National Cancer Center Korea
@@ -15,8 +15,9 @@
 #' @param data A list of main data from \code{\link{RunFIREVAT}}
 #'
 #' @return A data.frame of FIREVAT optimization logs
+#'
 #' @export
-ReadOptimizationIterationReport <- function(data)  {
+ReadOptimizationIterationReport <- function(data) {
     log.file <- paste0(data$output.dir,
                        data$vcf.file.basename, "_FIREVAT_Optimization_Logs.tsv")
     df <- read.table(log.file, sep = "\t",
@@ -27,7 +28,7 @@ ReadOptimizationIterationReport <- function(data)  {
 
 
 #' @title GetOptimizedSignatures
-#' @description 
+#' @description
 #' This function fetches the last row from the optimization iteration log
 #' and returns the target and artifactual mutational signatures
 #' for the type of mutations ('refined' or 'artifactual')
@@ -37,61 +38,58 @@ ReadOptimizationIterationReport <- function(data)  {
 #' @param signatures A string ('all', 'target', 'artifact')
 #'
 #' @return A data.frame with the columns 'signature' and 'weight'
+#'
 #' @export
-GetOptimizedSignatures <- function(data, mutations.type = "refined",
-                                   signatures = "all")  {
+GetOptimizedSignatures <- function(data,
+                                   mutations.type = "refined",
+                                   signatures = "all") {
 
-    if (mutations.type == "refined")  {
+    if (mutations.type == "refined") {
         target.signatures.str <- "refined.muts.target.signatures"
         target.signatures.weights.str <- "refined.muts.target.signatures.weights"
         artifact.signatures.str <- "refined.muts.sequencing.artifact.signatures"
         artifact.signatures.weights.str <- "refined.muts.sequencing.artifact.signatures.weights"
-    }
-    else if (mutations.type == "artifact") {
+    } else if (mutations.type == "artifact") {
         target.signatures.str <- "artifactual.muts.target.signatures"
         target.signatures.weights.str <- "artifactual.muts.target.signatures.weights"
         artifact.signatures.str <- "artifactual.muts.sequencing.artifact.signatures"
         artifact.signatures.weights.str <- "artifactual.muts.sequencing.artifact.signatures.weights"
-    }
-    else  {
+    } else {
         print(paste0("ERROR - unknown parameter passed.",
                      "'mutations.type' must be one of the following: ",
                      "'refined' or 'artifact'"))
         return(NULL)
     }
-    
-    # Get the signatures from the last optimization iteration from Mutational Patterns 
+
+    # Get the signatures from the last optimization iteration from Mutational Patterns
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
-    
+
     target.signatures <- tail(df.optimization.logs[,target.signatures.str], 1)
     target.signatures <- strsplit(target.signatures, ",")[[1]]
     target.signatures.weights <- tail(df.optimization.logs[,target.signatures.weights.str], 1)
     target.signatures.weights <- strsplit(target.signatures.weights, ",")[[1]]
-    
+
     artifact.signatures <- tail(df.optimization.logs[,artifact.signatures.str], 1)
     artifact.signatures <- strsplit(artifact.signatures, ",")[[1]]
     artifact.signatures.weights <- tail(df.optimization.logs[,artifact.signatures.weights.str], 1)
     artifact.signatures.weights <- strsplit(artifact.signatures.weights, ",")[[1]]
-    
-    if (signatures == "all")  {
+
+    if (signatures == "all") {
         df <- data.frame(list(signature = c(target.signatures,artifact.signatures),
                               weight = c(target.signatures.weights, artifact.signatures.weights)),
                          stringsAsFactors = F,
                          check.names = F)
-    }
-    else if (signatures == "target")  {
+    } else if (signatures == "target") {
         df <- data.frame(list(signature = target.signatures,
                               weight = target.signatures.weights),
                          stringsAsFactors = F,
                          check.names = F)
-    }
-    else if (signatures == "artifact")  {
+    } else if (signatures == "artifact") {
         df <- data.frame(list(signature = artifact.signatures,
                               weight = artifact.signatures.weights),
                          stringsAsFactors = F,
                          check.names = F)
-    }
-    else  {
+    } else {
         print(paste0("ERROR - unknown parameter passed.",
                      "'signatures' must be one of the following: ",
                      "'all', 'target' or 'artifact'"))
@@ -114,27 +112,27 @@ GetOptimizedSignatures <- function(data, mutations.type = "refined",
 #'  \item{df.results}{A data.frame of objective values}
 #'  \item{df.mutalisk.results}{A data.frame of mutational signature analysis results from Mutalisk}
 #' }
+#'
 #' @export
-PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
-
-    # 0. Write VCF Files
+PrepareReportDatafromConfig <- function(x.solution.decimal, data) {
+    # 1. Write VCF Files
     # Update filter
-    vcf.filter <- UpdateFilterFromConfig(vcf.filter = data$vcf.filter, 
+    vcf.filter <- UpdateFilterFromConfig(vcf.filter = data$vcf.filter,
                                          param.values = x.solution.decimal)
     # Filter vcf.data based on the updated vcf.filter
     vcf.objs <- FilterVCFFromConfig(vcf.obj = data$vcf.obj,
                                     config.obj = data$config.obj,
-                                    vcf.filter = vcf.filter, 
+                                    vcf.filter = vcf.filter,
                                     verbose = T)
     # Write refined and artifact vcf files
     WriteVCF(vcf.obj = data$vcf.obj,
              save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
-    WriteVCF(vcf.obj = vcf.objs$vcf.obj.filtered, 
+    WriteVCF(vcf.obj = vcf.objs$vcf.obj.filtered,
              save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
-    WriteVCF(vcf.obj = vcf.objs$vcf.obj.artifact, 
+    WriteVCF(vcf.obj = vcf.objs$vcf.obj.artifact,
              save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
 
-    # 1. FIREVAT Genetic Algorithm (GA) Parameters table
+    # 2. FIREVAT Genetic Algorithm (GA) Parameters table
     #
     # FIREVAT Genetic Algorithm (GA) Parameters
     # GA Population Size                                value
@@ -152,14 +150,14 @@ PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
                     format(x = data$pmutation, nsmall = 3))),
         stringsAsFactors = F,
         check.names = F)
-    
-    # 2. Filter Cutoffs
+
+    # 3. Filter Cutoffs
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
 
     filter.param.values <- sapply(
         names(vcf.filter), function(x) return(tail(df.optimization.logs[x], 1))
     )
-    
+
     filter.direction <- sapply(
         names(vcf.filter), function(x) return(data$config.obj[[x]]["direction"])
     )
@@ -178,7 +176,7 @@ PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
         stringsAsFactors = F,
         check.names = F)
 
-    # 3. FIREVAT Results
+    # 4. FIREVAT Results
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
     refined.muts.cos.sim <- tail(
         df.optimization.logs$refined.muts.cosine.similarity.score, 1)
@@ -212,7 +210,7 @@ PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
         stringsAsFactors = F,
         check.names = F)
 
-    # 4. Mutalisk Results
+    # 5. Mutalisk Results
     #
     #                               Original VCF    Refined VCF     Artifactual VCF
     # Mutations Count (%)               value           value           value
@@ -223,7 +221,7 @@ PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
         list(" " = c("Mutations Count (%)","Cosine similarity score",
                      "Residual sum of squares (RSS)"),
             "Original VCF" = c(paste0(
-                format(x = data$raw.muts.mutalisk.results$num.point.mutations, 
+                format(x = data$raw.muts.mutalisk.results$num.point.mutations,
                     big.mark = ","), " (100%)"),
                 format(x = data$raw.muts.mutalisk.results$cos.sim.score,
                     digits = 3),
@@ -236,7 +234,7 @@ PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
                     digits = 3),
                 format(x = data$refined.muts.mutalisk.results$rss, digits = 3)),
             "Artifactual VCF" = c(paste0(
-                format(x = artifactual.muts.count, big.mark = ","), " (", 
+                format(x = artifactual.muts.count, big.mark = ","), " (",
                 format(x = artifactual.muts.proportion * 100, digits = 4), "%)"),
                 format(x = data$artifactual.muts.mutalisk.results$cos.sim.score,
                     digits = 3),
@@ -271,21 +269,12 @@ PrepareReportDatafromConfig <- function(x.solution.decimal, data)  {
 #'  \item{artifact.vcf.stats.plots}{A histogram for artifactual VCF stats}
 #'  \item{vcf.stats.boxplots}{A plot for showing comparison results among VCF stats of original, refined and artifactual VCFs}
 #' }
+#'
 #' @importFrom graphics hist
 #' @export
-PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
-    # Prepares report plots
-    #
-    # Args:
-    #   x.solution.decimal = numeric vector
-    #   data = list with the following elements
-    #
-    # Returns:
-    #
-    #
-    
-    # 1. Refinement Optimization> Section
-    # 1.1 Objective Function Optimization
+PrepareReportPlotsfromConfig <- function(x.solution.decimal, data) {
+    # 1. Refinement Optimization Section
+    # Objective function optimization
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
     df.optimization.logs.temp <- df.optimization.logs[,c(
         "iteration",
@@ -294,7 +283,7 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         "refined.muts.proportion",
         "objective.value"
     )]
-    
+
     colnames(df.optimization.logs.temp) <- c(
         "iteration",
         "Refined Mutations Artifact Signatures Weights Sum",
@@ -302,13 +291,12 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         "Refined Mutations Proportion",
         "Objective Value"
     )
-    
+
     columns.to.plot <- colnames(df.optimization.logs.temp)[2:length(
         colnames(df.optimization.logs.temp)
     )]
-    
+
     optimization.iter.plot <- PlotOptimizationIterations(
-    
         df = df.optimization.logs.temp,
         columns.to.plot = columns.to.plot,
         x.axis.var = "iteration",
@@ -317,66 +305,61 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         title = "Objective Function Optimization",
         x.max = max(df.optimization.logs$iteration),
         legend.ncol = 2,
-        save.file = paste0(data$output.dir, 
+        save.file = paste0(data$output.dir,
             data$vcf.file.basename,
             "_FIREVAT_Optimization_Iterations.png"),
         connect.dots = T
-    
     )
 
     # 2. Plot sequencing artifact weight (refined mutations)
     # Enumerate sequencing artifact signature weights at each iteration
     # Get all sequencing artifact signatures
     refined.muts.seq.artifact.sigs <- c()
-    for (i in 1:nrow(df.optimization.logs))  {
+    for (i in 1:nrow(df.optimization.logs)) {
         curr.row <- df.optimization.logs[i,]
         curr.row.seq.art.sigs <- as.character(curr.row$refined.muts.sequencing.artifact.signatures)
-        if (nchar(curr.row.seq.art.sigs) > 0)  {
+        if (nchar(curr.row.seq.art.sigs) > 0) {
             curr.row.seq.art.sigs <- strsplit(curr.row.seq.art.sigs, "\\,")[[1]]
-            
-            refined.muts.seq.artifact.sigs <- c(
-                refined.muts.seq.artifact.sigs, curr.row.seq.art.sigs
-            )
+            refined.muts.seq.artifact.sigs <- c(refined.muts.seq.artifact.sigs, curr.row.seq.art.sigs)
         }
     }
     refined.muts.seq.artifact.sigs <- unique(refined.muts.seq.artifact.sigs)
     # Create a dataframe with columns 'iteration', 'SBS<NUM>', 'SBS<NUM>', ...
-    
+
     df.plot.data <- data.frame(
         matrix(0, ncol = 1 + length(refined.muts.seq.artifact.sigs),nrow = 0)
     )
-    
+
     colnames(df.plot.data) <- c("iteration", refined.muts.seq.artifact.sigs)
-    
+
     # Fill in data for each iteration
-    for (i in 1:nrow(df.optimization.logs))  {
+    for (i in 1:nrow(df.optimization.logs)) {
         curr.row <- df.optimization.logs[i,]
         curr.row.iter <- as.integer(curr.row$iteration)
         curr.row.seq.art.sigs <- as.character(
             curr.row$refined.muts.sequencing.artifact.signatures)
         curr.row.seq.art.sigs.probs <- as.character(
             curr.row$refined.muts.sequencing.artifact.signatures.weights)
-        
+
         df.plot.data.temp <- data.frame(
             matrix(0, ncol = 1 + length(refined.muts.seq.artifact.sigs), nrow = 1)
         )
-        
+
         colnames(df.plot.data.temp) <- c(
             "iteration", refined.muts.seq.artifact.sigs)
 
         df.plot.data.temp['iteration'] <- curr.row.iter
-        
-        if (nchar(curr.row.seq.art.sigs) > 0)  {
-            
+
+        if (nchar(curr.row.seq.art.sigs) > 0) {
             curr.row.seq.art.sigs <-as.character(
                 strsplit(curr.row.seq.art.sigs, "\\,")[[1]]
             )
-            
+
             curr.row.seq.art.sigs.probs <- as.numeric(
                 strsplit(curr.row.seq.art.sigs.probs, "\\,")[[1]]
             )
-            
-            for (j in 1:length(curr.row.seq.art.sigs))  {
+
+            for (j in 1:length(curr.row.seq.art.sigs)) {
                 curr.sig <- curr.row.seq.art.sigs[j]
                 curr.sig.prob <- curr.row.seq.art.sigs.probs[j]
                 df.plot.data.temp[curr.sig] <- curr.sig.prob
@@ -395,9 +378,10 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         title = "Refined Mutations Sequencing Artifact Weights at Each Iteration",
         legend.ncol = 5,
         save.file = paste0(
-            data$output.dir, 
+            data$output.dir,
             data$vcf.file.basename,
-            "_FIREVAT_Optimization_Iterations_Refined_Muts","_Seq_Art_Sigs_Weights.png"
+            "_FIREVAT_Optimization_Iterations_Refined_Muts",
+            "_Seq_Art_Sigs_Weights.png"
             ),
         connect.dots = T)
 
@@ -405,11 +389,11 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
     # Enumerate sequencing artifact signature weights at each iteration
     # Get all sequencing artifact signatures
     artifactual.muts.seq.artifact.sigs <- c()
-    for (i in 1:nrow(df.optimization.logs))  {
+    for (i in 1:nrow(df.optimization.logs)) {
         curr.row <- df.optimization.logs[i,]
         curr.row.seq.art.sigs <- as.character(
             curr.row$artifactual.muts.sequencing.artifact.signatures)
-        if (nchar(curr.row.seq.art.sigs) > 0)  {
+        if (nchar(curr.row.seq.art.sigs) > 0) {
             curr.row.seq.art.sigs <- strsplit(curr.row.seq.art.sigs, "\\,")[[1]]
             artifactual.muts.seq.artifact.sigs <- c(
                 artifactual.muts.seq.artifact.sigs, curr.row.seq.art.sigs
@@ -426,7 +410,7 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
     )
     colnames(df.plot.data) <- c("iteration", artifactual.muts.seq.artifact.sigs)
     # Fill in data for each iteration
-    for (i in 1:nrow(df.optimization.logs))  {
+    for (i in 1:nrow(df.optimization.logs)) {
         curr.row <- df.optimization.logs[i,]
         curr.row.iter <- as.integer(curr.row$iteration)
         curr.row.seq.art.sigs <- as.character(
@@ -437,16 +421,16 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
             matrix(0, ncol = 1 + length(artifactual.muts.seq.artifact.sigs),
                    nrow = 1)
         )
-        colnames(df.plot.data.temp) <- c("iteration", 
+        colnames(df.plot.data.temp) <- c("iteration",
             artifactual.muts.seq.artifact.sigs)
         df.plot.data.temp['iteration'] <- curr.row.iter
 
-        if (nchar(curr.row.seq.art.sigs) > 0)  {
+        if (nchar(curr.row.seq.art.sigs) > 0) {
             curr.row.seq.art.sigs <-as.character(
                 strsplit(curr.row.seq.art.sigs, "\\,")[[1]])
             curr.row.seq.art.sigs.probs <- as.numeric(
                 strsplit(curr.row.seq.art.sigs.probs, "\\,")[[1]])
-            for (j in 1:length(curr.row.seq.art.sigs))  {
+            for (j in 1:length(curr.row.seq.art.sigs)) {
                 curr.sig <- curr.row.seq.art.sigs[j]
                 curr.sig.prob <- curr.row.seq.art.sigs.probs[j]
                 df.plot.data.temp[curr.sig] <- curr.sig.prob
@@ -473,16 +457,15 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
                 "_Seq_Art_Sigs_Weights.png"
                 ),
             connect.dots = T)
-    
-        
-    # 3. Plot Mutalisk results
+
+    # 4. Plot Mutalisk results
     # Update MuTect2 filter
-    vcf.filter <- UpdateFilterFromConfig(vcf.filter = data$vcf.filter, 
+    vcf.filter <- UpdateFilterFromConfig(vcf.filter = data$vcf.filter,
                                          param.values = x.solution.decimal)
     # Filter vcf.data based on the updated vcf.filter
-    vcf.objs <- FilterVCFFromConfig(vcf.obj = data$vcf.obj, 
+    vcf.objs <- FilterVCFFromConfig(vcf.obj = data$vcf.obj,
                                     vcf.filter = vcf.filter,
-                                    config.obj = data$config.obj, 
+                                    config.obj = data$config.obj,
                                     verbose = T)
 
     # Plot Mutalisk results
@@ -506,7 +489,7 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
     all.sigs <- c(data$raw.muts.mutalisk.results$identified.mut.sigs,
                   data$refined.muts.mutalisk.results$identified.mut.sigs,
                   data$artifactual.muts.mutalisk.results$identified.mut.sigs)
-    
+
     raw.muts.mutalisk.plots <- PlotMutaliskResults(
         mutalisk.results = data$raw.muts.mutalisk.results,
         signatures = all.sigs,
@@ -515,7 +498,7 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         mut.type.max.y = mut.type.max.y,
         title = "Original VCF"
     )
-    
+
     refined.muts.mutalisk.plots <- PlotMutaliskResults(
         mutalisk.results = data$refined.muts.mutalisk.results,
         signatures = all.sigs,
@@ -524,7 +507,7 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         mut.type.max.y = mut.type.max.y,
         title = "Refined VCF"
     )
-    
+
     artifactual.muts.mutalisk.plots <- PlotMutaliskResults(
         mutalisk.results = data$artifactual.muts.mutalisk.results,
         signatures = all.sigs,
@@ -533,10 +516,9 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         mut.type.max.y = mut.type.max.y,
         title = "Artifactual VCF"
     )
-    
-    # 4. VCF Statistics
-    # Get VCF statistics
 
+    # 5. VCF Statistics
+    # Get VCF statistics
     original.vcf.stats <- GetVCFValues(vcf.obj = data$vcf.obj,
                                        vcf.filter = data$vcf.filter)
     refined.vcf.stats <- GetVCFValues(vcf.obj = vcf.objs$vcf.obj.filtered,
@@ -545,12 +527,12 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
                                        vcf.filter = data$vcf.filter)
 
     x.axis.labels <- names(data$vcf.filter)
+
     # Get the maximum frequency value for each VCF statistic variable
     stat.y.max.vals <- c()
     stat.x.max.vals <- c()
-    
-    for (param in x.axis.labels)  {
-        
+
+    for (param in x.axis.labels) {
         stat.x.max.vals <- c(stat.x.max.vals, max(max(original.vcf.stats[[param]]),
                                                   max(refined.vcf.stats[[param]]),
                                                   max(artifact.vcf.stats[[param]])))
@@ -568,8 +550,8 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
                                    max(refi.hist.data),
                                    max(arti.hist.data))))
     }
-    # Plot VCF statistics
 
+    # Plot VCF statistics
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
 
     cutoff.values <- as.vector(unlist(sapply(
@@ -586,7 +568,7 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         stat.y.max.vals = stat.y.max.vals,
         stat.x.max.vals = stat.x.max.vals,
         save.file = paste0(
-            data$output.dir, 
+            data$output.dir,
             data$vcf.file.basename,
             "_FIREVAT_Original_VCF_Stats_Histograms.png"
         )
@@ -603,12 +585,12 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         stat.x.max.vals = stat.x.max.vals,
         sample.id = data$vcf.file.basename,
         save.file = paste0(
-            data$output.dir, 
+            data$output.dir,
             data$vcf.file.basename,
             "_FIREVAT_Refined_VCF_Stats_Histograms.png"
         )
     )
-    
+
     artifact.vcf.stats.plots <- PlotVCFStatsHistograms(
         plot.values = artifact.vcf.stats,
         x.axis.labels = x.axis.labels,
@@ -620,32 +602,27 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
         stat.x.max.vals = stat.x.max.vals,
         sample.id = data$vcf.file.basename,
         save.file = paste0(
-            data$output.dir, 
+            data$output.dir,
             data$vcf.file.basename,
             "_FIREVAT_Artifact_VCF_Stats_Histograms.png"
         )
     )
-    
+
     vcf.stats.boxplots <- list()
-    
-    for (i in 1:length(x.axis.labels))  {
-        
+    for (i in 1:length(x.axis.labels)) {
         param <- x.axis.labels[i]
-        
         curr.var.orig.vcf.stats <- original.vcf.stats[[param]]
         curr.var.refi.vcf.stats <- refined.vcf.stats[[param]]
         curr.var.arti.vcf.stats <- artifact.vcf.stats[[param]]
-        
         g <- PlotVCFStatsBoxPlots(
                 original.vcf.stat.values = curr.var.orig.vcf.stats,
                 refined.vcf.stat.values = curr.var.refi.vcf.stats,
                 artifact.vcf.stat.values = curr.var.arti.vcf.stats,
                 xlab = x.axis.labels[i]
             )
-        
         vcf.stats.boxplots[[i]] <- g
     }
-    
+
     return(list(optimization.iter.plot = optimization.iter.plot,
                 refined.muts.seq.art.iter.plot = refined.muts.seq.art.iter.plot,
                 artifactual.muts.seq.art.iter.plot = artifactual.muts.seq.art.iter.plot,
@@ -659,8 +636,8 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
 }
 
 
-#' @title ReportFIREVATResultsfromConfig
-#' @description Reports FIREVAT results with in html format generated from Rmd
+#' @title ReportFIREVATResults
+#' @description Reports FIREVAT results in html format (generated from Rmd)
 #'
 #' @param x.solution.decimal A numeric vector
 #' @param data A list of main data from \code{\link{RunFIREVAT}}
@@ -669,19 +646,21 @@ PrepareReportPlotsfromConfig <- function(x.solution.decimal, data)  {
 #'
 #' @importFrom rmarkdown render
 #' @export
-ReportFIREVATResultsfromConfig <- function(x.solution.decimal,
-                                           data, verbose = T,
-                                           report.format = "html")  {
-    
-    if (verbose) print("Started generating FIREVAT report")
-    
+ReportFIREVATResults <- function(x.solution.decimal,
+                                 data, verbose = T,
+                                 report.format = "html") {
+
+    if (verbose) {
+        print("Started generating FIREVAT report")
+    }
+
     # Run Mutalisk
     # Update filter
-    vcf.filter <- UpdateFilterFromConfig(vcf.filter = data$vcf.filter, 
-                                      param.values = x.solution.decimal)
+    vcf.filter <- UpdateFilterFromConfig(vcf.filter = data$vcf.filter,
+                                         param.values = x.solution.decimal)
     # Filter vcf.data based on the updated vcf.filter
     vcf.objs <- FilterVCFFromConfig(vcf.obj = data$vcf.obj,
-                                    config.obj = data$config.obj, 
+                                    config.obj = data$config.obj,
                                     vcf.filter = vcf.filter,
                                     verbose = T)
     df.ref.mut.sigs <- GetPCAWGMutSigs()
@@ -691,31 +670,32 @@ ReportFIREVATResultsfromConfig <- function(x.solution.decimal,
         df.ref.mut.sigs = df.ref.mut.sigs,
         target.mut.sigs = target.mut.sigs
     )
-    
+
     data$refined.muts.mutalisk.results <- RunMutalisk(
         vcf.obj = vcf.objs$vcf.obj.filtered,
         df.ref.mut.sigs = df.ref.mut.sigs,
         target.mut.sigs = target.mut.sigs
     )
-    
+
     data$artifactual.muts.mutalisk.results <- RunMutalisk(
         vcf.obj = vcf.objs$vcf.obj.artifact,
         df.ref.mut.sigs = df.ref.mut.sigs,
         target.mut.sigs = target.mut.sigs
     )
-     
+
     # Prepare data to run report.Rmd
     report.plots <- PrepareReportPlotsfromConfig(
         x.solution.decimal = x.solution.decimal, data = data
     )
-    
+
     report.data <- PrepareReportDatafromConfig(
         x.solution.decimal = x.solution.decimal, data = data
     )
 
     # Generate html report
     if (report.format == "html") {
-        rmarkdown::render(input = "../inst/rmd_template/report.Rmd", 
+        rmarkdown.file <- system.file("rmd_template", "report.Rmd", package = "FIREVAT")
+        rmarkdown::render(input = rmarkdown.file,
                           params = list(data = data,
                                         report.data = report.data,
                                         report.plots = report.plots),
@@ -724,7 +704,9 @@ ReportFIREVATResultsfromConfig <- function(x.solution.decimal,
                                                "_FIREVAT_Report.html"))
     }
 
-    if (verbose) print("Finished generating FIREVAT report")
+    if (verbose) {
+        print("Finished generating FIREVAT report")
+    }
 }
 
 
@@ -735,10 +717,11 @@ ReportFIREVATResultsfromConfig <- function(x.solution.decimal,
 #' @param vcf.filter  A list of vcf filtering information
 #'
 #' @return A list with filtering parameter values
+#'
 #' @keywords internal
-GetVCFValues <- function(vcf.obj, vcf.filter)  {
-    params <- names(vcf.filter)
-    output.list <- vcf.obj$data[,..params]
+#' @import data.table
+GetVCFValues <- function(vcf.obj, vcf.filter) {
+    vcf.params <- names(vcf.filter)
+    output.list <- vcf.obj$data[, vcf.params, with=FALSE]
     return(output.list)
 }
-

@@ -1,0 +1,185 @@
+---
+title: "<b>FIREVAT Report</b>"
+output:
+    html_document:
+        toc: yes
+        toc_depth: 6
+        includes:
+            in_header: extLogo.html
+params:
+    data: data
+    report.data: report.data
+    report.plots: report.plots
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(fig.width = 12, 
+                      fig.height = 8,
+                      fig.align = "center")
+```
+
+<!-- Load libraries and data-->
+```{r, echo=FALSE}
+library(knitr)
+
+data <- params$data
+report.data <- params$report.data
+report.plots <- params$report.plots
+```
+
+```{css, echo=FALSE}
+.myheader .property  {
+  width:35%;
+  display:inline-block;
+  box-sizing:border-box;
+  text-align:left;
+  vertical-align: top;
+}
+
+.myheader .value  {
+  text-align:left;
+  width:64%;
+  display:inline-block;
+  box-sizing:border-box;
+}
+```
+
+***
+
+<div class="myheader">
+<div class="property">**Sample ID**</div><div class="value">`r data$vcf.file.basename`</div><br>
+<div class="property">**Sample VCF File**</div><div class="value">`r paste0(data$vcf.file.basename, ".vcf")`</div><br>
+<div class="property">**Sample VCF Genome**</div><div class="value">`r data$vcf.obj$genome`</div><br>
+<div class="property">**Sample VCF Mutation Calling Method**</div><div class="value">`r data$vcf.calling.method`</div><br>
+<div class="property">**Sample VCF Total Point Mutations**</div><div class="value">`r format(x = nrow(data$vcf.obj$data), big.mark = ",")`</div><br>
+<div class="property">**FIREVAT Execution Start Datetime**</div><div class="value">`r data$start.datetime`</div><br>
+<div class="property">**FIREVAT Execution End Datetime**</div><div class="value">`r data$end.datetime`</div><br>
+</div>
+
+```{r, echo=FALSE}
+kable(report.data$df.parameters, align = c('l','l'))
+```
+
+### **1. Refinement Optimization**
+```{r, echo=FALSE}
+kable(report.data$df.filter.cutoffs, align = c('l','c','c'))
+```
+
+```{r, echo=FALSE}
+kable(report.data$df.results, align = c('l','c','c','c','c'))
+```
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 6}
+print(report.plots$optimization.iter.plot)
+```
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 6}
+print(report.plots$artifactual.muts.seq.art.iter.plot)
+```
+
+### **2. Optimzed Mutational Signature Identification**
+
+<br>
+
+#### **2.1. Identified Signatures**
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+g1 <- ggarrange(report.plots$raw.muts.mutalisk.plots$f1,
+                report.plots$refined.muts.mutalisk.plots$f1,
+                report.plots$artifactual.muts.mutalisk.plots$f1,
+                ncol = 3, nrow = 1,
+                common.legend = TRUE, legend="bottom")
+print(g1)
+```
+
+***
+
+<br>
+
+#### **2.2. Trinucleotide Spectrums**
+```{r, echo=FALSE}
+kable(report.data$df.mutalisk.results, align = c('l','c','c','c'))
+```
+
+***
+
+##### **2.2.1. Observed Spectrum**
+
+***
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+g2 <- ggarrange(report.plots$raw.muts.mutalisk.plots$f2.1,
+                report.plots$refined.muts.mutalisk.plots$f2.1,
+                report.plots$artifactual.muts.mutalisk.plots$f2.1,
+                ncol = 1, nrow = 3)
+print(g2)
+```
+
+***
+
+##### **2.2.2. Maximum-likelihood Estimaation (MLE) Reconstructed Spectrum**
+
+***
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+g3 <- ggarrange(report.plots$raw.muts.mutalisk.plots$f2.2,
+                report.plots$refined.muts.mutalisk.plots$f2.2,
+                report.plots$artifactual.muts.mutalisk.plots$f2.2,
+                ncol = 1, nrow = 3)
+print(g3)
+```
+
+***
+
+##### **2.2.3. Residual Spectrum**
+
+***
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+g4 <- ggarrange(report.plots$raw.muts.mutalisk.plots$f2.3,
+                report.plots$refined.muts.mutalisk.plots$f2.3,
+                report.plots$artifactual.muts.mutalisk.plots$f2.3,
+                ncol = 1, nrow = 3)
+print(g4)
+```
+
+***
+
+<br>
+
+#### **2.3. Nucleotide Substitution Types**
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 4}
+g3 <- ggarrange(report.plots$raw.muts.mutalisk.plots$f3,
+                report.plots$refined.muts.mutalisk.plots$f3,
+                report.plots$artifactual.muts.mutalisk.plots$f3,
+                ncol = 3, nrow = 1)
+print(g3)
+```
+
+### **3. Optimized VCF Statistics**
+`r height <- (4 * length(report.plots$original.vcf.stats.plots$graphs))`
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = height}
+vcf.stat.plots <- list()
+list.idx <- 1
+for (i in 1:length(report.plots$original.vcf.stats.plots$graphs))  {
+    vcf.stat.plots[[list.idx]] <- report.plots$original.vcf.stats.plots$graphs[[i]]
+    list.idx <- list.idx + 1
+
+    vcf.stat.plots[[list.idx]] <- report.plots$refined.vcf.stats.plots$graphs[[i]]
+    list.idx <- list.idx + 1
+
+    vcf.stat.plots[[list.idx]] <- report.plots$artifact.vcf.stats.plots$graphs[[i]]
+    list.idx <- list.idx + 1
+
+    vcf.stat.plots[[list.idx]] <- report.plots$vcf.stats.boxplots[[i]]
+    list.idx <- list.idx + 1
+}
+
+g <- ggarrange(plotlist = vcf.stat.plots,
+               ncol = 4, 
+               nrow = length(report.plots$original.vcf.stats.plots$graphs),
+               widths = c(2,2,2,1.5), align = "h")
+print(g)
+
+```
+

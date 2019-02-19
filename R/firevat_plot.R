@@ -1,19 +1,20 @@
 # FIREVAT Plot Functions
 #
 # Last revised date:
-#   February 18, 2019
+#   February 19, 2019
 #
-# Authors: 
+# Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.kr)
-#   Clincial Genomics Analysis Branch, National Cancer Center of Korea
+#   Bioinformatics Analysis Team, National Cancer Center Korea
+
 
 #' @title PlotVCFStatsHistograms
 #' @description Plots multiple VCF stats histograms into one figure
 #'
 #' @param plot.values A list of multiple numeric vectors
 #' @param x.axis.labels A character vector of x axis labels
-#' @param stat.y.max.vals A numeric vector of max y-axis values 
+#' @param stat.y.max.vals A numeric vector of max y-axis values
 #' @param stat.x.max.vals A numeric vector of max x-axis values
 #' @param sample.id A string value of sample ID
 #' @param save.file A string value of file to which the resulting plot will be saved
@@ -22,7 +23,7 @@
 #' @param plot.boxplot A boolean value (default = False)
 #' @param plot.cutoff.line.color A hex string value (default = "#D4012E")
 #' @param plot.cutoff.value.lines A boolean value (default = False)
-#' @param bin.width An integer value (default = 1; histogram bin width) 
+#' @param bin.width An integer value (default = 1; histogram bin width)
 #' @param ncol An integer value (default = 4; ggarrange ncol)
 #' @param nrow An integer value (default = 3; ggarrange nrow)
 #' @param font.size.med An integer value (default = 10)
@@ -38,7 +39,7 @@
 #' @import ggplot2
 #' @import ggpubr
 #' @export
-PlotVCFStatsHistograms <- function(plot.values, 
+PlotVCFStatsHistograms <- function(plot.values,
                                    x.axis.labels,
                                    stat.y.max.vals,
                                    stat.x.max.vals,
@@ -49,18 +50,19 @@ PlotVCFStatsHistograms <- function(plot.values,
                                    plot.boxplot = F,
                                    plot.cutoff.line.color = "#D4012E",
                                    plot.cutoff.value.lines = F,
-                                   bin.width = 1, 
+                                   bin.width = 1,
                                    ncol = 4,
                                    nrow = 3,
                                    font.size.med = 10,
                                    font.size.large = 12,
-                                   plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))  {
-
+                                   plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
+    print("Started plotting vcf stats histograms")
     graphs <- list()
     i <- 1
-    for (curr.plot.values in plot.values)  {
-        df <- data.frame(x = curr.plot.values, stringsAsFactors = F)
-        g <- ggplot(df, aes(x = x)) +
+    for (curr.plot.values in plot.values) {
+        df <- data.frame('x' = curr.plot.values,
+                         stringsAsFactors = F)
+        g <- ggplot(df, aes_string(x = 'x')) +
             ggtitle(paste0("\n",title)) +
             geom_histogram(binwidth = bin.width,
                            color="black", fill="white") +
@@ -76,13 +78,13 @@ PlotVCFStatsHistograms <- function(plot.values,
             scale_y_continuous(limits = c(0, stat.y.max.vals[i])) +
             scale_x_continuous(limits = c(-0.5, stat.x.max.vals[i]),
                                expand = c(0.1, 0.1))
-                
-        if (plot.cutoff.value.lines)  {
+
+        if (plot.cutoff.value.lines) {
             g <- g + geom_vline(xintercept = cutoff.values[i], colour = plot.cutoff.line.color)
         }
-        
-        if (plot.boxplot)  {
-            p <- ggplot(aes(x = "", y = x), data = df) +
+
+        if (plot.boxplot) {
+            p <- ggplot(aes_string(x = "", y = 'x'), data = df) +
                 stat_boxplot(geom ='errorbar', width = 0.4) +
                 geom_boxplot(outlier.alpha = 0) +
                 coord_flip() +
@@ -100,32 +102,34 @@ PlotVCFStatsHistograms <- function(plot.values,
                 labs(x = "", y = xlab(paste0(x.axis.labels[i],"\n")))
 
             g <- ggarrange(g, p, heights = c(3,1), nrow = 2, align = "v")
-        }
-        else  {
+        } else {
             g <- g + xlab(paste0(x.axis.labels[i],"\n"))
         }
         graphs[[i]] <- g
         i <- i + 1
     }
-    
+
     f <- ggarrange(plotlist = graphs, ncol = ncol, nrow = nrow)
     title <- paste0(sample.id, " (n=", length(plot.values[[1]]), ")")
     annotate_figure(f, top = text_grob(title,
                                        color = "black",
                                        size = font.size.large))
     ggsave(save.file, width = 16, height = 9)
+
+    print("Finished plotting vcf stats histograms")
     return(list(f = f, graphs = graphs))
 }
 
+
 #' @title PlotVCFStatsBoxPlots
 #' @description Plots multiple (original, refined, artifact vcf) boxplots for single filter parameter
-#' 
+#'
 #' @param original.vcf.stat.values A numeric vector corresponding to the original vcf.obj values of single filter parameter
 #' @param refined.vcf.stat.values A numeric vector corresponding to the refined vcf.obj values of single filter parameter
 #' @param artifact.vcf.stat.values A numeric vector corresponding to the artifact vcf.obj values of single filter parameter
 #' @param xlab A string value (x-axis label)
 #' @param axis.font.size An integer value (axis font size)
-#' @param label.font.size An integer value (label font size) 
+#' @param label.font.size An integer value (label font size)
 #' @param title.font.size An integer value (title font size)
 #'
 #' @return A ggboxplot
@@ -138,7 +142,9 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
                                  xlab,
                                  axis.font.size = 10,
                                  label.font.size = 10,
-                                 title.font.size = 12)  {
+                                 title.font.size = 12) {
+    print("Started plotting vcf stats boxplots")
+
     # Prepare plot data
     df1 <- data.frame(type = rep('Original', length(original.vcf.stat.values)),
                       value = original.vcf.stat.values,
@@ -153,17 +159,17 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
                       stringsAsFactors = F,
                       check.names = F)
     df <- rbindlist(list(df1, df2, df3))
-    
-    # Get y-axis min and max 
+
+    # Get y-axis min and max
     original.quantiles <- quantile(original.vcf.stat.values)
     original.iqr <- original.quantiles[4] - original.quantiles[2]
-    
+
     refined.quantiles <- quantile(refined.vcf.stat.values)
     refined.iqr <- refined.quantiles[4] - refined.quantiles[2]
-    
+
     artifact.quantiles <- quantile(artifact.vcf.stat.values)
     artifactd.iqr <- artifact.quantiles[4] - artifact.quantiles[2]
-    
+
     # y minimum = max((Q1 - 1.5*IQR) * 0.9, globa.y.min)
     global.y.min <- min(original.vcf.stat.values,
                         refined.vcf.stat.values,
@@ -175,7 +181,7 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
                        refined.y.min,
                        artifact.y.min)) * 0.9,
                  global.y.min)
-    
+
     # y maxmimum = max(Q3 + 1.5*IQR)
     global.y.max <- max(original.vcf.stat.values,
                         refined.vcf.stat.values,
@@ -193,14 +199,14 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
     comparisons <- list(c("Original", "Refined"),
                         c("Refined", "Artifact"),
                         c("Original", "Artifact"))
-    g <- ggboxplot(df, x = "type", y = "value", outlier.shape = NA, 
+    g <- ggboxplot(df, x = "type", y = "value", outlier.shape = NA,
                    title = "\nComparisons",
                    palette = c("#000000", "#000000", "#000000")) +
-        font("x.text", size = axis.font.size) + 
+        font("x.text", size = axis.font.size) +
         font("y.text", size = axis.font.size) +
-        font("title", color = "black", size = title.font.size, hjust = 0.5) + 
-        font("ylab", size = axis.font.size) + 
-        font("xlab", size = title.font.size) + 
+        font("title", color = "black", size = title.font.size, hjust = 0.5) +
+        font("ylab", size = axis.font.size) +
+        font("xlab", size = title.font.size) +
         ylim(c(y.min, y.max + y.top.buffer)) + xlab(paste0(xlab,"\n")) +
         stat_compare_means(comparisons = comparisons,
                            label.y = c(y.max + y.top.buffer * 0.2,
@@ -211,9 +217,12 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
         stat_compare_means(label.y = y.max + y.top.buffer * 0.8,
                            label = "p.format") +
         rremove("legend") + rremove("ylab")
-    
+
+    print("Finished plotting vcf stats boxplots")
     return(g)
+
 }
+
 
 #' @title PlotOptimizationIterations
 #' @description Plots multiple scatter plots into one figure
@@ -239,7 +248,7 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
 #'
 #' @import ggplot2
 #' @import ggpubr
-#' @importFrom reshape2 melt
+#' @importFrom data.table melt
 #' @export
 PlotOptimizationIterations <- function(df,
                                        columns.to.plot,
@@ -256,7 +265,8 @@ PlotOptimizationIterations <- function(df,
                                        legend.ncol = 1,
                                        font.size.med = 14,
                                        font.size.large = 16,
-                                       plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))  {
+                                       plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
+    print("Started plotting optimization iterations")
 
     df.temp <- df[,c(x.axis.var, columns.to.plot)]
     df.temp[,x.axis.var] <- as.numeric(as.character(df.temp[, x.axis.var]))
@@ -281,13 +291,12 @@ PlotOptimizationIterations <- function(df,
         scale_y_continuous(limits = c(0, y.max), expand = c(0, 0)) +
         scale_x_continuous(limits = c(1, x.max), expand = c(0, 0))
 
-    if (plot.legend == F)  {
+    if (plot.legend == FALSE) {
         g <- g + guides(fill = FALSE) +
             theme(legend.position = "none")
-    }
-    else  {
-        g <- g + 
-            guides(color = guide_legend(ncol = legend.ncol, 
+    } else {
+        g <- g +
+            guides(color = guide_legend(ncol = legend.ncol,
                                         nrow = ceiling(length(unique(columns.to.plot)) / legend.ncol))) +
             theme(legend.position = "bottom",
                   legend.text = element_text(size = font.size.med),
@@ -297,14 +306,18 @@ PlotOptimizationIterations <- function(df,
                   legend.key.height = unit(1.5, 'lines'),
                   legend.spacing = unit(2, 'lines'))
     }
-    
+
+    # Save file
     ggsave(save.file, width = 16, height = 9)
+
+    print("Finished plotting optimization iterations")
     return(g)
 }
 
+
 #' @title PlotTriNucSpectrum
 #' @description
-#' Plots the spectrum of 96 trinucleotide distribution 
+#' Plots the spectrum of 96 trinucleotide distribution
 #' (C>A, C>G, C>T, T>A, T>C, T>G)
 #' Please note that this function assumes that both sub.types and spectrum
 #' are sorted in the following order: C>A, C>G, C>T, T>A, T>C, T>G
@@ -346,14 +359,15 @@ PlotTriNucSpectrum <- function(sub.types,
                                plot.margin.bottom = 0.5,
                                plot.margin.left = 0.5,
                                plot.margin.right = 0.5,
-                               title)  {
+                               title) {
+    print("Started plotting trinucleotide spectrum")
 
     # Prepare plot data
     plot.colors <- TriNuc.Mutation.Type.Hex.Colors
     mutation.types <- c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
-    
+
     df.plot.data <- list()
-    for (i in 1:6)  {
+    for (i in 1:6) {
         start.idx <- ((i - 1) * 16) + 1
         end.idx <- i * 16
         df.temp <- data.frame(
@@ -363,32 +377,30 @@ PlotTriNucSpectrum <- function(sub.types,
             stringsAsFactors = F)
         df.plot.data[[i]] <- df.temp
     }
-    
+
     # Plot
-    if (draw.x.axis.labels)  {
+    if (draw.x.axis.labels) {
         axis.text.x <- element_text(size = font.size.small,
-                                    family = "Arial", 
+                                    family = "Arial",
                                     colour = "#888888",
                                     angle = 90, hjust = 1)
-    }
-    else  {
+    } else {
         axis.text.x <- element_blank()
     }
-    
-    if (draw.y.axis.labels)  {
+
+    if (draw.y.axis.labels) {
         axis.text.y <- element_text(size = font.size.med - 4,
-                                    family = "Arial", 
+                                    family = "Arial",
                                     colour = "#888888")
-    }
-    else  {
+    } else {
         axis.text.y <- element_blank()
     }
-    
+
     strip.text.x.colors <- c("white", "white", "white", "white", "white", "white")
-    
-    plots <- list()    
-    for (i in 1:6)  {
-        p <- ggplot(df.plot.data[[i]], aes(x = mutation.subtype, y = value)) +
+
+    plots <- list()
+    for (i in 1:6) {
+        p <- ggplot(df.plot.data[[i]], aes_string(x = 'mutation.subtype', y = 'value')) +
             geom_bar(stat = "identity", width = 0.9,
                      fill = plot.colors[i]) + ylab(NULL) + xlab("") +
             scale_y_continuous(limits = c(min.y.val, max.y.val),
@@ -396,37 +408,35 @@ PlotTriNucSpectrum <- function(sub.types,
             theme(axis.text.x = axis.text.x,
                   axis.ticks.x = element_blank(),
                   axis.ticks.y = element_blank(),
-                  panel.grid.major.y = element_line(colour = "#DCDCDC", 
+                  panel.grid.major.y = element_line(colour = "#DCDCDC",
                                                     linetype = "solid"),
                   panel.grid.major.x = element_blank(),
                   panel.background = element_blank())
-        
-        if (draw.top.strip)  { # draw.top.strip
-            p <- p + 
-                theme(strip.background = element_rect(fill = plot.colors[i], 
+
+        if (draw.top.strip) { # draw.top.strip
+            p <- p +
+                theme(strip.background = element_rect(fill = plot.colors[i],
                                                       colour = plot.colors[i]),
                       strip.text.x = element_text(size = font.size.med - 2,
                                                   family = "Arial",
-                                                  face = "bold", 
+                                                  face = "bold",
                                                   colour = strip.text.x.colors[i])) +
                 facet_grid(~title)
         }
-                
-        if (i == 1)  {
+
+        if (i == 1) {
             p <- p + theme(axis.text.y = axis.text.y,
-                           plot.margin = unit(c(plot.margin.top, 0, 
+                           plot.margin = unit(c(plot.margin.top, 0,
                                                 plot.margin.bottom,
                                                 plot.margin.left), "cm"))
-        }
-        else if(i == 6) {
+        } else if(i == 6) {
             p <- p + theme(axis.text.y = element_text(size = font.size.med - 4,
                                                       family = "Arial", colour = "#FFFFFF"),
                            plot.margin = unit(c(plot.margin.top,
-                                                plot.margin.right, 
+                                                plot.margin.right,
                                                 plot.margin.bottom,
                                                 0), "cm"))
-        }
-        else  {
+        } else {
             p <- p + theme(axis.text.y = element_text(size = font.size.med - 4,
                                                       family = "Arial", colour = "#FFFFFF"),
                            plot.margin = unit(c(plot.margin.top, 0,
@@ -434,17 +444,17 @@ PlotTriNucSpectrum <- function(sub.types,
         }
         plots[[i]] <- p
     }
-    
+
     figure <- ggarrange(plots[[1]], plots[[2]], plots[[3]],
                         plots[[4]], plots[[5]], plots[[6]],
                         nrow = 1, ncol = 6, heights = c(rep(1, 6)),
                         align = "h")
-    
-    if (draw.y.axis.title)  {
+
+    if (draw.y.axis.title) {
         figure <- annotate_figure(figure,
-                                  top = text_grob(title, 
+                                  top = text_grob(title,
                                                   family = "Arial",
-                                                  color = "black", 
+                                                  color = "black",
                                                   face = "bold",
                                                   size = font.size.med),
                                   left = text_grob(y.axis.title,
@@ -452,9 +462,11 @@ PlotTriNucSpectrum <- function(sub.types,
                                                    size = font.size.med - 2,
                                                    color = "black", rot = 90))
     }
-    
+
+    print("Finished plotting trinucleotide spectrum")
     return(figure)
 }
+
 
 #' @title PlotSigsProbs
 #' @description
@@ -468,8 +480,9 @@ PlotTriNucSpectrum <- function(sub.types,
 #' @param font.size.med Medium font size; Default = 14,
 #' @param plot.margin Margin vector for drawing plot; Default = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))
 #'
-#' @import ggplot2
+#' @return A ggplot object
 #'
+#' @import ggplot2
 #' @examples
 #' \dontrun{
 #'  g <- PlotSigsProbs(sigs = c(mutalisk.results$identified.mut.sigs),
@@ -477,7 +490,6 @@ PlotTriNucSpectrum <- function(sub.types,
 #'                     df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
 #'  print(g)
 #' }
-#' @import ggplot2
 #' @export
 PlotSigsProbs <- function(df.identified.mut.sigs,
                           df.ref.sigs.groups.colors,
@@ -485,48 +497,48 @@ PlotSigsProbs <- function(df.identified.mut.sigs,
                           convert.to.percentage = T,
                           font.size.small = 8,
                           font.size.med = 14,
-                          plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))  {
+                          plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
+    print("Started plotting signatures probabilities")
 
     # Prepare plot data
     x <- as.character(df.identified.mut.sigs$signature)
     y <- as.numeric(df.identified.mut.sigs$weight)
     groups <-c ()
     groups.colors <- c()
-    for (curr.sig in x)  {
+    for (curr.sig in x) {
         matched <- df.ref.sigs.groups.colors[df.ref.sigs.groups.colors$signature == curr.sig,]
         groups <- c(groups, as.character(matched$group))
         groups.colors <- c(groups.colors, as.character(matched$color))
     }
 
-    if (convert.to.percentage)  {
+    if (convert.to.percentage) {
         y <- y * 100
         y <- round(y, 1)
         y.lim <- 100
         y.labels <- paste0(y, "%")
-    }
-    else  {
+    } else {
         y <- round(y, 2)
         y.lim <- 1
         y.labels <- y
     }
 
-    df.plot.group <- data.frame(x = x,
-                                y = y,
-                                label = y.labels,
-                                group = groups,
-                                group.color = groups.colors,
+    df.plot.group <- data.frame("x" = x,
+                                "y" = y,
+                                "label" = y.labels,
+                                "group" = groups,
+                                "group.color" = groups.colors,
                                 stringsAsFactors = F)
 
     names(groups.colors) <- groups
 
     # Plot
-    g <- ggplot(data = df.plot.group, aes(x = x, y = y, fill = group)) +
+    g <- ggplot(data = df.plot.group, aes_string(x = 'x', y = 'y', fill = 'group')) +
         geom_bar(stat="identity", width = 0.5,
-                 aes(fill = group)) +
+                 aes_string(fill = 'group')) +
         ggtitle(title) + ylab("Weight (%)") +
-        geom_text(aes(label = label),
+        geom_text(aes_string(label = 'label'),
                   vjust = 0.5,
-                  hjust = ifelse((y / y.lim) < 0.5, -0.3, 1.3),
+                  hjust = eval(parse(text = "ifelse((y / y.lim) < 0.5, -0.3, 1.3)")),
                   color = "black",
                   size = font.size.med / 3) +
         scale_y_continuous(limits = c(0, y.lim),
@@ -549,16 +561,19 @@ PlotSigsProbs <- function(df.identified.mut.sigs,
               legend.key.height = unit(1, 'lines'),
               legend.position = "bottom") +
         coord_flip() + xlab("") + ylab("") +
-        scale_fill_manual(values = groups.colors) + 
+        scale_fill_manual(values = groups.colors) +
         guides(fill = guide_legend(title = "Aetiologies",
                                    title.theme = element_text(size = font.size.med,
                                                               hjust = 0.5),
                                    ncol = 2,
                                    nrow = ceiling(length(unique(groups)) / 2),
-                                   title.position = "top", 
+                                   title.position = "top",
                                    title.hjust = 0))
+
+    print("Finished plotting signatures probabilities")
     return(g)
 }
+
 
 #' @title PlotMutationTypes
 #' @description
@@ -566,7 +581,7 @@ PlotSigsProbs <- function(df.identified.mut.sigs,
 #'
 #' @param mutation.types Mutation types; Default = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
 #' @param mutation.types.values Mutation count for each mutation type
-#' @param mutation.types.colors A color vector for indicating mutation types 
+#' @param mutation.types.colors A color vector for indicating mutation types
 #' @param max.y.val y axis maximum value
 #' @param title Plot title
 #' @param convert.to.percentage if True convert y values to percentage (x 100); Default = T
@@ -601,33 +616,33 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
                               show.legend = T,
                               font.size.small = 8,
                               font.size.med = 14,
-                              plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))  {
+                              plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
+    print("Started plotting mutation types")
 
     # Prepare plot data
     x <- mutation.types
     y <- mutation.types.values
-    if (convert.to.percentage)  {
+    if (convert.to.percentage) {
         y <- y * 100
         y <- round(y, 1)
         y.labels <- paste0(y, "%")
         max.y.val <- max.y.val * 100
-    }
-    else  {
+    } else {
         y <- round(y, 2)
         y.labels <- y
         y.lim <- 1
     }
     names(mutation.types.colors) <- x
-    
+
     df.plot <- data.frame(list(x = x,
                                y = y,
                                label = y.labels),
                           stringsAsFactors = F)
-    
+
     # Plot
     g <- ggplot(data = df.plot, aes(x = x, y = y, fill = x)) +
-        geom_bar(stat="identity", width = 0.5) + 
-        ggtitle(title) + 
+        geom_bar(stat="identity", width = 0.5) +
+        ggtitle(title) +
         xlab("") + ylab("Contribution (%)") +
         scale_y_continuous(limits = c(0, max.y.val),
                            expand = c(0,0)) +
@@ -641,19 +656,20 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
               panel.grid.major.x = element_blank(),
               panel.background = element_blank(),
               plot.margin = plot.margin) +
-        scale_fill_manual(values = mutation.types.colors) 
-    
-    if (show.legend)  {
+        scale_fill_manual(values = mutation.types.colors)
+
+    if (show.legend) {
         g <- g + guides(fill = guide_legend(title = "Mutation Type")) +
             theme(legend.title = element_text(size = font.size.med),
                   legend.text = element_text(size = font.size.med))
-    }
-    else  {
+    } else {
         g <- g + guides(fill = FALSE)
     }
-    
+
+    print("Finished plotting signatures probabilities")
     return(g)
 }
+
 
 #' @title PlotMutaliskResults
 #' @description
@@ -686,7 +702,9 @@ PlotMutaliskResults <- function(mutalisk.results,
                                 trinuc.max.y,
                                 trinuc.min.y,
                                 mut.type.max.y,
-                                title)  {
+                                title) {
+    print("Started plotting Mutalisk results")
+
     # 1. Plot contribution probabilities of identified signatures
     df.identified.mut.sigs <- data.frame(
         list(signature = mutalisk.results$identified.mut.sigs,
@@ -705,7 +723,7 @@ PlotMutaliskResults <- function(mutalisk.results,
     f1 <- PlotSigsProbs(df.identified.mut.sigs,
                         title = title,
                         df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
-    
+
     # 2. Plot trinucleotide spectrums (96 substitution subtypes)
     g1 <- PlotTriNucSpectrum(sub.types = mutalisk.results$sub.types,
                              spectrum = mutalisk.results$sub.types.spectrum,
@@ -723,7 +741,7 @@ PlotMutaliskResults <- function(mutalisk.results,
                              spectrum = mutalisk.results$sub.types.spectrum,
                              max.y.val = trinuc.max.y,
                              min.y.val = 0,
-                             draw.top.strip = T, 
+                             draw.top.strip = T,
                              draw.x.axis.labels = F,
                              y.axis.title = "MLE Frac",
                              plot.margin.top = 0.05,
@@ -736,7 +754,7 @@ PlotMutaliskResults <- function(mutalisk.results,
                              max.y.val = trinuc.max.y,
                              min.y.val = trinuc.min.y,
                              draw.top.strip = T,
-                             draw.x.axis.labels = F, 
+                             draw.x.axis.labels = F,
                              y.axis.title = "Res Frac",
                              plot.margin.top = 0.05,
                              plot.margin.right = 0.5,
@@ -754,13 +772,14 @@ PlotMutaliskResults <- function(mutalisk.results,
                             show.legend = F,
                             title = title)
 
-    
-    return(list(f1 = f1, 
+    print("Finished plotting Mutalisk results")
+    return(list(f1 = f1,
                 f2.1 = g1,
                 f2.2 = g2,
                 f2.3 = g3,
                 f3 = f3))
 }
+
 
 #' @title PlotTable
 #' @description
@@ -774,40 +793,42 @@ PlotMutaliskResults <- function(mutalisk.results,
 #'
 #' @importFrom gtable gtable_add_grob
 #' @importFrom gridExtra tableGrob ttheme_minimal
-#' @importFrom grid segmentsGrob grid.newpage
+#' @importFrom grid segmentsGrob grid.newpage gpar
 #' @export
 PlotTable <- function(df,
                       padding = 20,
-                      font.size = 14)  {    
+                      font.size = 14) {
+    print("Started plotting table")
+
     # Add padding
     padding.char <- rep(" ", padding)
     padding.char <- paste0(padding.char, collapse = "")
     df[,2] <- paste0(padding.char, df[,2])
-    
+
     padding.char <- rep(" ", nchar(colnames(df)[1]))
     padding.char <- paste0(padding.char, collapse = "")
     colnames(df)[1] <- paste0(colnames(df)[1], padding.char)
-    
-    # Render tableGrob    
+
+    # Render tableGrob
     g <- tableGrob(df[1:nrow(df),],
                    rows = NULL,
                    theme = ttheme_minimal(core = list(fg_params = list(hjust = 0, x = 0)),
                                           colhead = list(fg_params=list(hjust = 0, x = 0))))
-    
+
     # Align second column to right
     id <- which(grepl("core-fg", g$layout$name) & g$layout$l == 2)
     for (i in id) {
         g$grobs[[i]]$x <- unit(1, "npc")
         g$grobs[[i]]$hjust <- 1
     }
-    
-    # Set font size    
+
+    # Set font size
     lapply(1:length(g$grobs),function(i){g$grobs[[i]]$gp$fontsize <<- font.size})
-    
+
     # Add a horizontal line in each row
-    for (i in 1:(nrow(df)))  {
+    for (i in 1:(nrow(df))) {
         lwd <- 0.5
-        if (i == 1)  {
+        if (i == 1) {
             lwd <- 1
         }
         g <- gtable_add_grob(g,
@@ -816,66 +837,11 @@ PlotTable <- function(df,
                                  y0 = unit(0,"npc"),
                                  x1 = unit(1,"npc"),
                                  y1 = unit(0,"npc"),
-                                 gp = gpar(lwd = lwd)),
+                                 gp = eval(parse(text = "gpar(lwd = lwd)"))),
                              t = i, b = 1, l = 1, r = 2)
     }
     grid.newpage()
+
+    print("Finished plotting table")
     return(g)
 }
-
-
-# g <- PlotMutationTypes(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
-#                        mutation.types.values = EnumerateTriNucCounts(mutalisk.results$identified.mut.sigs.spectrum),
-#                        mutation.types.colors = TriNuc.Mutation.Type.Hex.Colors,
-#                        max.y.val = max(EnumerateTriNucCounts(mutalisk.results$identified.mut.sigs.spectrum)) * 1.3,
-#                        convert.to.percentage = T,
-#                        show.legend = F)
-# print(g)
-# ggsave(g, filename = "/home/jinseoklee/Desktop/test2.png", width = 5, height = 3)
-
-
-
-
-
-# Test
-# vcf.obj <- ReadVCF(vcf.file = "../data/sample/P-233-CT.final.vcf",
-#                    genome = "hg19")
-# 
-# format.values <- GetMuTect2FORMATValues(vcf.obj = vcf.obj)
-# PlotMultipleHistograms(plot.values = format.values,
-#                        sample.id = "Sample",
-#                        x.axis.labels = c("Average Tumor REF QSS",
-#                                          "Average Tumor ALT QSS",
-#                                          "Average Normal REF QSS",
-#                                          "Tumor AD REF",
-#                                          "Tumor AD ALT",
-#                                          "Normal AD REF",
-#                                          "Normal AD ALT"),
-#                        save.file = "../data/test.png")
-
-# 
-# df <- data.frame(list(i = 1:50,
-#                       a = runif(50, 0, 1.0),
-#                       b = runif(50, 0, 1.0),
-#                       d = runif(50, 0, 1.0),
-#                       e = runif(50, 0, 1.0)))
-# 
-# m <- melt(df, id.vars = "i")
-# ggplot(m, aes(x = i, y = value, colour = variable)) +
-#     geom_point(size = 3) +
-#     geom_line(size = 1) +
-#     xlab("Iteration") +
-#     ylab("Value\n") +
-#     theme_classic() +
-#     theme_minimal() +
-#     theme(panel.border = element_rect(colour = "black", fill=NA, size=0.5)) +
-#     scale_y_continuous(limits = c(0,1), expand = c(0, 0)) +
-#     scale_x_continuous(limits = c(1,50), expand = c(0, 0)) +
-#     theme(axis.text.x = element_text(size = 16),
-#           axis.text.y = element_text(size = 16),
-#           axis.title.x = element_text(size = 16),
-#           axis.title.y = element_text(size = 16)) +
-#     theme(axis.ticks.length = unit(.25, "cm")) +
-#     theme(axis.ticks = element_line(colour = 'black', size = 0.5))
-# 
-

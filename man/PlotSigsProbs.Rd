@@ -23,6 +23,9 @@ PlotSigsProbs(df.identified.mut.sigs, df.ref.sigs.groups.colors, title,
 
 \item{plot.margin}{Margin vector for drawing plot; Default = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))}
 }
+\value{
+A ggplot object
+}
 \description{
 Plots a horizontal barplot of identified mutational signatures
 }

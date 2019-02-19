@@ -16,7 +16,7 @@ MutaliskSigIndicesToNames(df.ref.mut.sigs, target.mut.sigs.indices)
 A character vector of target mutational signatures names
 }
 \description{
-Converts target mutational signatures indices to the corresponding target 
+Converts target mutational signatures indices to the corresponding target
 mutational signatures integer vector corresponding to the indices in df.ref.mut.sigs
 }
 \keyword{internal}

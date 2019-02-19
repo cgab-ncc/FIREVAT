@@ -2,12 +2,13 @@
 # Mutational Patterns (Blokzijl et al., Genome Medicine 2018; PMID 29695279)
 #
 # Last revised date:
-#   January 2, 2019
+#   February 19, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.k)rg
-#   Clincial Genomics Analysis Branch, National Cancer Center of Korea
+#   Bioinformatics Analysis Team, National Cancer Center Korea
+
 
 #' @title MutPatParseVCFObj
 #' @description Parses a vcf.obj and prepares it to run Mutational Patterns.
@@ -15,15 +16,16 @@
 #' @param vcf.obj A list from ReadVCF
 #' @param sample.id A string value
 #'
-#' @keywords internal
-#' @importFrom deconstructSigs mut.to.sigs.input
 #' @return A data.frame with the column sample.id and
 #' row names corresponding to 96 substitution types
-MutPatParseVCFObj <- function(vcf.obj, sample.id = "sample")  {
-    if (vcf.obj$genome == "hg19")  {
+#'
+#' @keywords internal
+#' @importFrom deconstructSigs mut.to.sigs.input
+MutPatParseVCFObj <- function(vcf.obj, sample.id = "sample") {
+    if (vcf.obj$genome == "hg19") {
         bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
     }
-    if (vcf.obj$genome == "hg38")  {
+    if (vcf.obj$genome == "hg38") {
         bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
     }
 
@@ -41,6 +43,7 @@ MutPatParseVCFObj <- function(vcf.obj, sample.id = "sample")  {
     return(df.mutational.patterns.input)
 }
 
+
 #' @title MutPatParseRefMutSigs
 #' @description Parses a df.ref.mut.sigs and prepares it to run Mutational Patterns.
 #' 
@@ -50,14 +53,15 @@ MutPatParseVCFObj <- function(vcf.obj, sample.id = "sample")  {
 #' @param mutation.type.header = A string value 
 #'                               (name of header corresponding to column containing 'A[C>A]A' data))
 #'
-#' @keywords internal
 #' @return A data.frame of the format deconstructSigs::signatures.cosmic
+#'
+#' @keywords internal
 MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
                                   target.mut.sigs,
                                   signature.start.column.index = 4,
-                                  mutation.type.header = "SomaticMutationType")  {    
+                                  mutation.type.header = "SomaticMutationType") {  
     # Only consider target.mut.sigs
-    if (length(target.mut.sigs) > 0)  {
+    if (length(target.mut.sigs) > 0) {
         df.ref.mut.sigs <- df.ref.mut.sigs[, c(mutation.type.header, target.mut.sigs)]
     }
 
@@ -69,6 +73,7 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
     return(df.ref.mut.sigs)
 }
 
+
 #' @title RunMutPat
 #' @description Identifies mutational signatures using Mutational Patterns
 #' 
@@ -77,8 +82,6 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 #' @param target.mut.sigs A character vector of target mutational signatures names
 #' @param verbose If true, provides process details
 #'
-#' @keywords internal
-#' @importFrom MutationalPatterns fit_to_signatures
 #' @return A list with the following elements
 #' \itemize{
 #'  \item{tumor.mutation.types.spectrum}{A numeric vector of length 96 - 'observed' spectrum}
@@ -89,6 +92,9 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 #'  \item{identified.mut.sigs.contribution.weights}{A numeric vector where each element is the weight of mutational signature identified. The ordering follows identified.mut.sigs}
 #'  \item{cosine.similarity.score}{A numeric value}
 #' }
+#'
+#' @keywords internal
+#' @importFrom MutationalPatterns fit_to_signatures
 #' @examples
 #' \dontrun{
 #' vcf.obj <- ReadVCF(vcf.file = "../data/sample/HNT-082-BT.final.call.vcf", genome = "hg19")
@@ -101,8 +107,8 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 RunMutPat <- function(vcf.obj,
                       df.ref.mut.sigs,
                       target.mut.sigs,
-                      verbose = F)  {
-    if (verbose)  {
+                      verbose = F) {
+    if (verbose) {
         print("Started running Mutational Patterns")
     }
     
@@ -117,10 +123,10 @@ RunMutPat <- function(vcf.obj,
     # Wrap Mutational Patterns results
     mut.sigs <- c()
     mut.sigs.contribution.weights <- c()
-    for(i in 1:nrow(mut.pat.results$contribution))  {
+    for(i in 1:nrow(mut.pat.results$contribution)) {
         curr.signature <- rownames(mut.pat.results$contribution)[i]
         curr.signature.weight <- mut.pat.results$contribution[i,1]
-        if (curr.signature.weight > 0)  {
+        if (curr.signature.weight > 0) {
             mut.sigs <- c(mut.sigs, curr.signature)
             mut.sigs.contribution.weights <- c(mut.sigs.contribution.weights,
                                                curr.signature.weight)
@@ -139,7 +145,7 @@ RunMutPat <- function(vcf.obj,
               identified.mut.sigs.contribution.weights = mut.sigs.contribution.weights,
               cosine.similarity.score = cosine.similarity.score)
     
-    if (verbose)  {
+    if (verbose) {
         print("Finished running Mutational Patterns")
     }
     return(r)

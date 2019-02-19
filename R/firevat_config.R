@@ -1,7 +1,7 @@
 # FIREVAT Configure Functions
 #
 # Last revised date:
-#   February 18, 2019
+#   February 19, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -19,6 +19,7 @@
 #' @param verbose If true, provides process detail
 #'
 #' @return config.obj: list of parameters
+#'
 #' @examples
 #' \dontrun{
 #' ParseConfigFile("example.variant.caller.json")
@@ -27,7 +28,7 @@
 #' @export
 #' @importFrom jsonlite validate read_json
 #' @importFrom yaml read_yaml
-ParseConfigFile <- function(config.path, verbose=TRUE){
+ParseConfigFile <- function(config.path, verbose=TRUE) {
     if(verbose) {
         print(paste("Parsing",config.path))
     }
@@ -35,21 +36,22 @@ ParseConfigFile <- function(config.path, verbose=TRUE){
     suppressWarnings(
         config.string <- readChar(config.path, file.info(config.path)$size)
     )
+
     # Check if config file is in json format
-    if (jsonlite::validate(config.string)==TRUE){
+    if (jsonlite::validate(config.string)==TRUE) {
         config.obj <- read_json(config.path)
-    }
-    else{
-        tryCatch({
+    } else {
+        tryCatch ({
             config.obj <- read_yaml(config.path)
-        }, error = function(e){
+        }, error = function(e) {
             # Error message if config file is in neither json nor yaml
             read.error.message <- paste("ERROR: Cannot read config file:",
                                         config.path)
             stop(read.error.message)
         })
     }
-    # set names for each parameter. names should be given in config file.
+
+    # Set names for each parameter. Names should be given in config file.
     names(config.obj)<-lapply(config.obj, function(x) return(x$name))
     
     attr(config.obj, "FORMAT_value_index") <- rep(FALSE, length(config.obj))
@@ -57,25 +59,23 @@ ParseConfigFile <- function(config.path, verbose=TRUE){
     attr(config.obj, "OP_value_index") <- rep(FALSE, length(config.obj))
     
     # Evaluate custom functions
-    for(i in 1:length(config.obj)){
-        
+    for(i in 1:length(config.obj)) {
         config.entry <- config.obj[[names(config.obj)[i]]]
         
-        if("op" %in% names(config.entry)){
-            tryCatch({
-                eval_function <- eval(parse(
-                    text=config.entry$op$function_string))
-                config.obj[[names(config.obj)[i]]][["eval_function"]]<-
-                    eval_function
+        if ("op" %in% names(config.entry)) {
+            tryCatch ({
+                eval_function <- eval(parse(text = config.entry$op$function_string))
+                config.obj[[names(config.obj)[i]]][["eval_function"]] <- eval_function
                 attr(config.obj,"OP_value_index")[i] <- TRUE
-            }, error = function(f){
+            }, error = function(f) {
                 # Error message if eval does not work
                 eval.error.message <- paste(
                     "ERROR: Cannot evaluate given function:",
                     config.entry$op$function_string)
-                stop(eval.error.message)})
-        } else if("field" %in% names(config.entry)){
-            if(config.entry[["field"]][["field_type"]] == "FORMAT") {
+                stop(eval.error.message)
+            })
+        } else if ("field" %in% names(config.entry)) {
+            if (config.entry[["field"]][["field_type"]] == "FORMAT") {
                 attr(config.obj,"FORMAT_value_index")[i] <- TRUE
             } else if (config.entry[["field"]][["field_type"]] == "INFO") {
                 attr(config.obj,"INFO_value_index")[i] <- TRUE
@@ -90,20 +90,22 @@ ParseConfigFile <- function(config.path, verbose=TRUE){
     return(config.obj)
 }
 
+
 #' @title TransformValueType
 #' @description This function checks the type of value and returns type-transformed value  
 #' 
 #' @param curr.value A value which need type conversion
 #' @param value_type A character value
 #'
-#' @keywords internal
 #' @return curr.value. Type-converted value (integer or numeric)
+#' 
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' TransformValueType("0.98", "double")
 #' TransformValueType("3.0", "integer")
 #' }
-TransformValueType <- function(curr.value, value_type){
+TransformValueType <- function(curr.value, value_type) {
     # Alias for each value type
     # Can be modified later
     integer.alias <- c("int","integer","i")
@@ -114,13 +116,13 @@ TransformValueType <- function(curr.value, value_type){
     value_type <- tolower(value_type)
 
     # Change types
-    if(value_type %in% integer.alias){
+    if (value_type %in% integer.alias) {
         curr.value <- as.integer(curr.value)
-    } else if(value_type %in% numeric.alias){
+    } else if (value_type %in% numeric.alias) {
         curr.value <- as.numeric(curr.value)
-    } else if(value_type %in% boolean.alias){
+    } else if (value_type %in% boolean.alias) {
         curr.value <- as.logical(curr.value)
-    } else if(value_type %in% character.alias){
+    } else if (value_type %in% character.alias) {
         curr.value <- as.character(curr.value)
     }
 
@@ -135,12 +137,12 @@ TransformValueType <- function(curr.value, value_type){
 #' 
 #' @param INFO.list A list of INFO values
 #'
-#' @keywords internal
 #' @return A vector of matching INFO values
-MatchINFOKeyValue <- function(INFO.list){
-
-    out.char <- sapply(INFO.list, function(INFO.entry){
-        if (length(INFO.entry) == 1){
+#' 
+#' @keywords internal
+MatchINFOKeyValue <- function(INFO.list) {
+    out.char <- sapply(INFO.list, function(INFO.entry) {
+        if (length(INFO.entry) == 1) {
             names(INFO.entry) <- INFO.entry
             return(INFO.entry)
         } else {
@@ -161,8 +163,9 @@ MatchINFOKeyValue <- function(INFO.list){
 #' 
 #' @param ... Multiple filtering conditions 
 #'
-#' @keywords internal
 #' @return A single condition reduced
+#' 
+#' @keywords internal
 AND.multiple <- function (...) { 
     Reduce("&", ...) 
 }

@@ -1,7 +1,7 @@
 # FIREVAT Math Functions
 #
 # Last revised date:
-#   February 15, 2019
+#   February 19, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -17,6 +17,7 @@
 #' @param x a numeric value
 #'
 #' @return a numeric value corresponding to the z-score of x
+#'
 #' @export
 #' @importFrom stats sd
 ComputeZScore <- function(values, x)  {
@@ -36,6 +37,7 @@ ComputeZScore <- function(values, x)  {
 #' @param values numeric vector
 #'
 #' @return a numeric value corresponding to the specified z.score in the 'values' distribution
+#'
 #' @export
 #' @importFrom stats sd
 ComputeZScoreEquiValue <- function(z.score, values)  {    
@@ -56,6 +58,7 @@ ComputeZScoreEquiValue <- function(z.score, values)  {
 #' @param decimal numeric value (e.g. 0.1, 0.001)
 #'
 #' @return a numeric value
+#'
 #' @export
 DecimalCeiling <- function(value, decimal)  {    
     ceil.value <- ceiling(value / decimal) * decimal

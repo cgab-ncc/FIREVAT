@@ -8,7 +8,7 @@ MakeFilterFromConfig(config.obj)
 }
 \arguments{
 \item{config.obj}{A list from ParseConfigFile
-(any filter with FALSE "use_in_filter" value is not considered)}
+(any filter with "use_in_filter" value declared as FALSE is not considered)}
 }
 \value{
 A list with the filter parameters

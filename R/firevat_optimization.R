@@ -1,20 +1,16 @@
 # FIREVAT Optimization Functions
 #
 # Last revised date:
-#   January 2, 2019
+#   February 19, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.k)rg
-#   Clincial Genomics Analysis Branch, National Cancer Center of Korea
+#   Bioinformatics Analysis Team, National Cancer Center Korea
 
 
 #' @title ParameterToBits
 #' @description Calculate the number of bits needed to conduct FIREVAT GA optimization.
-#' 
-## Modifies:
-##   vcf.obj$data: if max(vcf.obj$data[[param]]) < 1, 
-##                 multiply multiplier to the vector
 #' 
 #' @param vcf.obj A list from ReadVCF
 #' @param vcf.filter A list from MakeMuTect2Filter
@@ -24,34 +20,29 @@
 #' @details
 #' vcf.obj$data: if max(vcf.obj$data[[param]]) < 1, then multiply multiplier to the vector
 #'
-#' @keywords internal
-#' @importFrom GA decimal2binary
 #' @return A list with the elements 
 #' 'params.bit.len' containing the bit lengths of each parameter
 #' 'vcf.obj' with updated data 
-ParameterToBits <- function(vcf.obj, config.obj, vcf.filter, multiplier=100)  {
+#'
+#' @keywords internal
+#' @importFrom GA decimal2binary
+ParameterToBits <- function(vcf.obj, config.obj, vcf.filter, multiplier=100) {
     params.bit.len <- rep(0, length(vcf.filter))
-    for (i in 1:length(vcf.filter))  {
+    for (i in 1:length(vcf.filter)) {
         param <- names(vcf.filter)[i]
 
         # If custom range is given in config.obj,
         # calculate bit length with the given range.
-        if ("range"%in% names(config.obj[[param]]))  {
+        if ("range"%in% names(config.obj[[param]])) {
             max.range <- unlist(config.obj[[param]]["range"])
             params.bit.len[i] <- length(decimal2binary(max.range[[2]]))
-        }
-        else  {
-            if (max(vcf.obj$data[[param]]) > 1)  {    
-                params.bit.len[i] <- length(
-                    decimal2binary(max(vcf.obj$data[[param]]))
-                )
-            } 
-            else  {
+        } else {
+            if (max(vcf.obj$data[[param]]) > 1) {    
+                params.bit.len[i] <- length(decimal2binary(max(vcf.obj$data[[param]])))
+            } else {
                 # If max(vcf.obj$data[[param]]) <= 1,
                 # then multiply multiplier to value
-                params.bit.len[i] <- length(
-                    decimal2binary(max(multiplier * vcf.obj$data[[param]]))
-                )
+                params.bit.len[i] <- length(decimal2binary(max(multiplier * vcf.obj$data[[param]])))
                 vcf.obj$data[[param]] <- multiplier * vcf.obj$data[[param]]
             }
         } 
@@ -67,10 +58,11 @@ ParameterToBits <- function(vcf.obj, config.obj, vcf.filter, multiplier=100)  {
 #' @param string A binary expression of parameters
 #' @param data A list which contains FIREVAT data
 #'
-#' @keywords internal
-#' @importFrom GA binary2decimal gray2binary
 #' @return A numeric vector corresponding to decoded string representation
 #' of parameters
+#'
+#' @keywords internal
+#' @importFrom GA binary2decimal gray2binary
 GADecodeBinaryString <- function(string, data) {
     params.bit.len <- data$params.bit.len
     string <- gray2binary(string)
@@ -79,10 +71,10 @@ GADecodeBinaryString <- function(string, data) {
     
     start <- 1
     end <- params.bit.len[1]
-    for (i in 1:length(params.bit.len)){
+    for (i in 1:length(params.bit.len)) {
         decimal.vector[i] <- binary2decimal(string[start:end])
         start <- start + params.bit.len[i]
-        if (i != length(params.bit.len)){
+        if (i != length(params.bit.len)) {
             end <- start + params.bit.len[i+1]-1
         }        
     }
@@ -105,7 +97,6 @@ GADecodeBinaryString <- function(string, data) {
 #'  \item{"config.obj"}{\code{\link{ParseConfigFile}}}
 #' }
 #' 
-#' @keywords internal
 #' @return A list with the following elements
 #' \itemize{
 #'  \item{C.filtered}{numeric value}
@@ -122,7 +113,9 @@ GADecodeBinaryString <- function(string, data) {
 #'  \item{sequencing.artifact.signatures}{character vector (of signature names)}
 #'  \item{sequencing.artifact.signatures.weights}{numeric vector}
 #' }
-GAOptimizationObjFnHelper <- function(string, data)  {
+#'
+#' @keywords internal
+GAOptimizationObjFnHelper <- function(string, data) {
     # Convert binary string representation of filter parameters to integers
     x <- GADecodeBinaryString(string = string, data = data)
     
@@ -136,7 +129,7 @@ GAOptimizationObjFnHelper <- function(string, data)  {
     )
 
     # Return if 50 or fewer point mutations left
-    if ((nrow(vcf.objs$vcf.obj.filtered$data) <= 50) || (nrow(vcf.objs$vcf.obj.artifact$data) <= 50))  {
+    if ((nrow(vcf.objs$vcf.obj.filtered$data) <= 50) || (nrow(vcf.objs$vcf.obj.artifact$data) <= 50)) {
         return(list(valid = FALSE, 
                     x = x,
                     original.muts.count = nrow(data$vcf.obj$data),
@@ -156,14 +149,13 @@ GAOptimizationObjFnHelper <- function(string, data)  {
     refined.seq.art.sigs.weights <- c() # sequencing artifact signatures weights
     refined.target.sigs <- c()
     refined.target.sigs.weights <- c()
-    for (i in 1:length(refined.muts.mut.pat.results$identified.mut.sigs))  {
+    for (i in 1:length(refined.muts.mut.pat.results$identified.mut.sigs)) {
         curr.signature <- refined.muts.mut.pat.results$identified.mut.sigs[i]
         curr.signature.weight <- as.numeric(refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights[i])
-        if (curr.signature %in% data$sequencing.artifact.mut.sigs)  {
+        if (curr.signature %in% data$sequencing.artifact.mut.sigs) {
             refined.seq.art.sigs <- c(refined.seq.art.sigs, curr.signature)
             refined.seq.art.sigs.weights <- c(refined.seq.art.sigs.weights, curr.signature.weight)
-        }
-        else  {
+        } else {
             refined.target.sigs <- c(refined.target.sigs, curr.signature)
             refined.target.sigs.weights <- c(refined.target.sigs.weights, curr.signature.weight)
         }
@@ -185,23 +177,22 @@ GAOptimizationObjFnHelper <- function(string, data)  {
     # A.value.artifactual
     # P.value.artifactual
     artifactual.muts.mut.pat.results <- RunMutPat(
-                        vcf.obj = vcf.objs$vcf.obj.artifact,
-                        df.ref.mut.sigs = data$df.ref.mut.sigs,
-                        target.mut.sigs = c(data$target.mut.sigs)
+        vcf.obj = vcf.objs$vcf.obj.artifact,
+        df.ref.mut.sigs = data$df.ref.mut.sigs,
+        target.mut.sigs = c(data$target.mut.sigs)
     )
     
     artifactual.muts.seq.art.sigs <- c() # artifact signatures
     artifactual.muts.seq.art.sigs.weights <- c() # artifact signatures weights
     artifactual.target.sigs <- c()
     artifactual.target.sigs.weights <- c()
-    for (i in 1:length(artifactual.muts.mut.pat.results$identified.mut.sigs))  {
+    for (i in 1:length(artifactual.muts.mut.pat.results$identified.mut.sigs)) {
         curr.signature <- artifactual.muts.mut.pat.results$identified.mut.sigs[i]
         curr.signature.weight <- as.numeric(artifactual.muts.mut.pat.results$identified.mut.sigs.contribution.weights[i])
-        if (curr.signature %in% data$sequencing.artifact.mut.sigs)  {
+        if (curr.signature %in% data$sequencing.artifact.mut.sigs) {
             artifactual.muts.seq.art.sigs <- c(artifactual.muts.seq.art.sigs, curr.signature)
             artifactual.muts.seq.art.sigs.weights <- c(artifactual.muts.seq.art.sigs.weights, curr.signature.weight)
-        }
-        else  {
+        } else {
             artifactual.target.sigs <- c(artifactual.target.sigs, curr.signature)
             artifactual.target.sigs.weights <- c(artifactual.target.sigs.weights, curr.signature.weight)
         }
@@ -252,9 +243,10 @@ GAOptimizationObjFnHelper <- function(string, data)  {
 #'  \item{"config.obj"}{\code{\link{ParseConfigFile}}}
 #' }
 #'
-#' @keywords internal
 #' @return A numeric value corresponding to the optimization objective value
-GAOptimizationObjFn <- function(string, data)  {
+#'
+#' @keywords internal
+GAOptimizationObjFn <- function(string, data) {
     results <- GAOptimizationObjFnHelper(string = string, data = data)
     return(results$objective.val)
 }
@@ -277,7 +269,7 @@ GAOptimizationObjFn <- function(string, data)  {
 #' 
 #' @keywords internal
 #' @importFrom utils write.table
-GAMonitorFn <- function(obj, data)  {    
+GAMonitorFn <- function(obj, data) {
     max.fitness <- max(obj@fitness)
     max.fitness.index <- which(obj@fitness == max.fitness)
     max.fitness.pop <- unique(as.data.frame(obj@population)[max.fitness.index,])
@@ -300,7 +292,7 @@ GAMonitorFn <- function(obj, data)  {
         print(sprintf("%-50s%s", paste0(names(data$vcf.filter)[i], " ", inequal.sign), results$x[i]))
     }
 
-    if (results$valid)  {
+    if (results$valid) {
         print(sprintf("%-50s%f", "Refined mutations cosine sim score", results$refined.muts.cos.sim))
         print(sprintf("%-50s%f", "Refined mutations seq art sigs weights sum", results$refined.muts.seq.art.weights.sum))
         print(sprintf("%-50s%f", "Refined mutations proportion", results$refined.muts.proportion))
@@ -336,8 +328,7 @@ GAMonitorFn <- function(obj, data)  {
         for (i in 1:length(data$vcf.filter)) {
             df.log[names(data$vcf.filter)[i]] <- c(results$x[i])
         }
-    }
-    else  {
+    } else {
         print(sprintf("%-50s", "50 or fewer mutations. Skipping iteration"))
         
         # Prepare data to write to log
@@ -370,10 +361,9 @@ GAMonitorFn <- function(obj, data)  {
 
     # Write iteration to log file
     log.file <- paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_Optimization_Logs.tsv")
-    if (!file.exists(log.file))  {
+    if (!file.exists(log.file)) {
         write.table(df.log, log.file, row.names = F, sep = "\t")
-    }
-    else  {
+    } else {
         write.table(df.log, log.file, row.names = F, sep = "\t", append = T, col.names = F)
     }
 }

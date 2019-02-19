@@ -1,45 +1,56 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-FIREVAT
-=======
+# FIREVAT
 
-The goal of FIREVAT is to ...
+## **FI**nding **RE**liable **V**ariants without **A**r**T**ifacts
 
-Installation
-------------
+FIREVAT is a variant filtering tool for cancer sequencing data, 
+which uses mutational signatures to identify sequencing artifacts and 
+low-quality variants.
 
-You can install the released version of FIREVAT from [CRAN](https://CRAN.R-project.org) with:
+---
+
+### February 19, 2019
+
+### Authors
+- Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
+- Hyunbin Kim (khb7840@ncc.re.kr)
+
+Bioinformatics Analysis Team, National Cancer Center Korea
+
+---
+
+# Table of contents
+
+- [FIREVAT](#firevat)
+  - [**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts](#finding-reliable-variants-without-artifacts)
+- [Table of contents](#table-of-contents)
+- [Installation](#installation)
+- [Attributions](#attributions)
+- [License](#license)
+
+---
+
+## Installation
+
+You can install the released version of FIREVAT from [FIREVAT github repository](https://github.com/cgab-ncc/FIREVAT) with:
 
 ``` r
-install.packages("FIREVAT")
+install.packages("devtools")
+library(devtools)
+install_github("cgab-ncc/FIREVAT")
 ```
 
-Example
--------
+## Attributions
 
-This is a basic example which shows you how to solve a common problem:
+FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@ncc.re.kr) -- Dongwan Hong's lab -- National Cancer Center, Korea.
 
-``` r
-## basic example code
-```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
+## License 
+[GPL-2](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE)
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
 
-You can also embed plots, for example:
+[mutalisk]: http://mutalisk.org/
+[paper]: https://academic.oup.com/nar/article/46/W1/W102/5001159
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!

@@ -20,7 +20,7 @@ that gets appended to the list of candidate mutational signatures so that these 
 always considered.}
 
 \item{method}{A string value (must be either 'random.sampling' or 'all').
-The method 'random.sampling' samples (without replacement) 'n.sample' number of signatures 
+The method 'random.sampling' samples (without replacement) 'n.sample' number of signatures
 'n.iter' number of times and runs the candidate signatures one last time.
 The method 'all' uses all target.mut.sigs}
 
@@ -45,7 +45,7 @@ A list with the following elements
  \item{identified.mut.sigs.spectrum}{A numeric vector of length 96}
  \item{residuals}{A numeric vector of length 96}
  \item{rss}{A numeric value (residual sum of squares)}
- \item{cos.sim.score}{A numeric value (cosine similarity score between observed mutational spectrum and 
+ \item{cos.sim.score}{A numeric value (cosine similarity score between observed mutational spectrum and
   reconstructed mutational signatures)}
  \item{all.models.sigs}{A list where each element is a model; a model is a list of signatures identified)}
  \item{all.models.sigs.probs}{A list where each element is a model; a model is a list of contribution probabilities}

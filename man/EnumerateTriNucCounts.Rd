@@ -15,3 +15,12 @@ a numeric vector of length 6 corresponding to the counts of each trinucleotide c
 \description{
 Returns C>A, C>G, C>T, T>A, T>C, T>G counts
 }
+\details{
+Please note that this function assumes that 'spectrum' is sorted
+(i.e. 1:16  --> C>A;
+      17:32 --> C>G;
+      33:48 --> C>T;
+      49:64 --> T>A;
+      65:80 --> T>C;
+      81:96 --> T>G)
+}

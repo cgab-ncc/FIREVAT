@@ -1,0 +1,197 @@
+[{
+        "name": "ControlDPRefForward",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "CONTROL",
+            "key": "DP4",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "ControlDPRefReverse",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "CONTROL",
+            "key": "DP4",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "ControlDPAltForward",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "CONTROL",
+            "key": "DP4",
+            "index": 3
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "ControlDPAltReverse",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "CONTROL",
+            "key": "DP4",
+            "index": 4
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorDPRefForward",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "DP4",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorDPRefReverse",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "DP4",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorDPAltForward",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "DP4",
+            "index": 3
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorDPAltReverse",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "DP4",
+            "index": 4
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "ControlVAF",
+        "direction": "NEG",
+        "field": {
+            "field_type": "INFO",
+            "key": "AF",
+            "index": 1
+        },
+        "default": 100,
+        "type": "float",
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorVAF",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "AF",
+            "index": 2
+        },
+        "default": 0,
+        "type": "float",
+        "use_in_filter": true
+    },
+    {
+        "name": "MappingQuality",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "MQ",
+            "index": 1
+        },
+        "default": 10,
+        "type": "integer",
+        "use_in_filter": true
+    },
+    {
+        "name": "ControlDPRef",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["ControlDPRefForward", "ControlDPRefReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "ControlDPAlt",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["ControlDPAltForward", "ControlDPAltReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorDPRef",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["TumorDPRefForward", "TumorDPRefReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorDPAlt",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["TumorDPAltForward", "TumorDPAltReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": true
+    }
+]

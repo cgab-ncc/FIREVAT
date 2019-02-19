@@ -47,7 +47,7 @@ PlotTriNucSpectrum(sub.types, spectrum, max.y.val, min.y.val, y.axis.title,
 A ggplot object
 }
 \description{
-Plots the spectrum of 96 trinucleotide distribution 
+Plots the spectrum of 96 trinucleotide distribution
 (C>A, C>G, C>T, T>A, T>C, T>G)
 Please note that this function assumes that both sub.types and spectrum
 are sorted in the following order: C>A, C>G, C>T, T>A, T>C, T>G

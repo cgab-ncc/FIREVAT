@@ -10,6 +10,6 @@ GetCOSMICMutSigs()
 a data.frame of the COSMIC reference mutational signatures
 }
 \description{
-Returns a data.frame of the COSMIC mutational signature reference file 
+Returns a data.frame of the COSMIC mutational signature reference file
 from the data directory
 }

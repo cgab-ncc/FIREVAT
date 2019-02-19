@@ -23,7 +23,6 @@ Imports:
     ggrepel,
     gridExtra,
     ggplot2,
-    reshape2,
     rmarkdown,
     gtable
 Package: FIREVAT

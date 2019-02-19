@@ -44,5 +44,7 @@ A list with the following elements
 }
 }
 \description{
-Runs FIREVAT using configuration data
+Runs FIREVAT using configuration data.Filters point mutations in the specified vcf.file based on mutational signature
+decomposition and outputs the refined and artifact vcf as well as metadata related to
+the refinement process.
 }

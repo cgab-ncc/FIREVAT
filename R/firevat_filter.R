@@ -1,7 +1,7 @@
 # FIREVAT Filtering Functions
 #
 # Last revised date:
-#   February 18, 2019
+#   February 19, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -13,24 +13,24 @@
 #' @description Creates a vcf filter from config.obj
 #'
 #' @param config.obj A list from ParseConfigFile
-#' (any filter with FALSE "use_in_filter" value is not considered)
+#' (any filter with "use_in_filter" value declared as FALSE is not considered)
 #'
 #' @return A list with the filter parameters
+#'
 #' @export
-MakeFilterFromConfig <- function(config.obj)  {
-
+MakeFilterFromConfig <- function(config.obj) {
     vcf.config.filter <- list()
     
     # If default tag is given in config file, save default value into filter list
     for (config.entry in config.obj) {
         # Any filter with FALSE "use_in_filter" value is not considered
-        if (config.entry$use_in_filter == TRUE){
+        if (config.entry$use_in_filter == TRUE) {
             if ("default" %in% names(config.entry)) {
                 vcf.config.filter[[config.entry$name]] <- config.entry$default
             } else {
                 # Set default value according to the optimization direction
                 # of the parameter: POS=0 / NEG=Inf
-                if (config.entry$direction == "POS"){
+                if (config.entry$direction == "POS") {
                     vcf.config.filter[[config.entry$name]] <- 0
                 } else if (config.entry$direction == "NEG") {
                     vcf.config.filter[[config.entry$name]] <- Inf
@@ -44,17 +44,18 @@ MakeFilterFromConfig <- function(config.obj)  {
     return(vcf.config.filter)
 }
 
+
 #' @title UpdateFilterFromConfig
 #' @description Update filter based on optim parameter values
 #'
 #' @param vcf.filter A list from MakeFilterFromConfig
 #' @param param.values A numeric vector contains filtering value 
-#'  (same length with length(vcf.config.filter))
+#' (same length with length(vcf.config.filter))
 #'
 #' @return Updated vcf.filter (list)
+#'
 #' @export
-UpdateFilterFromConfig <- function(vcf.filter, param.values){
-
+UpdateFilterFromConfig <- function(vcf.filter, param.values) {
     vcf.filter.updated <- vcf.filter
 
     # Set the values in vcf.filter.updated with param.values
@@ -64,6 +65,7 @@ UpdateFilterFromConfig <- function(vcf.filter, param.values){
 
     return(vcf.filter.updated)
 }
+
 
 #' @title FilterVCFFromConfig
 #' @description 
@@ -81,8 +83,9 @@ UpdateFilterFromConfig <- function(vcf.filter, param.values){
 #'   \item{1) Mutations which passed filtering}{vcf.obj.filtered = vcf.obj (list with data, header, genome)}
 #'   \item{2) Mutations which did not pass filtering}{vcf.obj.artifact = vcf.obj (list with data, header, genome)}
 #' }
-FilterVCFFromConfig <- function(vcf.obj, vcf.filter, config.obj, verbose = FALSE){
-
+#'
+#' @export
+FilterVCFFromConfig <- function(vcf.obj, vcf.filter, config.obj, verbose = FALSE) {
     # Set up variables
     vcf.data.temp <- vcf.obj$data
     include <- rep(TRUE, nrow(vcf.data.temp))
@@ -95,7 +98,6 @@ FilterVCFFromConfig <- function(vcf.obj, vcf.filter, config.obj, verbose = FALSE
     }
 
     for (param in names(vcf.filter)) {
-
         # Get filtering direction from config.obj
         direction <- config.obj[[param]]["direction"]
 
@@ -114,7 +116,7 @@ FilterVCFFromConfig <- function(vcf.obj, vcf.filter, config.obj, verbose = FALSE
     vcf.data.temp <- vcf.data.temp[include, ]
     vcf.data.artifact <- vcf.obj$data[!include, ]
     
-    if (verbose)  {
+    if (verbose) {
         print(paste0("After applying filter: ", nrow(vcf.data.temp), 
                      " rows in vcf.data.filtered"))
         print(paste0("After applying filter: ", nrow(vcf.data.artifact), 

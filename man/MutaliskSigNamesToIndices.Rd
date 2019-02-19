@@ -12,7 +12,7 @@ MutaliskSigNamesToIndices(df.ref.mut.sigs, target.mut.sigs)
 \item{target.mut.sigs}{A character vector of target mutational signatures names}
 }
 \value{
-An integer vector of target mutational signatures indices 
+An integer vector of target mutational signatures indices
 (the first target mutational signature (e.g. 'SBS1') gets assigned a value of 1)
 }
 \description{
