@@ -12,7 +12,7 @@ GAOptimizationObjFnHelper(string, data)
 \item{data}{A list with the following data
 \itemize{
  \item{"vcf.obj"}{\code{\link{ReadVCF}}}
- \item{"vcf.filter"}{a list}   
+ \item{"vcf.filter"}{a list}
  \item{"vcf.calling.method"}{string value}
  \item{"df.ref.mut.sig"}{a data.frame}
  \item{"target.mut.sigs"}{a character vector}

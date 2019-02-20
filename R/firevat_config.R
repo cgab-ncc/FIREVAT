@@ -10,10 +10,10 @@
 
 
 #' @title ParseConfigFile
-#' @description 
+#' @description
 #' This function returns config.obj from JSON or YAML config file.
 #' - Check if the config file is in JSON format or YAML format
-#' - Return config.obj 
+#' - Return config.obj
 #'
 #' @param config.path A string for config file path
 #' @param verbose If true, provides process detail
@@ -28,8 +28,8 @@
 #' @export
 #' @importFrom jsonlite validate read_json
 #' @importFrom yaml read_yaml
-ParseConfigFile <- function(config.path, verbose=TRUE) {
-    if(verbose) {
+ParseConfigFile <- function(config.path, verbose = TRUE) {
+    if (verbose == TRUE) {
         print(paste("Parsing",config.path))
     }
 
@@ -53,15 +53,15 @@ ParseConfigFile <- function(config.path, verbose=TRUE) {
 
     # Set names for each parameter. Names should be given in config file.
     names(config.obj)<-lapply(config.obj, function(x) return(x$name))
-    
+
     attr(config.obj, "FORMAT_value_index") <- rep(FALSE, length(config.obj))
     attr(config.obj, "INFO_value_index") <- rep(FALSE, length(config.obj))
     attr(config.obj, "OP_value_index") <- rep(FALSE, length(config.obj))
-    
+
     # Evaluate custom functions
     for(i in 1:length(config.obj)) {
         config.entry <- config.obj[[names(config.obj)[i]]]
-        
+
         if ("op" %in% names(config.entry)) {
             tryCatch ({
                 eval_function <- eval(parse(text = config.entry$op$function_string))
@@ -80,10 +80,10 @@ ParseConfigFile <- function(config.path, verbose=TRUE) {
             } else if (config.entry[["field"]][["field_type"]] == "INFO") {
                 attr(config.obj,"INFO_value_index")[i] <- TRUE
             }
-        }   
+        }
     }
 
-    if (verbose) {
+    if (verbose == TRUE) {
         print(paste("Completed parsing",config.path))
     }
 
@@ -92,13 +92,13 @@ ParseConfigFile <- function(config.path, verbose=TRUE) {
 
 
 #' @title TransformValueType
-#' @description This function checks the type of value and returns type-transformed value  
-#' 
+#' @description This function checks the type of value and returns type-transformed value
+#'
 #' @param curr.value A value which need type conversion
 #' @param value_type A character value
 #'
 #' @return curr.value. Type-converted value (integer or numeric)
-#' 
+#'
 #' @keywords internal
 #' @examples
 #' \dontrun{
@@ -134,11 +134,11 @@ TransformValueType <- function(curr.value, value_type) {
 #' @description
 #' Check whether an INFO entry is given with single key or key-value pair.
 #' Return values accordingly.
-#' 
+#'
 #' @param INFO.list A list of INFO values
 #'
 #' @return A vector of matching INFO values
-#' 
+#'
 #' @keywords internal
 MatchINFOKeyValue <- function(INFO.list) {
     out.char <- sapply(INFO.list, function(INFO.entry) {
@@ -160,12 +160,12 @@ MatchINFOKeyValue <- function(INFO.list) {
 #' @description
 #' An internal function for handling multiple filtering conditions.
 #' Reduce conditions with "&" operations.
-#' 
-#' @param ... Multiple filtering conditions 
+#'
+#' @param ... Multiple filtering conditions
 #'
 #' @return A single condition reduced
-#' 
+#'
 #' @keywords internal
-AND.multiple <- function (...) { 
-    Reduce("&", ...) 
+AND.multiple <- function (...) {
+    Reduce("&", ...)
 }

@@ -6,41 +6,67 @@
 \usage{
 RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   target.mut.sigs, sequencing.artifact.mut.sigs, num.cores, output.dir,
-  pop.size = 200, max.iter = 200, run = 50, pmutation = 0.25,
+  mode = "ga", use.suggested.soln = TRUE, ga.pop.size = 200,
+  ga.max.iter = 200, ga.run = 50, ga.pmutation = 0.25,
+  mutalisk.method = "random.sampling",
+  mutalisk.random.sampling.count = 20,
+  mutalisk.random.sampling.max.iter = 10, report.format = "html",
   verbose = TRUE)
 }
 \arguments{
-\item{vcf.file}{String value corresponding to input .vcf file (full path)}
+\item{vcf.file}{String value corresponding to input .vcf file. Please provide the full path.}
 
-\item{vcf.file.genome}{Genome assembly of the input .vcf file}
+\item{vcf.file.genome}{Genome assembly of the input .vcf file. The value should be eitehr 'hg19' or 'hg38'.}
 
-\item{config.file}{String value corresponding to input configuration file (refer to ...)}
+\item{config.file}{String value corresponding to input configuration file. For more details please refer to ...}
 
 \item{df.ref.mut.sigs}{A data.frame of the reference mutational signatures}
 
-\item{target.mut.sigs}{A character vector of the target mutational signatures (from reference mutational signatures)}
+\item{target.mut.sigs}{A character vector of the target mutational signatures from reference mutational signatures.}
 
-\item{sequencing.artifact.mut.sigs}{A character vector of the sequencing artifact mutational signatures (from reference mutational signatures)}
+\item{sequencing.artifact.mut.sigs}{A character vector of the sequencing artifact mutational signatures from reference mutational signatures.}
 
 \item{num.cores}{Number of cores to allocate}
 
 \item{output.dir}{String value of the desired output directory}
 
-\item{pop.size}{Integer value of the Genetic Algorithm 'population size' parameter}
+\item{mode}{String value. The value should be either 'ga' or 'manual'.}
 
-\item{max.iter}{Integer value of the Genetic Algorithm 'maximum iterations' parameter}
+\item{use.suggested.soln}{Boolean value. If TRUE, then FIREVAT passes the default values
+of filter variables declared as 'use_in_filter' in the config file to the 'suggestions' parameter of
+the Genetic Algorithm package. If FALSE, then FIREVAT supplies NULL to the GA package 'suggestions' parameter.}
 
-\item{run}{Integer value of the Genetic Algorithm 'run' parameter}
+\item{ga.pop.size}{Integer value of the Genetic Algorithm 'population size' parameter. Default: 200.
+This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.}
 
-\item{pmutation}{Float value of the Genetic Algorithm 'mutation probability' parameter}
+\item{ga.max.iter}{Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 200.
+This value should be set based on the number of filter parameters. Recommendation: same as 'ga.pop.size'.}
 
-\item{verbose}{If true, provides process detail}
+\item{ga.run}{Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
+This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.}
+
+\item{ga.pmutation}{Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.}
+
+\item{mutalisk.method}{Mutalisk signature identification method. Default: 'random.sampling'.
+The value can be either 'all' or 'random.sampling'.
+'all' uses all target.mut.sigs to identify mutational signatures.
+'random.sampling' randomly samples from target.mut.sigs to identify mutational signatures.}
+
+\item{mutalisk.random.sampling.count}{Mutalisk random sampling count. Default: 20.
+The number of signatures to sample from target.mut.sigs}
+
+\item{mutalisk.random.sampling.max.iter}{Mutalisk random sampling maximum iteration. Default: 10.
+The number of times Mutalisk randomly samples from target.mut.sigs before determining the candidate signatures.}
+
+\item{report.format}{The format of FIREVAT report. We currently only support 'html'.}
+
+\item{verbose}{If TRUE, provides process detail. Default: TRUE.}
 }
 \value{
 A list with the following elements
 \itemize{
- \item{x.solution.decimal}{A numeric vector of optimized parameter values}
- \item{data}{}
+ \item{f}{ = A ggarrange object}
+ \item{graphs}{ = A list of length 3; each element is a ggplot histogram}
 }
 }
 \description{

@@ -220,7 +220,6 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
 
     print("Finished plotting vcf stats boxplots")
     return(g)
-
 }
 
 
@@ -468,7 +467,7 @@ PlotTriNucSpectrum <- function(sub.types,
 }
 
 
-#' @title PlotSigsProbs
+#' @title PlotSignaturesContProbs
 #' @description
 #' Plots a horizontal barplot of identified mutational signatures
 #'
@@ -485,19 +484,19 @@ PlotTriNucSpectrum <- function(sub.types,
 #' @import ggplot2
 #' @examples
 #' \dontrun{
-#'  g <- PlotSigsProbs(sigs = c(mutalisk.results$identified.mut.sigs),
-#'                     sigs.probs = c(mutalisk.results$identified.mut.sigs.probs),
-#'                     df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
+#'  g <- PlotSignaturesContProbs(sigs = c(mutalisk.results$identified.mut.sigs),
+#'  sigs.probs = c(mutalisk.results$identified.mut.sigs.probs),
+#'  df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
 #'  print(g)
 #' }
 #' @export
-PlotSigsProbs <- function(df.identified.mut.sigs,
-                          df.ref.sigs.groups.colors,
-                          title,
-                          convert.to.percentage = T,
-                          font.size.small = 8,
-                          font.size.med = 14,
-                          plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
+PlotSignaturesContProbs <- function(df.identified.mut.sigs,
+                                    df.ref.sigs.groups.colors,
+                                    title,
+                                    convert.to.percentage = T,
+                                    font.size.small = 8,
+                                    font.size.med = 14,
+                                    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
     print("Started plotting signatures probabilities")
 
     # Prepare plot data
@@ -720,9 +719,9 @@ PlotMutaliskResults <- function(mutalisk.results,
     df.identified.mut.sigs <- rbind(df.identified.mut.sigs,
                                     df.remaining.mut.sigs)
     df.identified.mut.sigs <- df.identified.mut.sigs[order(df.identified.mut.sigs$signature),]
-    f1 <- PlotSigsProbs(df.identified.mut.sigs,
-                        title = title,
-                        df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
+    f1 <- PlotSignaturesContProbs(df.identified.mut.sigs,
+                                  title = title,
+                                  df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
 
     # 2. Plot trinucleotide spectrums (96 substitution subtypes)
     g1 <- PlotTriNucSpectrum(sub.types = mutalisk.results$sub.types,

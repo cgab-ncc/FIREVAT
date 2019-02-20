@@ -16,7 +16,7 @@ ParameterToBits(vcf.obj, config.obj, vcf.filter, multiplier = 100)
 \item{multiplier}{A multiplier for convert fraction to integer (default = 100)}
 }
 \value{
-A list with the elements 
+A list with the elements
 'params.bit.len' containing the bit lengths of each parameter
 'vcf.obj' with updated data
 }
@@ -26,4 +26,3 @@ Calculate the number of bits needed to conduct FIREVAT GA optimization.
 \details{
 vcf.obj$data: if max(vcf.obj$data[[param]]) < 1, then multiply multiplier to the vector
 }
-\keyword{internal}

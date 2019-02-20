@@ -4,17 +4,13 @@
 \alias{ReportFIREVATResults}
 \title{ReportFIREVATResults}
 \usage{
-ReportFIREVATResults(x.solution.decimal, data, verbose = T,
-  report.format = "html")
+ReportFIREVATResults(data)
 }
 \arguments{
-\item{x.solution.decimal}{A numeric vector}
-
 \item{data}{A list of main data from \code{\link{RunFIREVAT}}}
-
-\item{verbose}{If true, provides process detail}
-
-\item{report.format}{The format of FIREVAT report. In current version, we only support "html"}
+}
+\value{
+An updated data list
 }
 \description{
 Reports FIREVAT results in html format (generated from Rmd)

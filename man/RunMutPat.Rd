@@ -4,7 +4,7 @@
 \alias{RunMutPat}
 \title{RunMutPat}
 \usage{
-RunMutPat(vcf.obj, df.ref.mut.sigs, target.mut.sigs, verbose = F)
+RunMutPat(vcf.obj, df.ref.mut.sigs, target.mut.sigs, verbose = TRUE)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}

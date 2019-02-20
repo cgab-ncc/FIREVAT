@@ -9,17 +9,14 @@ config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json
 results <- RunFIREVAT(vcf.file = sample.vcf.file,
                       vcf.file.genome = 'hg19',
                       config.file = config.file,
+                      mode = "manual",
                       df.ref.mut.sigs = GetPCAWGMutSigs(),
                       target.mut.sigs = GetPCAWGMutSigsNames(),
                       sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
-                      output.dir = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_153000/",
-                      num.cores = 6,
-                      ga.pop.size = 100,
-                      ga.max.iter = 5,
-                      ga.run = 50,
+                      output.dir = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_180000/",
                       mutalisk.random.sampling.count = 10,
-                      mutalisk.random.sampling.max.iter = 10,
-                      ga.pmutation = 0.25)
+                      num.cores = 1,
+                      mutalisk.random.sampling.max.iter = 10)
 
-save(results, file = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_153000/results.RData")
-load("/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_153000/results.RData")
+save(results, file = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_180000/results.RData")
+load("/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_180000/results.RData")

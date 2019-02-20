@@ -9,7 +9,7 @@
 #   Bioinformatics Analysis Team, National Cancer Center Korea
 
 
-#' @title MakeFilterFromConfig
+#' @title MakeFilter
 #' @description Creates a vcf filter from config.obj
 #'
 #' @param config.obj A list from ParseConfigFile
@@ -18,9 +18,9 @@
 #' @return A list with the filter parameters
 #'
 #' @export
-MakeFilterFromConfig <- function(config.obj) {
+MakeFilter <- function(config.obj) {
     vcf.config.filter <- list()
-    
+
     # If default tag is given in config file, save default value into filter list
     for (config.entry in config.obj) {
         # Any filter with FALSE "use_in_filter" value is not considered
@@ -45,17 +45,17 @@ MakeFilterFromConfig <- function(config.obj) {
 }
 
 
-#' @title UpdateFilterFromConfig
+#' @title UpdateFilter
 #' @description Update filter based on optim parameter values
 #'
 #' @param vcf.filter A list from MakeFilterFromConfig
-#' @param param.values A numeric vector contains filtering value 
+#' @param param.values A numeric vector contains filtering value
 #' (same length with length(vcf.config.filter))
 #'
 #' @return Updated vcf.filter (list)
 #'
 #' @export
-UpdateFilterFromConfig <- function(vcf.filter, param.values) {
+UpdateFilter <- function(vcf.filter, param.values) {
     vcf.filter.updated <- vcf.filter
 
     # Set the values in vcf.filter.updated with param.values
@@ -67,8 +67,8 @@ UpdateFilterFromConfig <- function(vcf.filter, param.values) {
 }
 
 
-#' @title FilterVCFFromConfig
-#' @description 
+#' @title FilterVCF
+#' @description
 #' Filter vcf based on the filter
 #' Filtering parameters are saved in config.obj
 #' Split vcf.obj into vcf.obj.filtered & vcf.obj.artifact based on vcf.filter
@@ -77,32 +77,32 @@ UpdateFilterFromConfig <- function(vcf.filter, param.values) {
 #' @param vcf.filter A list from MakeMuTect2Filter
 #' @param config.obj A list from ParseConfigFile
 #' @param verbose If true, provides process detail
-#' 
-#' @return A list with the following elements 
+#'
+#' @return A list with the following elements
 #' \itemize{
 #'   \item{1) Mutations which passed filtering}{vcf.obj.filtered = vcf.obj (list with data, header, genome)}
 #'   \item{2) Mutations which did not pass filtering}{vcf.obj.artifact = vcf.obj (list with data, header, genome)}
 #' }
 #'
 #' @export
-FilterVCFFromConfig <- function(vcf.obj, vcf.filter, config.obj, verbose = FALSE) {
+FilterVCF <- function(vcf.obj, vcf.filter, config.obj, verbose = TRUE) {
     # Set up variables
     vcf.data.temp <- vcf.obj$data
     include <- rep(TRUE, nrow(vcf.data.temp))
     atcg.chars <- c("A", "T", "C", "G")
-    
+
     condition.list <- list("include"=include)
 
-    if (verbose) { 
-        print(paste0("Before applying filter: ", nrow(vcf.data.temp), " rows")) 
+    if (verbose == TRUE) {
+        print(paste0("Before applying filter: ", nrow(vcf.data.temp), " rows"))
     }
 
     for (param in names(vcf.filter)) {
         # Get filtering direction from config.obj
         direction <- config.obj[[param]]["direction"]
 
-        # "POS": pass values bigger than cutoff 
-        # "NEG": pass values smaller than cutoff 
+        # "POS": pass values bigger than cutoff
+        # "NEG": pass values smaller than cutoff
         if (direction == "POS") {
             condition.list[[param]] <- vcf.obj$data[[param]] > vcf.filter[[param]]
         } else if (direction == "NEG") {
@@ -115,19 +115,61 @@ FilterVCFFromConfig <- function(vcf.obj, vcf.filter, config.obj, verbose = FALSE
     # Split vcf.data with "INCLUDE"
     vcf.data.temp <- vcf.data.temp[include, ]
     vcf.data.artifact <- vcf.obj$data[!include, ]
-    
-    if (verbose) {
-        print(paste0("After applying filter: ", nrow(vcf.data.temp), 
+
+    if (verbose == TRUE) {
+        print(paste0("After applying filter: ", nrow(vcf.data.temp),
                      " rows in vcf.data.filtered"))
-        print(paste0("After applying filter: ", nrow(vcf.data.artifact), 
+        print(paste0("After applying filter: ", nrow(vcf.data.artifact),
                      " rows in vcf.data.artifact"))
     }
-    
+
     # Return two vcf.obj
-    return(list(vcf.obj.filtered = list(data = vcf.data.temp, 
-                                        header = vcf.obj$header, 
+    return(list(vcf.obj.filtered = list(data = vcf.data.temp,
+                                        header = vcf.obj$header,
                                         genome = vcf.obj$genome),
                 vcf.obj.artifact = list(data = vcf.data.artifact,
-                                        header = vcf.obj$header, 
+                                        header = vcf.obj$header,
                                         genome = vcf.obj$genome)))
+}
+
+
+#' @title Transform default filtering parameters to a binary vector
+#' @description
+#' This function transforms default filtering parameter to binary vector
+#' which can be used as a suggested solution in GA algorithm.
+#'
+#' @param vcf.filter A list generated in \code{\link{MakeFilter}}
+#' @param params.bit.len A list with bit lengths of filtering parameters which is generated from \code{\link{ParameterToBits}}
+#'
+#' @return A binary vector
+#'
+#' @export
+DefaultFilterToBinary <- function(vcf.filter, params.bit.len) {
+    default.filter.decimal <- rep(0, length(vcf.filter))
+    default.filter.binary <- c()
+
+    for (i in 1:length(vcf.filter)) {
+        param <- names(vcf.filter)[i]
+
+        # max.binary = maximum value of parameter calculated from bit length.
+        # max.binary is formatted in decimal format.
+        max.binary <- 2^params.bit.len[[param]] - 1
+
+        # Compare default filtering value with max.binary
+        # If default filtering value > max.binary, return max.binary
+        # Else, return default value in vcf.filter
+        if (vcf.filter[[param]] > max.binary) {
+            default.filter.decimal[i] <- max.binary
+        } else {
+            default.filter.decimal[i] <- vcf.filter[[param]]
+        }
+    }
+
+    # Generate default.filter.binary with decimal values & bit length
+    for (j in 1:length(default.filter.decimal)) {
+        param.binary <- decimal2binary(default.filter.decimal[j], params.bit.len[j])
+        default.filter.binary <- c(default.filter.binary, param.binary)
+    }
+
+    return(default.filter.binary)
 }

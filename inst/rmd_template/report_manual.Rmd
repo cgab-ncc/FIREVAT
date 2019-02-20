@@ -1,0 +1,125 @@
+---
+title: "<b>FIREVAT Report</b>"
+output:
+    html_document:
+        toc: yes
+        toc_depth: 6
+        includes:
+            in_header: extLogo.html
+params:
+    data: data
+    report.items: report.items
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(fig.width = 12, 
+                      fig.height = 8,
+                      fig.align = "center")
+```
+
+<!-- Load libraries and data-->
+```{r, echo=FALSE}
+library(knitr)
+
+data <- params$data
+report.items <- params$report.items
+```
+
+```{css, echo=FALSE}
+.myheader .property  {
+  width:35%;
+  display:inline-block;
+  box-sizing:border-box;
+  text-align:left;
+  vertical-align: top;
+}
+
+.myheader .value  {
+  text-align:left;
+  width:64%;
+  display:inline-block;
+  box-sizing:border-box;
+}
+```
+
+***
+
+<div class="myheader">
+<div class="property">**Sample ID**</div><div class="value">`r data$vcf.file.basename`</div><br>
+<div class="property">**Sample VCF File**</div><div class="value">`r paste0(data$vcf.file.basename, ".vcf")`</div><br>
+<div class="property">**Sample VCF Genome**</div><div class="value">`r data$vcf.obj$genome`</div><br>
+<div class="property">**Sample VCF Mutation Calling Method**</div><div class="value">`r data$vcf.calling.method`</div><br>
+<div class="property">**Sample VCF Total Point Mutations**</div><div class="value">`r format(x = nrow(data$vcf.obj$data), big.mark = ",")`</div><br>
+<div class="property">**FIREVAT Execution Start Datetime**</div><div class="value">`r data$start.datetime`</div><br>
+<div class="property">**FIREVAT Execution End Datetime**</div><div class="value">`r data$end.datetime`</div><br>
+</div>
+
+### **1. Refinement Optimization**
+```{r, echo=FALSE}
+kable(report.items$df.filter.cutoffs, align = c('l','c','c'))
+```
+
+### **2. Optimzed Mutational Signature Identification**
+
+<br>
+
+#### **2.1. Identified Signatures**
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+print(report.items$identified.signatures.plot)
+```
+
+***
+
+<br>
+
+#### **2.2. Trinucleotide Spectrums**
+```{r, echo=FALSE}
+kable(report.items$df.trinucleotide.spectrums, align = c('l','c','c','c'))
+```
+
+***
+
+##### **2.2.1. Observed Spectrum**
+
+***
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+print(report.items$observed.spectrums.plot)
+```
+
+***
+
+##### **2.2.2. Maximum-likelihood Estimaation (MLE) Reconstructed Spectrum**
+
+***
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+print(report.items$mle.reconstructed.spectrums.plot)
+```
+
+***
+
+##### **2.2.3. Residual Spectrum**
+
+***
+
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 8}
+print(report.items$residual.spectrums.plot)
+```
+
+***
+
+<br>
+
+#### **2.3. Nucleotide Substitution Types**
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = 4}
+print(report.items$nucleotide.substitution.types.plot)
+```
+
+### **3. Optimized VCF Statistics**
+`r height <- (4 * report.items$vcf.stats.plot$params.count)`
+```{r, echo=FALSE, warning=FALSE, fig.width = 12, fig.height = height}
+print(report.items$vcf.stats.plot$fig)
+```
+

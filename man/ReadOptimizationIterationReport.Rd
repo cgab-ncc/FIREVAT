@@ -7,7 +7,7 @@
 ReadOptimizationIterationReport(data)
 }
 \arguments{
-\item{data}{A list of main data from \code{\link{RunFIREVAT}}}
+\item{data}{A list of elements returned from \code{\link{RunFIREVAT}}}
 }
 \value{
 A data.frame of FIREVAT optimization logs

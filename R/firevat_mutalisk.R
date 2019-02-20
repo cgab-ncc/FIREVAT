@@ -123,11 +123,13 @@ MutaliskSigIndicesToNames <- function(df.ref.mut.sigs,
 #' @importFrom caTools combs
 RunMutaliskHelper <- function(vcf.trinucleotide.data,
                               df.ref.mut.sigs,
-                              target.mut.sigs)  {
+                              target.mut.sigs) {
     target_signature <- MutaliskSigNamesToIndices(df.ref.mut.sigs = df.ref.mut.sigs,
                                                   target.mut.sigs = target.mut.sigs)
     num_rounds <- length(target_signature)
-    if(num_rounds > 7) { num_rounds <- 7 } # get up to 7 models
+    if(num_rounds > 7) { # get up to 7 models
+        num_rounds <- 7
+    }
 
     min_prop = 0.01
     zeta_value = 1e-10
@@ -136,14 +138,15 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
     sigdata <- df.ref.mut.sigs
 
     sigdata <- sigdata[order(sigdata$`Type`),]
-    data1 <- cbind(spec = as.integer(spec1[1:96,2]),sigdata[1:96,4:ncol(sigdata)])
+    data1 <- cbind(spec = as.integer(spec1[1:96,2]),
+                   sigdata[1:96,4:ncol(sigdata)])
 
     num_mut = sum(data1[,1])
     this_subclass = spec1[1:96,1]
     this_spectrum = data1$spec/num_mut
 
-    zero <- which(data1[,1]==0)
-    data1 <- data1[data1[,1]!=0,]
+    zero <- which(data1[,1] == 0)
+    data1 <- data1[data1[,1] != 0,]
 
     total_num <- as.integer(spec1[97,2])
     total_CA <- sum(as.integer(spec1[1:16,2] ))
@@ -176,31 +179,37 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
         if (nrs == 1) {
             all_comb <- combs(target_signature,1)
             length_all <- length(all_comb[,1])
-            for (this_n in 1:length_all){
+            for (this_n in 1:length_all) {
                 background <- data1[,all_comb[this_n,]+1]+zeta_value
                 ## BIC: Bayesian Information Criterion
                 this_value <- sum(log(background)*data1[,1])*-2+log(num_mut)*1
-                if (this_value < min_value) { min_sig = all_comb[this_n,]; min_value = this_value; min_par = 1 }
+                if (this_value < min_value) {
+                    min_sig = all_comb[this_n,]
+                    min_value = this_value; min_par = 1
+                }
                 LIK[nrs] <- min_value
             }
             stopVal <- LIK[nrs]
-        }
-        else {
+        } else {
             str <- "function(par, data, sigs) { sum((data[,1]-data[,sigs[1]]*par[1]"
             for (idx in 2:nrs) {
-                if (idx == nrs) { break() }
+                if (idx == nrs) {
+                    break
+                }
                 str <- paste0(str," - data[,sigs[",idx,"]]*par[",idx,"]")
             }
             str2 <- "par[1]"
             for (idx in 1:(nrs-1)) {
-                if ((idx+1) == nrs) { break() }
+                if ((idx+1) == nrs) {
+                    break
+                }
                 str2 <- paste0(str2,"-par[",(idx+1),"]")
             }
             str <- paste0(str," - data[,sigs[",nrs,"]]*max(0,num_mut-",str2,"))^2) }")
-            min.RSS <- eval(parse(text = str))		## Linear Regression
+            min.RSS <- eval(parse(text = str)) ## Linear Regression
 
             # FAST VERSION
-            if ( nrs >= 4 ) {
+            if (nrs >= 4) {
                 tmp = min_sig
                 tmp <- tmp[which(!tmp %in% farr)]
                 tmp_par <- min_par[which(!min_sig %in% farr)]
@@ -208,23 +217,22 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                 fixed <- tmp[max.idx]
                 farr <- c(farr, fixed)
 
-                if ( length(target_signature) > 40 ) {
-                    if ( nrs != length(target_signature) ) {
+                if (length(target_signature) > 40) {
+                    if (nrs != length(target_signature)) {
                         new_target <- target_signature[!target_signature %in% farr]
 
                         ac <- combs(new_target, 3)
-                        for (i in 1:length(farr))
+                        for (i in 1:length(farr)) {
                             ac <- as.matrix(cbind(farr[i],ac))
+                        }
                         all_comb <- ac
                         length_all <- length(all_comb[,1])
-                    }
-                    else {
+                    } else {
                         all_comb <- combs(target_signature, nrs)
                         length_all <- length(all_comb[,1])
                     }
-                }
-                else {
-                    if ( length(farr) == 1 ) {
+                } else {
+                    if (length(farr) == 1) {
                         tmp = min_sig
                         tmp <- tmp[which(!tmp %in% farr)]
                         tmp_par <- min_par[which(!min_sig %in% farr)]
@@ -233,7 +241,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                         farr <- c(farr, fixed)
                     }
 
-                    if ( nrs != length(target_signature) ) {
+                    if (nrs != length(target_signature)) {
                         all_comb <- combs(target_signature, nrs)
                         us_combs <- all_comb
                         for (i in farr) {
@@ -242,19 +250,17 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                         }
                         all_comb <- us_combs
                         length_all <- length(all_comb[,1])
-                    }
-                    else {
+                    } else {
                         all_comb <- combs(target_signature, nrs)
                         length_all <- length(all_comb[,1])
                     }
                 }
-            }
-            else {
+            } else {
                 all_comb <- combs(target_signature, nrs)
                 length_all <- length(all_comb[,1])
             }
 
-            for (this_n in 1:length_all)  {
+            for (this_n in 1:length_all) {
                 result <- optim(par = rep(1, (nrs-1)),
                                 fn = min.RSS,
                                 data = data1,
@@ -263,7 +269,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                                 lower = min_prop*num_mut,
                                 upper = num_mut)
 
-                if (result$value < min_value){
+                if (result$value < min_value) {
                     min_value = result$value
                     min_result = result
                     min_sig = c(all_comb[this_n,])
@@ -277,18 +283,18 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
                 sss <- paste0(sss,"data1[,min_sig[",i,"]+1]*min_par[",i,"]+")
             }
             sss <- paste0(sss,"zeta_value")
-
             background <- eval(parse(text = sss))
 
             ## BIC: Bayesian Information Criterion
             LIK[nrs] <- sum(log(background)*data1[,1])*-2+log(num_mut)*nrs
 
-            if ( nrs == 1 ) {
+            if (nrs == 1) {
                 stopVal <- LIK[nrs]
             } else {
-                if ( LIK[nrs] < stopVal ) {
-                    if ( stopIdx == 1 )
+                if (LIK[nrs] < stopVal) {
+                    if (stopIdx == 1 ) {
                         stopIdx <- stopIdx - 1
+                    }
                     stopVal <- LIK[nrs]
                 } else {
                     stopIdx <- stopIdx + 1
@@ -300,11 +306,10 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
         pdb[nrs] <- list(min_par)
         bdb <- cbind(bdb,background)
 
-        if ( stopIdx == 2 ) {
-            if ( nrs < 4 ) {
+        if (stopIdx == 2) {
+            if (nrs < 4) {
                 stopIdx <- 0
-            }
-            else {
+            } else {
                 num_rounds <- nrs
                 break
             }
@@ -320,16 +325,14 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
         }
     }
 
-    if (length(final_background)<96) {
-        for(i in zero){
+    if (length(final_background) < 96) {
+        for(i in zero) {
             dtmp <- as.vector(final_background)
             if( i == 96 ) {
                 str <- paste0("final_background <- c(dtmp[1:",i-1,"],0)")
-            }
-            else if( i == 1 ){
+            } else if (i == 1) {
                 str <- paste0("final_background <- c(0,dtmp[",i,":",length(dtmp),"])")
-            }
-            else {
+            } else {
                 str <- paste0("final_background <- c(dtmp[1:",i-1,"],0,dtmp[",i,":",length(dtmp),"])")
             }
             eval(parse(text = str))
@@ -338,18 +341,16 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
 
     # Get cosine similarity for all models considered
     all.models.cos.sim.scores <- c()
-    for (idx in 1:num_rounds)  {
+    for (idx in 1:num_rounds) {
         curr.background = bdb[,idx]
-        if (length(curr.background)<96) {
-            for(i in zero){
+        if (length(curr.background) < 96) {
+            for(i in zero) {
                 dtmp <- as.vector(curr.background)
-                if( i == 96 ) {
+                if (i == 96) {
                     str <- paste0("curr.background <- c(dtmp[1:",i-1,"],0)")
-                }
-                else if( i == 1 ){
+                } else if (i == 1) {
                     str <- paste0("curr.background <- c(0,dtmp[",i,":",length(dtmp),"])")
-                }
-                else {
+                } else {
                     str <- paste0("curr.background <- c(dtmp[1:",i-1,"],0,dtmp[",i,":",length(dtmp),"])")
                 }
                 eval(parse(text = str))
@@ -364,7 +365,7 @@ RunMutaliskHelper <- function(vcf.trinucleotide.data,
     # Get signature names
     all.models.signatures <- list()
     curr.model.idx <- 1
-    for (curr.model in sdb)  {
+    for (curr.model in sdb) {
         all.models.signatures[[curr.model.idx]] <- MutaliskSigIndicesToNames(df.ref.mut.sigs = df.ref.mut.sigs,
                                                                              target.mut.sigs.indices = curr.model)
         curr.model.idx <- curr.model.idx + 1
@@ -441,8 +442,8 @@ RunMutalisk <- function(vcf.obj,
                         method = "random.sampling",
                         n.sample = 20,
                         n.iter = 10,
-                        verbose = T)  {
-    if (method != "all" && method != "random.sampling")  {
+                        verbose = TRUE) {
+    if (method != "all" && method != "random.sampling") {
         stop("The parameter 'method' must be either 'all' or 'random.sampling'")
     }
 

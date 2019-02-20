@@ -15,7 +15,7 @@ MutPatParseRefMutSigs(df.ref.mut.sigs, target.mut.sigs,
 
 \item{signature.start.column.index}{= An integer value (e.g. column index corresponding to 'SBS1')}
 
-\item{mutation.type.header}{= A string value 
+\item{mutation.type.header}{= A string value
 (name of header corresponding to column containing 'A[C>A]A' data))}
 }
 \value{
