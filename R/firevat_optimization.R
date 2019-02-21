@@ -140,25 +140,25 @@ GAOptimizationObjFnHelper <- function(string, data) {
     # C.value.refined
     # A.value.refined
     # P.value.refined
-    refined.muts.mut.pat.results <- RunMutPat(vcf.obj = vcf.objs$vcf.obj.filtered,
-                                              df.ref.mut.sigs = data$df.ref.mut.sigs,
+    refined.mut.pat.input <- MutPatParseVCFObj(vcf.obj = vcf.objs$vcf.obj.filtered,
+                                               bsg = data$bsg)
+    refined.muts.mut.pat.results <- RunMutPat(mut.pat.input = refined.mut.pat.input,
+                                              df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
                                               target.mut.sigs = c(data$target.mut.sigs),
                                               verbose = FALSE)
-    refined.seq.art.sigs <- c()
-    refined.seq.art.sigs.weights <- c()
-    refined.target.sigs <- c()
-    refined.target.sigs.weights <- c()
-    for (i in 1:length(refined.muts.mut.pat.results$identified.mut.sigs)) {
-        curr.signature <- refined.muts.mut.pat.results$identified.mut.sigs[i]
-        curr.signature.weight <- as.numeric(refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights[i])
-        if (curr.signature %in% data$sequencing.artifact.mut.sigs) {
-            refined.seq.art.sigs <- c(refined.seq.art.sigs, curr.signature)
-            refined.seq.art.sigs.weights <- c(refined.seq.art.sigs.weights, curr.signature.weight)
-        } else {
-            refined.target.sigs <- c(refined.target.sigs, curr.signature)
-            refined.target.sigs.weights <- c(refined.target.sigs.weights, curr.signature.weight)
-        }
-    }
+
+    # Extract Mutational Patterns data
+    df.refined.sigs <- data.frame(list(sig = as.character(refined.muts.mut.pat.results$identified.mut.sigs),
+                                       weight = as.numeric(refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights)),
+                                  stringsAsFactors = F)
+    df.refined.sigs.seq.art <- df.refined.sigs[(df.refined.sigs$sig %in% data$sequencing.artifact.mut.sigs), ]
+    refined.seq.art.sigs <- df.refined.sigs.seq.art$sig
+    refined.seq.art.sigs.weights <- df.refined.sigs.seq.art$weight
+    df.refined.sigs.target <- df.refined.sigs[!(df.refined.sigs$sig %in% data$sequencing.artifact.mut.sigs), ]
+    refined.target.sigs <- df.refined.sigs.target$sig
+    refined.target.sigs.weights <- df.refined.sigs.target$weight
+
+    # Compute desired variables
     refined.seq.art.sigs.weights <- refined.seq.art.sigs.weights / sum(refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights)
     refined.target.sigs.weights <- refined.target.sigs.weights / sum(refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights)
     C.value.refined <- refined.muts.mut.pat.results$cosine.similarity.score
@@ -167,8 +167,10 @@ GAOptimizationObjFnHelper <- function(string, data) {
 
     # Identify mutational signatures
     # C.value.artifactual
-    artifactual.muts.mut.pat.results <- RunMutPat(vcf.obj = vcf.objs$vcf.obj.artifact,
-                                                  df.ref.mut.sigs = data$df.ref.mut.sigs,
+    artifact.mut.pat.input <- MutPatParseVCFObj(vcf.obj = vcf.objs$vcf.obj.artifact,
+                                                bsg = data$bsg)
+    artifactual.muts.mut.pat.results <- RunMutPat(mut.pat.input = artifact.mut.pat.input,
+                                                  df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
                                                   target.mut.sigs = data$sequencing.artifact.mut.sigs,
                                                   verbose = FALSE)
     C.value.artifactual <- artifactual.muts.mut.pat.results$cosine.similarity.score
@@ -176,25 +178,23 @@ GAOptimizationObjFnHelper <- function(string, data) {
     # Identify mutational signatures
     # A.value.artifactual
     # P.value.artifactual
-    artifactual.muts.mut.pat.results <- RunMutPat(vcf.obj = vcf.objs$vcf.obj.artifact,
-                                                  df.ref.mut.sigs = data$df.ref.mut.sigs,
-                                                  target.mut.sigs = c(data$target.mut.sigs),
+    artifactual.muts.mut.pat.results <- RunMutPat(mut.pat.input = artifact.mut.pat.input,
+                                                  df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
+                                                  target.mut.sigs = data$target.mut.sigs,
                                                   verbose = FALSE)
-    artifactual.muts.seq.art.sigs <- c()
-    artifactual.muts.seq.art.sigs.weights <- c()
-    artifactual.target.sigs <- c()
-    artifactual.target.sigs.weights <- c()
-    for (i in 1:length(artifactual.muts.mut.pat.results$identified.mut.sigs)) {
-        curr.signature <- artifactual.muts.mut.pat.results$identified.mut.sigs[i]
-        curr.signature.weight <- as.numeric(artifactual.muts.mut.pat.results$identified.mut.sigs.contribution.weights[i])
-        if (curr.signature %in% data$sequencing.artifact.mut.sigs) {
-            artifactual.muts.seq.art.sigs <- c(artifactual.muts.seq.art.sigs, curr.signature)
-            artifactual.muts.seq.art.sigs.weights <- c(artifactual.muts.seq.art.sigs.weights, curr.signature.weight)
-        } else {
-            artifactual.target.sigs <- c(artifactual.target.sigs, curr.signature)
-            artifactual.target.sigs.weights <- c(artifactual.target.sigs.weights, curr.signature.weight)
-        }
-    }
+
+    # Extract Mutational Patterns data
+    df.artifact.sigs <- data.frame(list(sig = as.character(artifactual.muts.mut.pat.results$identified.mut.sigs),
+                                        weight = as.numeric(artifactual.muts.mut.pat.results$identified.mut.sigs.contribution.weights)),
+                                   stringsAsFactors = F)
+    df.artifact.sigs.seq.art <- df.artifact.sigs[(df.artifact.sigs$sig %in% data$sequencing.artifact.mut.sigs), ]
+    artifactual.muts.seq.art.sigs <- df.artifact.sigs.seq.art$sig
+    artifactual.muts.seq.art.sigs.weights <- df.artifact.sigs.seq.art$weight
+    df.artifact.sigs.target <- df.artifact.sigs[!(df.artifact.sigs$sig %in% data$sequencing.artifact.mut.sigs), ]
+    artifactual.target.sigs <- df.artifact.sigs.target$sig
+    artifactual.target.sigs.weights <- df.artifact.sigs.target$weight
+
+    # Compute desired variables
     artifactual.muts.seq.art.sigs.weights <- artifactual.muts.seq.art.sigs.weights / sum(artifactual.muts.mut.pat.results$identified.mut.sigs.contribution.weights)
     artifactual.target.sigs.weights <- artifactual.target.sigs.weights / sum(artifactual.muts.mut.pat.results$identified.mut.sigs.contribution.weights)
     A.value.artifactual <- sum(artifactual.muts.seq.art.sigs.weights)
@@ -371,9 +371,5 @@ GAMonitorFn <- function(obj, data) {
         write.table(df.log, log.file, row.names = F, sep = "\t")
     } else {
         write.table(df.log, log.file, row.names = F, sep = "\t", append = T, col.names = F)
-    }
-
-    if (data$verbose == TRUE) {
-        print("End of optimization monitor function")
     }
 }

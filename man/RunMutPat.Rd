@@ -4,16 +4,17 @@
 \alias{RunMutPat}
 \title{RunMutPat}
 \usage{
-RunMutPat(vcf.obj, df.ref.mut.sigs, target.mut.sigs, verbose = TRUE)
+RunMutPat(mut.pat.input, df.mut.pat.ref.sigs, target.mut.sigs,
+  verbose = TRUE)
 }
 \arguments{
-\item{vcf.obj}{A list from ReadVCF}
-
-\item{df.ref.mut.sigs}{A data.frame of reference mutational signatures}
+\item{df.mut.pat.ref.sigs}{A data.frame returned by \code{\link{MutPatParseRefMutSigs}}}
 
 \item{target.mut.sigs}{A character vector of target mutational signatures names}
 
 \item{verbose}{If true, provides process details}
+
+\item{mut.pat.vcf.obj}{A list from \code{\link{MutPatParseVCFObj}}}
 }
 \value{
 A list with the following elements

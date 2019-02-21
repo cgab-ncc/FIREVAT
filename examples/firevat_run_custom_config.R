@@ -14,12 +14,9 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
                       sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
                       output.dir = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_153000/",
                       num.cores = 6,
-                      ga.pop.size = 100,
-                      ga.max.iter = 5,
-                      ga.run = 50,
+                      ga.pop.size = 200,
+                      ga.max.iter = 50,
+                      ga.run = 20,
                       mutalisk.random.sampling.count = 10,
                       mutalisk.random.sampling.max.iter = 10,
                       ga.pmutation = 0.25)
-
-save(results, file = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_153000/results.RData")
-load("/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_153000/results.RData")

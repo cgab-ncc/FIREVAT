@@ -24,4 +24,3 @@ A data.frame of the format deconstructSigs::signatures.cosmic
 \description{
 Parses a df.ref.mut.sigs and prepares it to run Mutational Patterns.
 }
-\keyword{internal}

@@ -6,7 +6,7 @@
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
-#   Hyunbin Kim (khb7840@ncc.re.k)rg
+#   Hyunbin Kim (khb7840@ncc.re.kr)
 #   Bioinformatics Analysis Team, National Cancer Center Korea
 
 
@@ -14,21 +14,17 @@
 #' @description Parses a vcf.obj and prepares it to run Mutational Patterns.
 #'
 #' @param vcf.obj A list from ReadVCF
+#' @param bsg
+#' BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19 or
+#' BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
 #' @param sample.id A string value
 #'
 #' @return A data.frame with the column sample.id and
 #' row names corresponding to 96 substitution types
 #'
-#' @keywords internal
+#' @export
 #' @importFrom deconstructSigs mut.to.sigs.input
-MutPatParseVCFObj <- function(vcf.obj, sample.id = "sample") {
-    if (vcf.obj$genome == "hg19") {
-        bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
-    }
-    if (vcf.obj$genome == "hg38") {
-        bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
-    }
-
+MutPatParseVCFObj <- function(vcf.obj, bsg, sample.id = "sample") {
     vcf.obj$data$Sample <- rep(sample.id, nrow(vcf.obj$data))
     df.deconstructsigs.sigs.input <- mut.to.sigs.input(mut.ref = vcf.obj$data,
                                                        sample.id = "Sample",
@@ -55,7 +51,7 @@ MutPatParseVCFObj <- function(vcf.obj, sample.id = "sample") {
 #'
 #' @return A data.frame of the format deconstructSigs::signatures.cosmic
 #'
-#' @keywords internal
+#' @export
 MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
                                   target.mut.sigs,
                                   signature.start.column.index = 4,
@@ -77,8 +73,8 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 #' @title RunMutPat
 #' @description Identifies mutational signatures using Mutational Patterns
 #'
-#' @param vcf.obj A list from ReadVCF
-#' @param df.ref.mut.sigs A data.frame of reference mutational signatures
+#' @param mut.pat.vcf.obj A list from \code{\link{MutPatParseVCFObj}}
+#' @param df.mut.pat.ref.sigs A data.frame returned by \code{\link{MutPatParseRefMutSigs}}
 #' @param target.mut.sigs A character vector of target mutational signatures names
 #' @param verbose If true, provides process details
 #'
@@ -104,45 +100,37 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 #' df.ref.mut.sigs = df.ref.mut.sigs,
 #' target.mut.sigs = target.mut.sigs)
 #' }
-RunMutPat <- function(vcf.obj,
-                      df.ref.mut.sigs,
+RunMutPat <- function(mut.pat.input,
+                      df.mut.pat.ref.sigs,
                       target.mut.sigs,
                       verbose = TRUE) {
     if (verbose == TRUE) {
         print("Started running Mutational Patterns")
     }
 
+    # Take only unique mutational signatures
     target.mut.sigs <- unique(target.mut.sigs)
-    mut.pat.input <- MutPatParseVCFObj(vcf.obj = vcf.obj)
-    df.mut.pat.ref.sigs <- MutPatParseRefMutSigs(df.ref.mut.sigs = df.ref.mut.sigs,
-                                                 target.mut.sigs = target.mut.sigs)
 
     # Mutational Patterns - identify mutational signatures
     mut.pat.results <- fit_to_signatures(mut.pat.input, df.mut.pat.ref.sigs)
 
     # Wrap Mutational Patterns results
-    mut.sigs <- c()
-    mut.sigs.contribution.weights <- c()
-    for(i in 1:nrow(mut.pat.results$contribution)) {
-        curr.signature <- rownames(mut.pat.results$contribution)[i]
-        curr.signature.weight <- mut.pat.results$contribution[i,1]
-        if (curr.signature.weight > 0) {
-            mut.sigs <- c(mut.sigs, curr.signature)
-            mut.sigs.contribution.weights <- c(mut.sigs.contribution.weights,
-                                               curr.signature.weight)
-        }
-    }
+    df.mut.pat.results <- data.frame(list(sig = rownames(mut.pat.results$contribution),
+                                          weight = unname(mut.pat.results$contribution)),
+                                     stringsAsFactors = F)
+    df.mut.pat.results <- df.mut.pat.results[(df.mut.pat.results$weight > 0), ]
 
     # Compute cosine similarity score
     cosine.similarity.score <- lsa::cosine(as.numeric(mut.pat.results$reconstructed),
                                            as.numeric(mut.pat.input))
 
+    # Prepare return data
     r <- list(tumor.mutation.types.spectrum = as.numeric(mut.pat.input),
               identified.mutation.types.spectrum = as.numeric(mut.pat.results$reconstructed),
               residuals = as.numeric(mut.pat.input) - as.numeric(mut.pat.results$reconstructed),
               mutation.types = row.names(mut.pat.results$reconstructed),
-              identified.mut.sigs = mut.sigs,
-              identified.mut.sigs.contribution.weights = mut.sigs.contribution.weights,
+              identified.mut.sigs = df.mut.pat.results$sig,
+              identified.mut.sigs.contribution.weights = df.mut.pat.results$weight,
               cosine.similarity.score = cosine.similarity.score)
 
     if (verbose == TRUE) {

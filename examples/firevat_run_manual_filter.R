@@ -17,6 +17,3 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
                       mutalisk.random.sampling.count = 10,
                       num.cores = 1,
                       mutalisk.random.sampling.max.iter = 10)
-
-save(results, file = "/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_180000/results.RData")
-load("/home/jinseoklee/Documents/Projects/FIREVAT_Workspace/20190220_180000/results.RData")

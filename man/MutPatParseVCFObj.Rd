@@ -4,10 +4,13 @@
 \alias{MutPatParseVCFObj}
 \title{MutPatParseVCFObj}
 \usage{
-MutPatParseVCFObj(vcf.obj, sample.id = "sample")
+MutPatParseVCFObj(vcf.obj, bsg, sample.id = "sample")
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}
+
+\item{bsg}{BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19 or
+BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38}
 
 \item{sample.id}{A string value}
 }
@@ -18,4 +21,3 @@ row names corresponding to 96 substitution types
 \description{
 Parses a vcf.obj and prepares it to run Mutational Patterns.
 }
-\keyword{internal}

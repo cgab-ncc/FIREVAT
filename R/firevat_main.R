@@ -200,6 +200,17 @@ RunFIREVAT <- function(vcf.file,
         } else {
             suggestions = NULL
         }
+
+        # Prepare data for Mutational Patterns (memoization)
+        data$df.mut.pat.ref.sigs <- MutPatParseRefMutSigs(df.ref.mut.sigs = df.ref.mut.sigs,
+                                                          target.mut.sigs = target.mut.sigs)
+        if (data$vcf.obj$genome == "hg19") {
+            data$bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
+        }
+        if (data$vcf.obj$genome == "hg38") {
+            data$bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+        }
+
         ga.results <- ga(type = "binary",
                          fitness =  function(string) GAOptimizationObjFn(string, data),
                          nBits = n.bits,
