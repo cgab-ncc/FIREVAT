@@ -144,12 +144,12 @@ GAOptimizationObjFnHelper <- function(string, data) {
                                                bsg = data$bsg)
     refined.muts.mut.pat.results <- RunMutPat(mut.pat.input = refined.mut.pat.input,
                                               df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
-                                              target.mut.sigs = c(data$target.mut.sigs),
+                                              target.mut.sigs = data$target.mut.sigs,
                                               verbose = FALSE)
 
     # Extract Mutational Patterns data
-    df.refined.sigs <- data.frame(list(sig = as.character(refined.muts.mut.pat.results$identified.mut.sigs),
-                                       weight = as.numeric(refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights)),
+    df.refined.sigs <- data.frame(sig = refined.muts.mut.pat.results$identified.mut.sigs,
+                                  weight = refined.muts.mut.pat.results$identified.mut.sigs.contribution.weights,
                                   stringsAsFactors = F)
     df.refined.sigs.seq.art <- df.refined.sigs[(df.refined.sigs$sig %in% data$sequencing.artifact.mut.sigs), ]
     refined.seq.art.sigs <- df.refined.sigs.seq.art$sig

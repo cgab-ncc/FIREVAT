@@ -3,7 +3,7 @@
 # FIREVAT Run
 #
 # Last revised date:
-#   February 19, 2019
+#   February 21, 2019
 #
 # Authors: 
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -33,6 +33,9 @@ firevat.run.option.list <- list(
     # reference genome version
     make_option(c("-g","--genome"), type="character",
         help="Genome version of input vcf (hg19/hg38)"),
+    # running mode of firevat: v0.1.2 - manual / ga
+    make_option(c("-m","--mode"), type="character", default="ga",
+        help="Running mode of FIREVAT (manual or ga)")
     # number of cores
     make_option(c("-n","--numcores"), type="integer", default=1, dest="num.cores",
         help="Number of cores using in FIREVAT pipeline [default\"%default\"]"),
@@ -46,8 +49,7 @@ firevat.run.option.list <- list(
     make_option(c("-r","--run"), type="integer", default= 25,
         help="Limit for consecutive generations without changes [default\"%default\"]"),
     # GA: mutation probability
-    make_option(c("-m","--pmutation"), type="numeric",
-        default= 0.25, dest="p.mutation",
+    make_option("--pmutation", type="numeric", default= 0.25, dest="p.mutation",
         help="Mutation probability for GA algorithm [default\"%default\"]"),
     # verbose / quiet option
     make_option("--verbose", action="store_true", default= TRUE,
@@ -76,12 +78,13 @@ if (!interactive()){
         df.ref.mut.sigs = df.ref.mut.sigs,
         target.mut.sigs = target.mut.sigs,
         sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+        mode = firevat.run.args$mode,
         num.cores = firevat.run.args$num.cores,
         output.dir = firevat.run.args$output,
-        pop.size = firevat.run.args$pop.size,
-        max.iter = firevat.run.args$max.iter,
-        run = firevat.run.args$run,
-        pmutation = firevat.run.args$p.mutation,
+        ga.pop.size = firevat.run.args$pop.size,
+        ga.max.iter = firevat.run.args$max.iter,
+        ga.run = firevat.run.args$run,
+        ga.pmutation = firevat.run.args$p.mutation,
         verbose = verbose
         )
     if (verbose) print(paste0("Finished datetime ", Sys.time()))

@@ -4,7 +4,8 @@
 \alias{FilterVCF}
 \title{FilterVCF}
 \usage{
-FilterVCF(vcf.obj, vcf.filter, config.obj, verbose = TRUE)
+FilterVCF(vcf.obj, vcf.filter, config.obj, include.array = NULL,
+  force.include = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}
@@ -12,6 +13,10 @@ FilterVCF(vcf.obj, vcf.filter, config.obj, verbose = TRUE)
 \item{vcf.filter}{A list from MakeMuTect2Filter}
 
 \item{config.obj}{A list from ParseConfigFile}
+
+\item{include.array}{A boolean vector}
+
+\item{force.include}{A boolean value. If TRUE, then uses 'include.array'}
 
 \item{verbose}{If true, provides process detail}
 }

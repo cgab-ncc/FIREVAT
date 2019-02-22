@@ -3,9 +3,7 @@
 
 ## **FI**nding **RE**liable **V**ariants without **A**r**T**ifacts
 
-FIREVAT is a variant filtering tool for cancer sequencing data, 
-which uses mutational signatures to identify sequencing artifacts and 
-low-quality variants.
+FIREVAT is a variant filtering tool for cancer sequencing data. FIREVAT uses mutational signatures to identify sequencing artifacts and low-quality variants.
 
 ---
 

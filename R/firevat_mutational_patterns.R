@@ -73,7 +73,7 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 #' @title RunMutPat
 #' @description Identifies mutational signatures using Mutational Patterns
 #'
-#' @param mut.pat.vcf.obj A list from \code{\link{MutPatParseVCFObj}}
+#' @param mut.pat.input A list from \code{\link{MutPatParseVCFObj}}
 #' @param df.mut.pat.ref.sigs A data.frame returned by \code{\link{MutPatParseRefMutSigs}}
 #' @param target.mut.sigs A character vector of target mutational signatures names
 #' @param verbose If true, provides process details
@@ -89,7 +89,7 @@ MutPatParseRefMutSigs <- function(df.ref.mut.sigs,
 #'  \item{cosine.similarity.score}{A numeric value}
 #' }
 #'
-#' @keywords internal
+#' @export
 #' @importFrom MutationalPatterns fit_to_signatures
 #' @examples
 #' \dontrun{

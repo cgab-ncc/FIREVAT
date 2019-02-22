@@ -8,10 +8,17 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   target.mut.sigs, sequencing.artifact.mut.sigs, num.cores, output.dir,
   mode = "ga", use.suggested.soln = TRUE, ga.pop.size = 200,
   ga.max.iter = 200, ga.run = 50, ga.pmutation = 0.25,
-  mutalisk.method = "random.sampling",
-  mutalisk.random.sampling.count = 20,
-  mutalisk.random.sampling.max.iter = 10, report.format = "html",
-  verbose = TRUE)
+  mutalisk.method = "all", mutalisk.random.sampling.count = 20,
+  mutalisk.random.sampling.max.iter = 10,
+  perform.strand.bias.analysis = TRUE,
+  strand.bias.perform.fdr.correction = TRUE,
+  strand.bias.fdr.correction.method = "BH",
+  ref.forward.strand.var = NULL, ref.reverse.strand.var = NULL,
+  alt.forward.strand.var = NULL, alt.reverse.strand.var = NULL,
+  report.format = "html", annotate = TRUE, df.annotation.db = NULL,
+  annotated.columns.to.display = NULL,
+  annotation.filter.key.value.pairs = NULL,
+  annotation.filter.condition = "AND", verbose = TRUE)
 }
 \arguments{
 \item{vcf.file}{String value corresponding to input .vcf file. Please provide the full path.}
@@ -58,7 +65,33 @@ The number of signatures to sample from target.mut.sigs}
 \item{mutalisk.random.sampling.max.iter}{Mutalisk random sampling maximum iteration. Default: 10.
 The number of times Mutalisk randomly samples from target.mut.sigs before determining the candidate signatures.}
 
+\item{perform.strand.bias.analysis}{If TRUE, then performs strand bias analysis.}
+
+\item{strand.bias.perform.fdr.correction}{If TRUE, then performs false discovery rate
+correction for strand bias analysis.}
+
+\item{strand.bias.fdr.correction.method}{A string value. Default value is 'BH'.
+Refer to 'p.adjust()' function method.}
+
+\item{ref.forward.strand.var}{A string value.}
+
+\item{ref.reverse.strand.var}{A string value,}
+
+\item{alt.forward.strand.var}{A string value,}
+
+\item{alt.reverse.strand.var}{A string value,}
+
 \item{report.format}{The format of FIREVAT report. We currently only support 'html'.}
+
+\item{annotate}{A boolean value. Default value is TRUE.}
+
+\item{df.annotation.db}{A data.frame. Please refer to \code{\link{PrepareAnnotationDB}}}
+
+\item{annotated.columns.to.display}{A character vector.}
+
+\item{annotation.filter.key.value.pairs}{A list.}
+
+\item{annotation.filter.condition}{'AND' or 'OR'.}
 
 \item{verbose}{If TRUE, provides process detail. Default: TRUE.}
 }

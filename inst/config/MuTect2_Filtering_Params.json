@@ -1,0 +1,256 @@
+[
+    {
+        "name": "NormalADRef",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalADAlt",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalADRefQSS",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "QSS",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    },
+    {
+        "name": "AvgNormalRefQSS",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a/b)},error=function(e){return(0)})}",
+            "args": [
+                "NormalADRefQSS",
+                "NormalADRef"
+            ]
+        },
+        "type": "float",
+        "default": 25,
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorADRef",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorADRefQSS",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "QSS",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    },
+    {
+        "name": "AvgTumorRefQSS",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a/b)},error=function(e){return(0)})}",
+            "args": [
+                "TumorADRefQSS",
+                "TumorADRef"
+            ]
+        },
+        "type": "float",
+        "default": 25,
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorADAlt",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorADAltQSS",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "QSS",
+            "index": 2
+        },
+        "type": "integer",
+        "use_in_filter": false
+    },
+    {
+        "name": "AvgTumorAltQSS",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a/b)},error=function(e){return(0)})}",
+            "args": [
+                "TumorADAltQSS",
+                "TumorADAlt"
+            ]
+        },
+        "type": "float",
+        "default": 25,
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalVAF",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "AF",
+            "index": 1
+        },
+        "type": "float",
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorVAF",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "AF",
+            "index": 1
+        },
+        "type": "float",
+        "use_in_filter": true
+    },
+    {
+        "name": "TLOD",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "TLOD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 6,
+        "use_in_filter": true
+    },
+    {
+        "name": "NLOD",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "NLOD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 2,
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorFOXOG",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "FOXOG",
+            "index": 1
+        },
+        "type": "float",
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorRefF1R2",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "REF_F1R2",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorRefF2R1",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "REF_F2R1",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorAltF1R2",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "ALT_F1R2",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorAltF2R1",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "TUMOR",
+            "key": "ALT_F2R1",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    }
+]

@@ -43,7 +43,21 @@
 #' @param mutalisk.random.sampling.max.iter Mutalisk random sampling maximum iteration. Default: 10.
 #' The number of times Mutalisk randomly samples from target.mut.sigs before determining the candidate signatures.
 #' @param report.format The format of FIREVAT report. We currently only support 'html'.
+#' @param perform.strand.bias.analysis If TRUE, then performs strand bias analysis.
+#' @param strand.bias.perform.fdr.correction If TRUE, then performs false discovery rate
+#' correction for strand bias analysis.
+#' @param strand.bias.fdr.correction.method A string value. Default value is 'BH'.
+#' Refer to 'p.adjust()' function method.
+#' @param ref.forward.strand.var A string value.
+#' @param ref.reverse.strand.var A string value,
+#' @param alt.forward.strand.var A string value,
+#' @param alt.reverse.strand.var A string value,
 #' @param verbose If TRUE, provides process detail. Default: TRUE.
+#' @param annotate A boolean value. Default value is TRUE.
+#' @param df.annotation.db A data.frame. Please refer to \code{\link{PrepareAnnotationDB}}
+#' @param annotated.columns.to.display A character vector.
+#' @param annotation.filter.key.value.pairs A list.
+#' @param annotation.filter.condition 'AND' or 'OR'.
 #'
 #' @return A list with the following elements
 #' \itemize{
@@ -67,10 +81,22 @@ RunFIREVAT <- function(vcf.file,
                        ga.max.iter = 200,
                        ga.run = 50,
                        ga.pmutation = 0.25,
-                       mutalisk.method = "random.sampling",
+                       mutalisk.method = "all",
                        mutalisk.random.sampling.count = 20,
                        mutalisk.random.sampling.max.iter = 10,
+                       perform.strand.bias.analysis = TRUE,
+                       strand.bias.perform.fdr.correction = TRUE,
+                       strand.bias.fdr.correction.method = "BH",
+                       ref.forward.strand.var = NULL,
+                       ref.reverse.strand.var = NULL,
+                       alt.forward.strand.var = NULL,
+                       alt.reverse.strand.var = NULL,
                        report.format = "html",
+                       annotate = TRUE,
+                       df.annotation.db = NULL,
+                       annotated.columns.to.display = NULL,
+                       annotation.filter.key.value.pairs = NULL,
+                       annotation.filter.condition = "AND",
                        verbose = TRUE) {
     # Check input parameters
     if (is.character(vcf.file) == FALSE) {
@@ -256,11 +282,94 @@ RunFIREVAT <- function(vcf.file,
     data$refined.vcf.obj <- optimized.vcf.objs$vcf.obj.filtered
     data$artifactual.vcf.obj <- optimized.vcf.objs$vcf.obj.artifact
 
-    # 9. Run Mutalisk
+    # 9. Strand bias analysis
+    data$perform.strand.bias.analysis <- perform.strand.bias.analysis
+    data$ref.forward.strand.var <- ref.forward.strand.var
+    data$ref.reverse.strand.var <- ref.reverse.strand.var
+    data$alt.forward.strand.var <- alt.forward.strand.var
+    data$alt.reverse.strand.var <- alt.reverse.strand.var
+    data$strand.bias.fdr.correction.method <- strand.bias.fdr.correction.method
+    data$strand.bias.perform.fdr.correction <- strand.bias.perform.fdr.correction
+
+    if (data$perform.strand.bias.analysis == TRUE) {
+        data$refined.vcf.obj <- PerformStrandBiasAnalysis(
+            vcf.obj = data$refined.vcf.obj,
+            ref.forward.strand.var = data$ref.forward.strand.var,
+            ref.reverse.strand.var = data$ref.reverse.strand.var,
+            alt.forward.strand.var = data$alt.forward.strand.var,
+            alt.reverse.strand.var = data$alt.reverse.strand.var,
+            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+            fdr.correction.method = data$strand.bias.fdr.correction.method)
+        data$artifactual.vcf.obj <- PerformStrandBiasAnalysis(
+            vcf.obj = data$artifactual.vcf.obj,
+            ref.forward.strand.var = data$ref.forward.strand.var,
+            ref.reverse.strand.var = data$ref.reverse.strand.var,
+            alt.forward.strand.var = data$alt.forward.strand.var,
+            alt.reverse.strand.var = data$alt.reverse.strand.var,
+            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+            fdr.correction.method = data$strand.bias.fdr.correction.method)
+    }
+
+    # 10. Annotate
+    data$annotate = annotate
+    data$df.annotation.db = df.annotation.db
+    data$annotated.columns.to.display = annotated.columns.to.display
+    data$annotation.filter.key.value.pairs = annotation.filter.key.value.pairs
+    data$annotation.filter.condition = annotation.filter.condition
+
+    if (data$annotate == TRUE) {
+        # Annotate VCFs
+        data$vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$vcf.obj,
+                                                 df.annotation.db = data$df.annotation.db,
+                                                 include.all.columns = TRUE)
+        data$refined.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$refined.vcf.obj,
+                                                         df.annotation.db = data$df.annotation.db,
+                                                         include.all.columns = TRUE)
+        data$artifactual.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$artifactual.vcf.obj,
+                                                             df.annotation.db = data$df.annotation.db,
+                                                             include.all.columns = TRUE)
+
+        # Query annotated VCFs
+        data$refined.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$refined.vcf.obj.annotated,
+                                                                    filter.key.value.pairs = data$annotation.filter.key.value.pairs,
+                                                                    filter.condition = data$annotation.filter.condition)
+        data$artifactual.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$artifactual.vcf.obj.annotated,
+                                                                        filter.key.value.pairs = data$annotation.filter.key.value.pairs,
+                                                                        filter.condition = data$annotation.filter.condition)
+    }
+
+    # 11. Run Mutalisk
+    # Identify target mutational signatures
+    # Here we fetch all signatures ever identified by Mutational Patterns
+    df.optimization.logs <- ReadOptimizationIterationReport(data = data)
+    Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
+        sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
+        weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
+
+        candidate.sigs <- c()
+        for (i in 1:length(sigs)) {
+            df <- data.frame(sig = sigs[[i]],
+                             weight = weights[[i]],
+                             stringsAsFactors = F)
+            df <- df[df$weight >= cutoff, ]
+            candidate.sigs <- c(candidate.sigs, df$sig)
+        }
+        return(candidate.sigs)
+    }
+    sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
+                        weights = df.optimization.logs$refined.muts.target.signatures.weights)
+    sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
+                        weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
+    sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
+                        weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
+    sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
+                        weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
+    data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4))
+
     # Original vcf
     data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
                                                   df.ref.mut.sigs = data$df.ref.mut.sigs,
-                                                  target.mut.sigs = data$target.mut.sigs,
+                                                  target.mut.sigs = data$mut.pat.target.sigs,
                                                   method = data$mutalisk.method,
                                                   n.sample = data$mutalisk.random.sampling.count,
                                                   n.iter = data$mutalisk.random.sampling.max.iter,
@@ -268,7 +377,7 @@ RunFIREVAT <- function(vcf.file,
     # Refined vcf
     data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
                                                       df.ref.mut.sigs = df.ref.mut.sigs,
-                                                      target.mut.sigs = target.mut.sigs,
+                                                      target.mut.sigs = data$mut.pat.target.sigs,
                                                       method = data$mutalisk.method,
                                                       n.sample = data$mutalisk.random.sampling.count,
                                                       n.iter = data$mutalisk.random.sampling.max.iter,
@@ -276,26 +385,34 @@ RunFIREVAT <- function(vcf.file,
     # Artifact vcf
     data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
                                                           df.ref.mut.sigs = df.ref.mut.sigs,
-                                                          target.mut.sigs = target.mut.sigs,
+                                                          target.mut.sigs = data$mut.pat.target.sigs,
                                                           method = data$mutalisk.method,
                                                           n.sample = data$mutalisk.random.sampling.count,
                                                           n.iter = data$mutalisk.random.sampling.max.iter,
                                                           verbose = data$verbose)
 
-    # 10. Write VCF Files
+    # 12. Write VCF Files
     WriteVCF(vcf.obj = data$vcf.obj,
              save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
     WriteVCF(vcf.obj = data$refined.vcf.obj,
              save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
     WriteVCF(vcf.obj = data$artifactual.vcf.obj,
              save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
+    if (data$annotate == TRUE) {
+        WriteVCF(vcf.obj = data$data$vcf.obj.annotated,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original_Annotated.vcf"))
+        WriteVCF(vcf.obj = data$refined.vcf.obj.annotated,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined_Annotated.vcf"))
+        WriteVCF(vcf.obj = data$artifactual.vcf.obj.annotated,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact_Annotated.vcf"))
+    }
 
     data$end.datetime <- Sys.time()
 
-    # 11. Report results
+    # 13. Report results
     data <- ReportFIREVATResults(data = data)
 
-    # 12. Save data
+    # 14. Save data
     save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
 
     return(data)

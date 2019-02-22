@@ -4,12 +4,19 @@
 \alias{ReadVCF}
 \title{ReadVCF}
 \usage{
-ReadVCF(vcf.file, genome = "hg19")
+ReadVCF(vcf.file, genome = "hg19", split.info = FALSE,
+  check.chromosome.name = TRUE)
 }
 \arguments{
 \item{vcf.file}{(full path of a .vcf file)}
 
 \item{genome}{('hg19' or 'hg38')}
+
+\item{split.info}{A boolean value. If TRUE, then makes the INFO column in the vcf
+as a separate column. Default value is FALSE.}
+
+\item{check.chromosome.name}{A boolean value. If TRUE, then check whether converts
+'MT' to 'M' and adds 'chr' to the CHROM column. Default value is TRUE.}
 }
 \value{
 A list with elements 'data', 'header', 'genome'

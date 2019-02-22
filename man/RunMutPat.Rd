@@ -8,13 +8,13 @@ RunMutPat(mut.pat.input, df.mut.pat.ref.sigs, target.mut.sigs,
   verbose = TRUE)
 }
 \arguments{
+\item{mut.pat.input}{A list from \code{\link{MutPatParseVCFObj}}}
+
 \item{df.mut.pat.ref.sigs}{A data.frame returned by \code{\link{MutPatParseRefMutSigs}}}
 
 \item{target.mut.sigs}{A character vector of target mutational signatures names}
 
 \item{verbose}{If true, provides process details}
-
-\item{mut.pat.vcf.obj}{A list from \code{\link{MutPatParseVCFObj}}}
 }
 \value{
 A list with the following elements
@@ -41,4 +41,3 @@ df.ref.mut.sigs = df.ref.mut.sigs,
 target.mut.sigs = target.mut.sigs)
 }
 }
-\keyword{internal}

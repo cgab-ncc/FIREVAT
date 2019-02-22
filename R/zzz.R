@@ -14,5 +14,6 @@ ______ _____ _____  _________      __  ________
 .onAttach <- function(lib, pkg) {
     packageStartupMessage("Initializing FIREVAT")
     packageStartupMessage(FIREVATStartupMessage())
+    packageStartupMessage(paste0("version ", packageVersion("FIREVAT")))
     packageStartupMessage("\"Need a light? You got it.\"")
 }

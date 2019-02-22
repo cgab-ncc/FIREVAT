@@ -226,9 +226,9 @@ PrepareTrinucleotideSpectrumsTable <- function(data) { # COMMON_3
     # Residual Sum of Squares (RSS)     value           value           value
     original.muts.count <- nrow(data$vcf.obj$data)
     refined.muts.count <- nrow(data$refined.vcf.obj$data)
-    refined.muts.proportion <- (refined.muts.count / original.muts.count) * 100
+    refined.muts.proportion <- (refined.muts.count / original.muts.count)
     artifactual.muts.count <- nrow(data$artifactual.vcf.obj$data)
-    artifactual.muts.proportion <- (artifactual.muts.count / original.muts.count) * 100
+    artifactual.muts.proportion <- (artifactual.muts.count / original.muts.count)
 
     df <- data.frame(
         list(" " = c("Mutations Count (%)","Cosine Similarity Score",
@@ -658,10 +658,10 @@ PrepareGeneticAlgorithmParametersTable <- function(data) { # GA_1
         list("FIREVAT Genetic Algorithm (GA) Parameters" = c(
             "GA Population Size", "GA Maximum Iteration", "GA Run",
             "GA Mutation Probability"),
-            " " = c(format(x = data$pop.size, nsmall = 0, big.mark = ","),
-                    format(x = data$max.iter, nsmall = 0, big.mark = ","),
-                    format(x = data$run, nsmall = 0, big.mark = ","),
-                    format(x = data$pmutation, nsmall = 3))),
+            " " = c(format(x = data$ga.pop.size, nsmall = 0, big.mark = ","),
+                    format(x = data$ga.max.iter, nsmall = 0, big.mark = ","),
+                    format(x = data$ga.run, nsmall = 0, big.mark = ","),
+                    format(x = data$ga.pmutation, nsmall = 3))),
         stringsAsFactors = F,
         check.names = F)
     return(df)
@@ -676,7 +676,7 @@ PrepareGeneticAlgorithmParametersTable <- function(data) { # GA_1
 #' @return A data.frame
 #'
 #' @export
-PrepareOptimizationResultsTable <- function(data) {
+PrepareOptimizationResultsTable <- function(data) { # Optional_1
     # Get optimization results
     df <- ReadOptimizationIterationReport(data = data)
     refined.muts.cos.sim <- tail(df$refined.muts.cosine.similarity.score, 1)
@@ -713,7 +713,7 @@ PrepareOptimizationResultsTable <- function(data) {
 #' @return A ggplot object
 #'
 #' @export
-PrepareRefinedMutsOptimizationIterationsPlot <- function(data) {
+PrepareRefinedMutsOptimizationIterationsPlot <- function(data) { # Optional_2
     # Get optimization results
     df <- ReadOptimizationIterationReport(data = data)
     df.temp <- df[,c(
@@ -759,7 +759,7 @@ PrepareRefinedMutsOptimizationIterationsPlot <- function(data) {
 #' @return A ggplot object
 #'
 #' @export
-PrepareArtifactualMutsOptimizationIterationsPlot <- function(data) {
+PrepareArtifactualMutsOptimizationIterationsPlot <- function(data) { # Optional_3
     # Get optimization results
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
 
@@ -835,6 +835,141 @@ PrepareArtifactualMutsOptimizationIterationsPlot <- function(data) {
 }
 
 
+#' @title PrepareRefinedAnnotationTable
+#' @description Prepares refined mutations annotation (filtered, queried) table
+#'
+#' @param data A list of elements returned from \code{\link{RunFIREVAT}}
+#'
+#' @return A data.frame
+#'
+#' @export
+PrepareRefinedAnnotationTable <- function(data) { # Optional_4
+    if (data$annotate == FALSE) {
+        return(data.frame())
+    }
+
+    # CHROM POS REF ALT <data$annotated.columns.to.display>
+    cols.to.display <- unique(c(c("CHROM", "POS", "REF", "ALT"),
+                                data$annotated.columns.to.display))
+    df <- as.data.frame(data$refined.vcf.obj.annotated.queried$data)
+    df <- df[, cols.to.display]
+    df$POS <- format(x = df$POS, big.mark = ",")
+    return(df)
+}
+
+
+#' @title PrepareArtifactAnnotationTable
+#' @description Prepares artifactual mutations annotation (filtered, queried) table
+#'
+#' @param data A list of elements returned from \code{\link{RunFIREVAT}}
+#'
+#' @return A data.frame
+#'
+#' @export
+PrepareArtifactAnnotationTable <- function(data) { # Optional_5
+    if (data$annotate == FALSE) {
+        return(data.frame())
+    }
+
+    # CHROM POS REF ALT <data$annotated.columns.to.display>
+    cols.to.display <- unique(c(c("CHROM", "POS", "REF", "ALT"),
+                                data$annotated.columns.to.display))
+    df <- as.data.frame(data$artifactual.vcf.obj.annotated.queried$data)
+    df <- df[, cols.to.display]
+    df$POS <- format(x = df$POS, big.mark = ",")
+    return(df)
+}
+
+
+#' @title PrepareRefinedStrandBiasTable
+#' @description Prepares refined mutations strand biased variants table
+#'
+#' @param data A list of elements returned from \code{\link{RunFIREVAT}}
+#'
+#' @return A data.frame
+#'
+#' @export
+PrepareRefinedStrandBiasTable <- function(data) {
+    if (data$perform.strand.bias.analysis == FALSE) {
+        return(data.frame())
+    }
+
+    if (data$strand.bias.perform.fdr.correction == TRUE) {
+        include.array <- data$refined.vcf.obj$data$StrandBiasQValue < 0.05
+        vcf.objs <- FilterVCF(vcf.obj = data$refined.vcf.obj,
+                              include.array = include.array,
+                              force.include = TRUE,
+                              verbose = FALSE)
+        vcf.obj <- vcf.objs$vcf.obj.filtered
+        stat.sig.value.col <- "StrandBiasQValue"
+    } else {
+        include.array <- data$refined.vcf.obj$data$StrandBiasPValue < 0.05
+        vcf.objs <- FilterVCF(vcf.obj = data$refined.vcf.obj,
+                              include.array = include.array,
+                              force.include = TRUE,
+                              verbose = FALSE)
+        vcf.obj <- vcf.objs$vcf.obj.filtered
+        stat.sig.value.col <- "StrandBiasPValue"
+    }
+
+    cols.to.display <- c("CHROM", "POS", "REF", "ALT",
+                         data$ref.forward.strand.var,
+                         data$ref.reverse.strand.var,
+                         data$alt.forward.strand.var,
+                         data$alt.reverse.strand.var,
+                         stat.sig.value.col)
+    df <- as.data.frame(vcf.obj$data)
+    df <- df[, cols.to.display]
+    df$POS <- format(x = df$POS, big.mark = ",")
+    df <- df[order(df[stat.sig.value.col]),]
+    return(df)
+}
+
+
+#' @title PrepareArtifactStrandBiasTable
+#' @description Prepares artifactual mutations strand biased variants table
+#'
+#' @param data A list of elements returned from \code{\link{RunFIREVAT}}
+#'
+#' @return A data.frame
+#'
+#' @export
+PrepareArtifactStrandBiasTable <- function(data) {
+    if (data$perform.strand.bias.analysis == FALSE) {
+        return(data.frame())
+    }
+    if (data$strand.bias.perform.fdr.correction == TRUE) {
+        include.array <- data$artifactual.vcf.obj$data$StrandBiasQValue < 0.05
+        vcf.objs <- FilterVCF(vcf.obj = data$artifactual.vcf.obj,
+                              include.array = include.array,
+                              force.include = TRUE,
+                              verbose = FALSE)
+        vcf.obj <- vcf.objs$vcf.obj.filtered
+        stat.sig.value.col <- "StrandBiasQValue"
+    } else {
+        include.array <- data$artifactual.vcf.obj$data$StrandBiasPValue < 0.05
+        vcf.objs <- FilterVCF(vcf.obj = data$artifactual.vcf.obj,
+                              include.array = include.array,
+                              force.include = TRUE,
+                              verbose = FALSE)
+        vcf.obj <- vcf.objs$vcf.obj.filtered
+        stat.sig.value.col <- "StrandBiasPValue"
+    }
+
+    cols.to.display <- c("CHROM", "POS", "REF", "ALT",
+                         data$ref.forward.strand.var,
+                         data$ref.reverse.strand.var,
+                         data$alt.forward.strand.var,
+                         data$alt.reverse.strand.var,
+                         stat.sig.value.col)
+    df <- as.data.frame(vcf.obj$data)
+    df <- df[, cols.to.display]
+    df$POS <- format(x = df$POS, big.mark = ",")
+    df <- df[order(df[stat.sig.value.col]),]
+    return(df)
+}
+
+
 #' @title ReportFIREVATResults
 #' @description Reports FIREVAT results in html format (generated from Rmd)
 #'
@@ -863,7 +998,11 @@ ReportFIREVATResults <- function(data) {
                                  mle.reconstructed.spectrums.plot = PrepareMLEReconstructedSpectrumsPlot(data = data),
                                  residual.spectrums.plot = PrepareResidualSpectrumsPlot(data = data),
                                  nucleotide.substitution.types.plot = PrepareNucleotideSubstitutionTypesPlot(data = data),
-                                 vcf.stats.plot = PrepareOptimizedVCFStatisticsPlot(data = data))
+                                 vcf.stats.plot = PrepareOptimizedVCFStatisticsPlot(data = data),
+                                 df.refined.vcf.annotated = PrepareRefinedAnnotationTable(data = data),
+                                 df.artifact.vcf.annotated = PrepareArtifactAnnotationTable(data = data),
+                                 df.refined.vcf.strand.bias = PrepareRefinedStrandBiasTable(data = data),
+                                 df.artifact.vcf.strand.bias = PrepareArtifactStrandBiasTable(data = data))
             rmarkdown.file <- system.file("rmd_template", "report_ga.Rmd", package = "FIREVAT")
         } else if (data$mode == "manual") {
             report.items <- list(df.filter.cutoffs = PrepareFilterCutoffsTable(data = data),
@@ -873,7 +1012,11 @@ ReportFIREVATResults <- function(data) {
                                  mle.reconstructed.spectrums.plot = PrepareMLEReconstructedSpectrumsPlot(data = data),
                                  residual.spectrums.plot = PrepareResidualSpectrumsPlot(data = data),
                                  nucleotide.substitution.types.plot = PrepareNucleotideSubstitutionTypesPlot(data = data),
-                                 vcf.stats.plot = PrepareOptimizedVCFStatisticsPlot(data = data))
+                                 vcf.stats.plot = PrepareOptimizedVCFStatisticsPlot(data = data),
+                                 df.refined.vcf.annotated = PrepareRefinedAnnotationTable(data = data),
+                                 df.artifact.vcf.annotated = PrepareArtifactAnnotationTable(data = data),
+                                 df.refined.vcf.strand.bias = PrepareRefinedStrandBiasTable(data = data),
+                                 df.artifact.vcf.strand.bias = PrepareArtifactStrandBiasTable(data = data))
             rmarkdown.file <- system.file("rmd_template", "report_manual.Rmd", package = "FIREVAT")
         }
 

@@ -1,7 +1,7 @@
 # FIREVAT Configure Functions
 #
 # Last revised date:
-#   February 19, 2019
+#   February 22, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -156,16 +156,234 @@ MatchINFOKeyValue <- function(INFO.list) {
 }
 
 
-#' @title AND.multiple
+#' @title Generate config.obj by checking vcf header
 #' @description
-#' An internal function for handling multiple filtering conditions.
-#' Reduce conditions with "&" operations.
+#' This function generate config.obj by checking vcf header. 
+#' Users should fill in the information needed in console.
+#' In current version, only Integers & Float values can be used in 
+#' config.obj for running FIREVAT.
 #'
-#' @param ... Multiple filtering conditions
+#' @param vcf.obj A list from \code{\link{ReadVCF}}
+#' @param save.config If true, save config.obj to config.path
+#' @param config.path File path to write config.obj (json or yaml)
 #'
-#' @return A single condition reduced
+#' @return config.obj
 #'
-#' @keywords internal
-AND.multiple <- function (...) {
-    Reduce("&", ...)
+#' @export
+#' @importFrom jsonlite write_json
+#' @importFrom yaml write_yaml
+#' @importFrom tools file_ext
+GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
+                              config.path = "../temp/FIREVAT_configure.json") {
+    # FORMAT
+    ## mandatory fields: name/direction/field_type/column_header/key/index/type
+    ## optional fields: default/range
+    # INFO
+    ## mandatory fields: name/direction/field_type/key/index/type
+    ## optional fields: default/range
+    
+    # Define config.obj
+    print(paste("VCF Spec:", vcf.obj$header$fileformat))
+    print("Checklist protocol, initiated.")
+    
+    config.obj <- list()
+    
+    column.names <- c("FORMAT", "INFO")
+    
+    # Check FORMAT & INFO columns.
+    for (col.name in column.names) {
+        col.name.info <- vcf.obj$header[[col.name]]
+        
+        # Show fields
+        print(paste(length(col.name.info[,"ID"]),col.name,"fields identified."))
+        print(paste0(col.name.info[,"ID"], ": ",
+                     col.name.info[,"Description"],
+                     ", Type: ", col.name.info[,"Type"]))
+        
+        i <- 1
+        
+        repeat{
+            if (i >  length(col.name.info[,"ID"])){
+                break
+            }
+            
+            # Get values
+            key <- col.name.info[i,"ID"]
+            print(paste("Checking", key))
+            type <- col.name.info[i,"Type"]
+            col.samples <- vcf.obj$header$SAMPLE[,"ID"]
+
+            key.count <- as.integer(col.name.info[i,"Number"])
+
+            if (is.na(key.count)){
+                i <- i + 1
+                next
+            }
+            
+            # Skip if type == String or Flag
+            if (type %in% c("String", "Flag")) { 
+                i <- i + 1
+                next
+            }
+            # Check key.count: 1 or more
+            if (key.count == 1) {
+                print(paste("There is a value in",key,"field"))
+                use.in.filter <- as.logical(readline(
+                    prompt="Include this in config.obj (T/F): "))
+                if (use.in.filter==TRUE) {
+                    field.index <- 1
+                } else {
+                    i <- i + 1
+                    next
+                }
+            } else {
+                print(paste("There are",key.count,"values in",key,"field"))
+                use.in.filter <- as.logical(readline(
+                    prompt="Include this in config.obj (T/F): "))
+                if (use.in.filter==TRUE) {
+                    field.index <- NA
+                } else {
+                    i <- i + 1
+                    next
+                }
+            }
+            
+            if (use.in.filter==TRUE) {
+                param.name <- readline(prompt="Parameter name: ")
+                field.type <- col.name
+                field.key <- key
+                # if key.count > 1, get field_index here
+                if (key.count > 1) {
+                    field.index <- as.integer(readline(prompt=
+                        paste("Index of the value to use (1-based): ")
+                    ))
+                }
+                # if col.name == "FORMAT", get column names to extract value.
+                if (col.name == "FORMAT") {
+                    
+                    field.column.header <- readline(prompt=
+                        paste0("Get values from column (",
+                               paste(col.samples, collapse=", "),
+                               "): ")
+                    )
+                    # Check whether given column header is present
+                    if (!(field.column.header %in% col.samples)) {
+                        stop(paste("Fail to find column",field.column.header))
+                    }
+                } else if (col.name == "INFO") {
+                    field.column.header <- ""
+                }
+                
+                direction <- readline(prompt=
+                    paste0("Filtering direction (",
+                           "POS: Parameter of Refined variants > CUTOFF, ",
+                           "NEG: Parameter of Refined variants < CUTOFF): ")
+                )
+                # Check whether given direction is valid
+                if (!(direction %in% c("POS","NEG"))) {
+                    stop(paste("Fail to recognize direction:", direction))
+                }
+                # (Optional field) Get default cutoff & filtering range
+                default.cutoff <- readline(prompt=
+                    "Default cutoff (Optional: Press ENTER to ignore): "
+                )
+                filtering.range <- readline(prompt=
+                    "Filtering range (min,max; Optional: Press ENTER to ignore): "
+                )
+                
+                # Check whether given information is right.
+                print(paste0("Check this information.",
+                             "name: ", param.name, ";",
+                             "direction: ", direction, ";",
+                             "field_type: ", field.type, ";",
+                             "column_header: ", field.column.header, ";",
+                             "key: ", field.key, ";",
+                             "index: ", field.index, ";",
+                             "type: ", type, ";",
+                             "default: ", default.cutoff, ";",
+                             "range: ", filtering.range, ";",
+                             "use_in_filter: ", use.in.filter))
+                check.before.save <- as.logical(readline(prompt=
+                                     "Save this information to config.obj (T/F): "))
+                
+                suppressWarnings({                
+                    if (check.before.save) {
+                        config.obj[[param.name]] <- list(
+                            "name" = param.name,
+                            "direction" = direction,
+                            "field" = list(
+                                "field_type" = field.type,
+                                "key" = field.key,
+                                "index" = field.index
+                            ),
+                            "type" = type,
+                            "use_in_filter" = use.in.filter
+                        )
+                        # If col.name == "FORMAT", save column header
+                        if (col.name == "FORMAT"){
+                            config.obj[[param.name]]["field"]["column_header"] <- field.column.header
+                        }
+                        # default: Optional
+                        if (default.cutoff != "") {
+                            default.cutoff <- as.integer(default.cutoff)
+                            config.obj[[param.name]]["default"] <- default.cutoff
+                        }
+                        # range: Optional
+                        if (filtering.range != "") {
+                            filtering.range <- as.integer(unlist(strsplit(
+                                gsub(" ","",filtering.range), ",")))
+                            config.obj[[param.name]]["range"] <- filtering.range
+                        }
+                        print(paste("Saved",param.name,"to config.obj"))
+                    }
+                })
+            }
+            
+            # Check whether to repeat generatation parameters from this key.
+            print(paste("Current field:",col.name))
+            print(paste("Current key:", key))
+            if(col.name=="FORMAT") {
+                print(paste("Sample columns:", paste0(col.samples,collapse = ", ")))
+                print(paste("Current sample column:", field.column.header))
+            }
+            print(paste("Current index of value:", field.index))
+            print(paste("Number of values in this key:", key.count))
+            # Check whether to finish or not
+            if (i == length(col.name.info[,"ID"])) {
+                end.flag <- as.logical(readline(prompt=
+                    paste0("You reached last values of ", col.name, ".",
+                           "Proceed to next step (T/F): ")
+                ))
+                if (end.flag==TRUE) {
+                    break
+                } else {
+                    next
+                }
+            }
+            # Jump to next parameter
+            key.next <- as.logical(readline(prompt="Jump to next param (T/F): "))
+            
+            if (key.next) {
+                i <- i + 1
+                next
+            }
+        }
+    }
+    
+    # Save config.obj if save.config == TRUE
+    if (save.config) {
+        config.extension <- file_ext(config.path)
+        if (config.extension == "json") {
+            write_json(config.obj, config.path,
+                       auto_unbox = TRUE)
+        } else if (config.extension == "yaml") {
+            write_yaml(config.obj, config.path)
+        } else {
+            stop("FIREVAT config file should be in json or yaml format.")
+        }
+    }
+    
+    # Jobs Done!
+    print("Completed.")
+    return(config.obj)
 }

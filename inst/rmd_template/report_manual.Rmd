@@ -123,3 +123,90 @@ print(report.items$nucleotide.substitution.types.plot)
 print(report.items$vcf.stats.plot$fig)
 ```
 
+### **4. Variants with Strand Bias**
+
+<br>
+
+#### **4.1. Refined VCF**
+```{r, echo=FALSE}
+if (is.null(report.items$df.refined.vcf.strand.bias)) {
+    cat("None to display.")
+}
+if (data$annotate) {
+    if (nrow(report.items$df.refined.vcf.strand.bias) == 0) {
+        cat("None to display.")
+    }
+    else {
+        kable(report.items$df.refined.vcf.strand.bias, 
+              align = c('l','r','c','c','c','c','c','c','c'), 
+              row.names = FALSE)
+    }
+}    
+```
+
+***
+
+<br>
+
+#### **4.2. Artifactual VCF**
+```{r, echo=FALSE}
+if (is.null(report.items$df.artifact.vcf.strand.bias)) {
+    cat("None to display.")
+}
+if (data$annotate) {
+    if (nrow(report.items$df.artifact.vcf.strand.bias) == 0) {
+        cat("None to display.")
+    }
+    else {
+        kable(report.items$df.artifact.vcf.strand.bias,
+              align = c('l','r','c','c','c','c','c','c','c'),
+              row.names = FALSE)
+    }
+}
+```
+
+### **5. VCF Annotation (ClinVar)**
+
+<br>
+
+#### **5.1. Refined VCF**
+```{r, echo=FALSE}
+if (is.null(report.items$df.refined.vcf.annotated)) {
+    cat("None to display.")
+}
+if (data$annotate) {
+    if (nrow(report.items$df.refined.vcf.annotated) == 0) {
+        cat("None to display.")
+    }
+    else {
+        align.vec <- rep("c", ncol(report.items$df.refined.vcf.annotated))
+        align.vec[1] <- "l"
+        align.vec[2] <- "r"
+        kable(report.items$df.refined.vcf.annotated, align = align.vec)
+    }
+}    
+```
+
+***
+
+<br>
+
+#### **5.2. Artifactual VCF**
+```{r, echo=FALSE}
+if (is.null(report.items$df.artifact.vcf.annotated)) {
+    cat("None to display.")
+}
+if (data$annotate) {
+    if (nrow(report.items$df.artifact.vcf.annotated) == 0) {
+        cat("None to display.")
+    }
+    else {
+        align.vec <- rep("c", ncol(report.items$df.artifact.vcf.annotated))
+        align.vec[1] <- "l"
+        align.vec[2] <- "r"
+        kable(report.items$df.artifact.vcf.annotated, align = align.vec)
+    }
+}
+```
+
+<br>

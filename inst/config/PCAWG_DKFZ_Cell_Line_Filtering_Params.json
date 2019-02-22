@@ -180,7 +180,7 @@
         "type": "integer",
         "default": 5,
         "range": [0, 30],
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "TumorDPAlt",

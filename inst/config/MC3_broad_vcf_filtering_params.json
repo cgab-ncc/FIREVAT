@@ -1,0 +1,150 @@
+[{
+        "name": "PrimaryBQ",
+        "description": "Base Quality of Primary Tumor Sample",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "BQ",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalADRef",
+        "description": "Reference Allele Depth in Normal Sample",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalADAlt",
+        "description": "Alternative Allele Depth in Normal Sample",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryADRef",
+        "description": "Reference Allele Depth in Primary Tumor Sample",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryADAlt",
+        "description": "Alternative Allele Depth in Primary Tumor Sample",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryFA",
+        "description": "Fraction of Reads Supporting Alternative Allele in Primary Tumor Sample",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "FA",
+            "index": 1
+        },
+        "type": "float",
+        "default": 10,
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalFA",
+        "description": "Fraction of Reads Supporting Alternative Allele in Primary Tumor Sample",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "FA",
+            "index": 1
+        },
+        "type": "float",
+        "default": 100,
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryMQ0",
+        "description": "Number of Mapping Quality Zero Reads in Primary Tumor Sample",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "MQ0",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalMQ0",
+        "description": "Number of Mapping Quality Zero Reads in Normal Sample",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "MQ0",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [
+            0,
+            30
+        ],
+        "use_in_filter": true
+    }
+]

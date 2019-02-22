@@ -14,16 +14,47 @@
 #'
 #' @param vcf.file (full path of a .vcf file)
 #' @param genome ('hg19' or 'hg38')
+#' @param split.info A boolean value. If TRUE, then makes the INFO column in the vcf
+#' as a separate column. Default value is FALSE.
+#' @param check.chromosome.name A boolean value. If TRUE, then check whether converts
+#' 'MT' to 'M' and adds 'chr' to the CHROM column. Default value is TRUE.
 #'
 #' @return A list with elements 'data', 'header', 'genome'
 #'
 #' @export
 #' @importFrom bedr read.vcf
-ReadVCF <- function(vcf.file, genome = "hg19") {
-    vcf.temp <- read.vcf(x = vcf.file)
-    return(list(data = vcf.temp$vcf,
-                header = vcf.temp$header,
-                genome = genome))
+ReadVCF <- function(vcf.file,
+                    genome = "hg19",
+                    split.info = FALSE,
+                    check.chromosome.name = TRUE) {
+    vcf.temp <- read.vcf(x = vcf.file,
+                         split.info = split.info)
+
+    vcf.obj <- list(data = vcf.temp$vcf,
+                    header = vcf.temp$header,
+                    genome = genome)
+
+    if (check.chromosome.name == TRUE) {
+        # Check "CHROM" column.
+        # If name of mitochondrial chromosome is given as "MT",
+        # change it into "M"
+        chrom.MT.check <- grepl("MT",vcf.obj$data$CHROM)
+        vcf.obj$data$CHROM[chrom.MT.check] <- "M"
+
+        # Check if chromosome names start with "chr"
+        # If not, paste "chr"
+        chrom.chr.check <- grepl("chr",vcf.obj$data$CHROM)
+
+        vcf.obj$data$CHROM[chrom.chr.check==F] <- paste0(
+            "chr", vcf.obj$data$CHROM[chrom.chr.check==F]
+        )
+
+        # Finally, compare chromosome names of vcf with names in firevat_constants
+        chrom.name.match <- vcf.obj$data$CHROM %in% Chromosome.Names
+        vcf.obj$data <- vcf.obj$data[chrom.name.match,]
+    }
+
+    return(vcf.obj)
 }
 
 
@@ -184,20 +215,6 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     condition.list <- list(
         "REF.atcg" = vcf.obj$data$REF %in% atcg.chars,
         "ALT.atcg" = vcf.obj$data$ALT %in% atcg.chars
-    )
-
-    # Check "CHROM" column
-    ## If name of mitochondrial chromosome is given as "MT",
-    ## change it into "M"
-    chrom.MT.check <- grepl("MT",vcf.obj$data$CHROM)
-    vcf.obj$data$CHROM[chrom.MT.check] <- "M"
-
-    ## Check if chromosome names start with "chr"
-    ## If not, paste "chr"
-    chrom.chr.check <- grepl("chr",vcf.obj$data$CHROM)
-
-    vcf.obj$data$CHROM[chrom.chr.check==F] <- paste0(
-        "chr", vcf.obj$data$CHROM[chrom.chr.check==F]
     )
 
     if (verbose == TRUE) {

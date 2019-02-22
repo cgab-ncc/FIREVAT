@@ -76,6 +76,8 @@ UpdateFilter <- function(vcf.filter, param.values) {
 #' @param vcf.obj A list from ReadVCF
 #' @param vcf.filter A list from MakeMuTect2Filter
 #' @param config.obj A list from ParseConfigFile
+#' @param include.array A boolean vector
+#' @param force.include A boolean value. If TRUE, then uses 'include.array'
 #' @param verbose If true, provides process detail
 #'
 #' @return A list with the following elements
@@ -85,51 +87,76 @@ UpdateFilter <- function(vcf.filter, param.values) {
 #' }
 #'
 #' @export
-FilterVCF <- function(vcf.obj, vcf.filter, config.obj, verbose = TRUE) {
-    # Set up variables
-    vcf.data.temp <- vcf.obj$data
-    include <- rep(TRUE, nrow(vcf.data.temp))
-    atcg.chars <- c("A", "T", "C", "G")
+FilterVCF <- function(vcf.obj,
+                      vcf.filter,
+                      config.obj,
+                      include.array = NULL,
+                      force.include = FALSE,
+                      verbose = TRUE) {
+    if (force.include == FALSE) {
+        # Set up variables
+        include <- rep(TRUE, nrow(vcf.obj$data))
+        atcg.chars <- c("A", "T", "C", "G")
 
-    condition.list <- list("include"=include)
+        condition.list <- list("include"=include)
 
-    if (verbose == TRUE) {
-        print(paste0("Before applying filter: ", nrow(vcf.data.temp), " rows"))
-    }
-
-    for (param in names(vcf.filter)) {
-        # Get filtering direction from config.obj
-        direction <- config.obj[[param]]["direction"]
-
-        # "POS": pass values bigger than cutoff
-        # "NEG": pass values smaller than cutoff
-        if (direction == "POS") {
-            condition.list[[param]] <- vcf.obj$data[[param]] > vcf.filter[[param]]
-        } else if (direction == "NEG") {
-            condition.list[[param]] <- vcf.obj$data[[param]] < vcf.filter[[param]]
+        if (verbose == TRUE) {
+            print(paste0("Before applying filter: ", nrow(vcf.obj$data), " rows"))
         }
+
+        for (param in names(vcf.filter)) {
+            # Get filtering direction from config.obj
+            direction <- config.obj[[param]]["direction"]
+
+            # "POS": pass values bigger than cutoff
+            # "NEG": pass values smaller than cutoff
+            if (direction == "POS") {
+                condition.list[[param]] <- vcf.obj$data[[param]] > vcf.filter[[param]]
+            } else if (direction == "NEG") {
+                condition.list[[param]] <- vcf.obj$data[[param]] < vcf.filter[[param]]
+            }
+        }
+
+        include <- AND.multiple(condition.list)
+
+        # Split vcf.data with "INCLUDE"
+        vcf.data.refined <- vcf.obj$data[include, ]
+        vcf.data.artifact <- vcf.obj$data[!include, ]
+
+        if (verbose == TRUE) {
+            print(paste0("After applying filter: ", nrow(vcf.data.refined),
+                         " rows in vcf.data.filtered"))
+            print(paste0("After applying filter: ", nrow(vcf.data.artifact),
+                         " rows in vcf.data.artifact"))
+        }
+
+        # Return two vcf.obj
+        return(list(vcf.obj.filtered = list(data = vcf.data.refined,
+                                            header = vcf.obj$header,
+                                            genome = vcf.obj$genome),
+                    vcf.obj.artifact = list(data = vcf.data.artifact,
+                                            header = vcf.obj$header,
+                                            genome = vcf.obj$genome)))
     }
+    else {
+        if (is.null(include.array)) {
+            stop("The parameter 'include.array' must not be NULL as force.include is TRUE.")
+        }
+        if (nrow(vcf.obj$data) != length(include.array)) {
+            stop("The parameter 'include.array' length must be the same
+                 as the number of rows in vcf.obj$data")
+        }
+        vcf.data.include <- vcf.obj$data[include.array, ]
+        vcf.data.exclude <- vcf.obj$data[!include.array, ]
 
-    include <- AND.multiple(condition.list)
-
-    # Split vcf.data with "INCLUDE"
-    vcf.data.temp <- vcf.data.temp[include, ]
-    vcf.data.artifact <- vcf.obj$data[!include, ]
-
-    if (verbose == TRUE) {
-        print(paste0("After applying filter: ", nrow(vcf.data.temp),
-                     " rows in vcf.data.filtered"))
-        print(paste0("After applying filter: ", nrow(vcf.data.artifact),
-                     " rows in vcf.data.artifact"))
+        # Return two vcf.obj
+        return(list(vcf.obj.filtered = list(data = vcf.data.include,
+                                            header = vcf.obj$header,
+                                            genome = vcf.obj$genome),
+                    vcf.obj.artifact = list(data = vcf.data.exclude,
+                                            header = vcf.obj$header,
+                                            genome = vcf.obj$genome)))
     }
-
-    # Return two vcf.obj
-    return(list(vcf.obj.filtered = list(data = vcf.data.temp,
-                                        header = vcf.obj$header,
-                                        genome = vcf.obj$genome),
-                vcf.obj.artifact = list(data = vcf.data.artifact,
-                                        header = vcf.obj$header,
-                                        genome = vcf.obj$genome)))
 }
 
 
@@ -173,3 +200,34 @@ DefaultFilterToBinary <- function(vcf.filter, params.bit.len) {
 
     return(default.filter.binary)
 }
+
+
+#' @title AND.multiple
+#' @description
+#' An internal function for handling multiple filtering conditions.
+#' Reduce conditions with "&" operations.
+#'
+#' @param ... Multiple filtering conditions
+#'
+#' @return A single condition reduced
+#'
+#' @keywords internal
+AND.multiple <- function (...) {
+    Reduce("&", ...)
+}
+
+
+#' @title OR.multiple
+#' @description
+#' An internal function for handling multiple filtering conditions.
+#' Reduce conditions with "|" operations.
+#'
+#' @param ... Multiple filtering conditions
+#'
+#' @return A single condition reduced
+#'
+#' @keywords internal
+OR.multiple <- function (...) {
+    Reduce("|", ...)
+}
+
