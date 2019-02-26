@@ -463,17 +463,17 @@ PrepareNucleotideSubstitutionTypesPlot <- function(data) { # COMMON_7
     # Compute mutation type max y.axis value
     mut.type.max.y <- max(c(
         EnumerateTriNucCounts(
-            data$raw.muts.mutalisk.results$identified.mut.sigs.spectrum),
+            data$raw.muts.mutalisk.results$sub.types.spectrum),
         EnumerateTriNucCounts(
-            data$refined.muts.mutalisk.results$identified.mut.sigs.spectrum),
+            data$refined.muts.mutalisk.results$sub.types.spectrum),
         EnumerateTriNucCounts(
-            data$artifactual.muts.mutalisk.results$identified.mut.sigs.spectrum)
+            data$artifactual.muts.mutalisk.results$sub.types.spectrum)
     )) * 1.1
 
     # Plot mutation types - original vcf
     g1 <- PlotMutationTypes(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
                             mutation.types.values = EnumerateTriNucCounts(
-                                data$raw.muts.mutalisk.results$identified.mut.sigs.spectrum),
+                                data$raw.muts.mutalisk.results$sub.types.spectrum),
                             mutation.types.colors = TriNuc.Mutation.Type.Hex.Colors,
                             max.y.val = mut.type.max.y,
                             convert.to.percentage = T,
@@ -482,7 +482,7 @@ PrepareNucleotideSubstitutionTypesPlot <- function(data) { # COMMON_7
     # Plot mutation types - refined vcf
     g2 <- PlotMutationTypes(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
                             mutation.types.values = EnumerateTriNucCounts(
-                                data$refined.muts.mutalisk.results$identified.mut.sigs.spectrum),
+                                data$refined.muts.mutalisk.results$sub.types.spectrum),
                             mutation.types.colors = TriNuc.Mutation.Type.Hex.Colors,
                             max.y.val = mut.type.max.y,
                             convert.to.percentage = T,
@@ -491,7 +491,7 @@ PrepareNucleotideSubstitutionTypesPlot <- function(data) { # COMMON_7
     # Plot mutation types - artifactual vcf
     g3 <- PlotMutationTypes(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
                             mutation.types.values = EnumerateTriNucCounts(
-                                data$artifactual.muts.mutalisk.results$identified.mut.sigs.spectrum),
+                                data$artifactual.muts.mutalisk.results$sub.types.spectrum),
                             mutation.types.colors = TriNuc.Mutation.Type.Hex.Colors,
                             max.y.val = mut.type.max.y,
                             convert.to.percentage = T,

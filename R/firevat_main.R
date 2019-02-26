@@ -364,7 +364,7 @@ RunFIREVAT <- function(vcf.file,
                         weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
     sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
                         weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
-    data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4))
+    data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
 
     # Original vcf
     data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
