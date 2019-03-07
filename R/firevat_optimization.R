@@ -201,7 +201,10 @@ GAOptimizationObjFnHelper <- function(string, data) {
     P.value.artifactual <- nrow(vcf.objs$vcf.obj.artifact$data) / nrow(data$vcf.obj$data)
 
     # Objective value
-    obj.val <- A.value.artifactual * C.value.artifactual * (1 - A.value.refined) * C.value.refined
+    obj.val <- data$objective.fn(C.refined = C.value.refined,
+                                 A.refined = A.value.refined,
+                                 C.artifactual = C.value.artifactual,
+                                 A.artifactual = A.value.artifactual)
 
     return(list(valid = TRUE,
                 x = x,

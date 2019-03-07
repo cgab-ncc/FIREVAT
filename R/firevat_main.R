@@ -24,6 +24,7 @@
 #' @param num.cores Number of cores to allocate
 #' @param output.dir String value of the desired output directory
 #' @param mode String value. The value should be either 'ga' or 'manual'.
+#' @param objective.fn Objective value derivation function. Default: Default.Obj.Fn.
 #' @param use.suggested.soln Boolean value. If TRUE, then FIREVAT passes the default values
 #' of filter variables declared as 'use_in_filter' in the config file to the 'suggestions' parameter of
 #' the Genetic Algorithm package. If FALSE, then FIREVAT supplies NULL to the GA package 'suggestions' parameter.
@@ -76,6 +77,7 @@ RunFIREVAT <- function(vcf.file,
                        num.cores,
                        output.dir,
                        mode = "ga",
+                       objective.fn = Default.Obj.Fn,
                        use.suggested.soln = TRUE,
                        ga.pop.size = 200,
                        ga.max.iter = 200,
@@ -190,6 +192,7 @@ RunFIREVAT <- function(vcf.file,
 
     # 6. Prepare data for optimization
     data = list(start.datetime = start.datetime,
+                objective.fn = objective.fn,
                 n.bits = n.bits,
                 params.bit.len = params.bit.len,
                 vcf.file = vcf.file,
@@ -343,6 +346,10 @@ RunFIREVAT <- function(vcf.file,
     # Here we fetch all signatures ever identified by Mutational Patterns
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
     Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
+        include <- rep(TRUE, length(sigs))
+        include[which(sigs == "")] <- FALSE
+        sigs <- as.character(sigs[include])
+        weights <- as.character(weights[include])
         sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
         weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
 

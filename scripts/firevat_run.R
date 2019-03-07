@@ -43,11 +43,11 @@ firevat.run.option.list <- list(
                 default="ga",
                 help="Running mode of FIREVAT (manual or ga)"),
     # annotate
-    make_option("--annotate",
+    make_option(c("--annotate"),
                 default= TRUE,
                 help="Annotate [default]"),
     # perform strand bias analysis
-    make_option("--strand_bias",
+    make_option(c("--strandbias"),
                 default= FALSE,
                 help="Perform strand bias analysis [default: FALSE]"),
     # number of cores
@@ -92,13 +92,13 @@ firevat.run.option.list <- list(
 parser <- OptionParser(usage="%prog [options]",
                        option_list = firevat.run.option.list)
 
-firevat.run.args <- parse_args(parser, args = commandArgs(trailingOnly=TRUE))
+run.args <- parse_args(parser, args = commandArgs(trailingOnly=TRUE))
 
 
 if (!interactive()){
 
     # Execution
-    verbose <- firevat.run.args$verbose
+    verbose <- run.args$verbose
     if (verbose) print(paste0("Started datetime ", Sys.time()))
 
     if (run.args$annotate == TRUE) {

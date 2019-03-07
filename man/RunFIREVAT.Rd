@@ -6,9 +6,10 @@
 \usage{
 RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   target.mut.sigs, sequencing.artifact.mut.sigs, num.cores, output.dir,
-  mode = "ga", use.suggested.soln = TRUE, ga.pop.size = 200,
-  ga.max.iter = 200, ga.run = 50, ga.pmutation = 0.25,
-  mutalisk.method = "all", mutalisk.random.sampling.count = 20,
+  mode = "ga", objective.fn = Default.Obj.Fn,
+  use.suggested.soln = TRUE, ga.pop.size = 200, ga.max.iter = 200,
+  ga.run = 50, ga.pmutation = 0.25, mutalisk.method = "all",
+  mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
   perform.strand.bias.analysis = TRUE,
   strand.bias.perform.fdr.correction = TRUE,
@@ -38,6 +39,8 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
 \item{output.dir}{String value of the desired output directory}
 
 \item{mode}{String value. The value should be either 'ga' or 'manual'.}
+
+\item{objective.fn}{Objective value derivation function. Default: Default.Obj.Fn.}
 
 \item{use.suggested.soln}{Boolean value. If TRUE, then FIREVAT passes the default values
 of filter variables declared as 'use_in_filter' in the config file to the 'suggestions' parameter of

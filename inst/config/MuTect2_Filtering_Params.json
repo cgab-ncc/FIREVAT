@@ -150,7 +150,7 @@
         "direction": "NEG",
         "field": {
             "field_type": "FORMAT",
-            "column_header": "TUMOR",
+            "column_header": "NORMAL",
             "key": "AF",
             "index": 1
         },
@@ -194,7 +194,7 @@
         "use_in_filter": true
     },
     {
-        "name": "TumorFOXOG",
+        "name": "RawFOXOG",
         "direction": "NEG",
         "field": {
             "field_type": "FORMAT",
@@ -203,6 +203,19 @@
             "index": 1
         },
         "type": "float",
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorFOXOG",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(a){tryCatch({return(abs(a-0.5))},error=function(e){return(1)})}",
+            "args": [
+                "RawFOXOG"
+            ]
+        },
+        "type": "float",
+        "default": 0.25,
         "use_in_filter": true
     },
     {
