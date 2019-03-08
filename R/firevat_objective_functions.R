@@ -38,10 +38,10 @@ Default.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
 #'
 #' @export
 Euc.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
-    # Calculates the Euclidean distance from the ideal point
-    ideal.point <- c(1,1,1,1)
+    # Calculates the Euclidean distance from the reference point
+    reference.point <- c(0,0,0,0)
     curr.point <- c(C.refined, (1 - A.refined), C.artifactual, A.artifactual)
-    obj.val <- dist(rbind(ideal.point, curr.point))
+    obj.val <- as.numeric(dist(rbind(reference.point, curr.point)))
     return(obj.val)
 }
 
@@ -96,7 +96,7 @@ Euc.Exp.Weighted.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artif
     # Exponential weight
     # y = (10^(x-1) - 0.1) / 0.9
     #
-    # Calculates the Euclidean distance from the ideal point
+    # Calculates the Euclidean distance from the reference point
 
     C.refined <- log(((0.9* C.refined) + 0.1), base = 10) + 1
     A.refined <- (10**((1 - A.refined) - 1) - 0.1) / 0.9
@@ -104,9 +104,9 @@ Euc.Exp.Weighted.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artif
     C.artifactual <- log(((0.9* C.artifactual) + 0.1), base = 10) + 1
     A.artifactual <- (10**(A.artifactual - 1) - 0.1) / 0.9
 
-    ideal.point <- c(1,1,1,1)
-    curr.point <- c(C.refined, (1 - A.refined), C.artifactual, A.artifactual)
-    obj.val <- dist(rbind(ideal.point, curr.point))
+    reference.point <- c(0,0,0,0)
+    curr.point <- c(C.refined, A.refined, C.artifactual, A.artifactual)
+    obj.val <- as.numeric(dist(rbind(reference.point, curr.point)))
     return(obj.val)
 }
 

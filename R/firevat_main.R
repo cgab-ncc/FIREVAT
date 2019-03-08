@@ -171,10 +171,11 @@ RunFIREVAT <- function(vcf.file,
                               config.obj = config.obj,
                               verbose = verbose)
     vcf.obj <- vcf.objs$vcf.obj.filtered
+
     # FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
     if (nrow(vcf.obj$data) <= 50) {
-        warning("FIREVAT must have at least 50 mutations to run. Returning without running FIREVAT.")
-        return()
+        print("FIREVAT must have at least 50 mutations to run. Returning without running FIREVAT.")
+        return(NULL)
     } else {
         if (verbose == TRUE) {
             print(paste0("Starting with ", nrow(vcf.obj$data), " point mutations"))
