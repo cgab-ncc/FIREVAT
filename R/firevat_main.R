@@ -349,10 +349,16 @@ RunFIREVAT <- function(vcf.file,
     Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
         include <- rep(TRUE, length(sigs))
         include[which(sigs == "")] <- FALSE
+        include[is.na(sigs)] <- FALSE
+
         sigs <- as.character(sigs[include])
         weights <- as.character(weights[include])
         sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
         weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
+
+        if (length(sigs) == 0) {
+            return(c())
+        }
 
         candidate.sigs <- c()
         for (i in 1:length(sigs)) {

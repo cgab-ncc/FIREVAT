@@ -22,9 +22,9 @@ ReadOptimizationIterationReport <- function(data) {
                        data$vcf.file.basename, "_FIREVAT_Optimization_Logs.tsv")
     df <- read.table(log.file, sep = "\t",
                      header = TRUE,
+                     na.strings = "",
                      check.names = FALSE,
                      stringsAsFactors = FALSE)
-    df <- df[complete.cases(df),]
     return(df)
 }
 
@@ -67,14 +67,24 @@ GetOptimizedSignatures <- function(data,
     df.optimization.logs <- ReadOptimizationIterationReport(data = data)
 
     target.signatures <- tail(df.optimization.logs[,target.signatures.str], 1)
-    target.signatures <- strsplit(target.signatures, ",")[[1]]
-    target.signatures.weights <- tail(df.optimization.logs[,target.signatures.weights.str], 1)
-    target.signatures.weights <- strsplit(target.signatures.weights, ",")[[1]]
+    if (is.na(target.signatures)) {
+        target.signatures <- c()
+        target.signatures.weights <- c()
+    } else {
+        target.signatures <- strsplit(target.signatures, ",")[[1]]
+        target.signatures.weights <- tail(df.optimization.logs[,target.signatures.weights.str], 1)
+        target.signatures.weights <- strsplit(target.signatures.weights, ",")[[1]]
+    }
 
     artifact.signatures <- tail(df.optimization.logs[,artifact.signatures.str], 1)
-    artifact.signatures <- strsplit(artifact.signatures, ",")[[1]]
-    artifact.signatures.weights <- tail(df.optimization.logs[,artifact.signatures.weights.str], 1)
-    artifact.signatures.weights <- strsplit(artifact.signatures.weights, ",")[[1]]
+    if (is.na(artifact.signatures)) {
+        artifact.signatures <- c()
+        artifact.signatures.weights <- c()
+    } else {
+        artifact.signatures <- strsplit(artifact.signatures, ",")[[1]]
+        artifact.signatures.weights <- tail(df.optimization.logs[,artifact.signatures.weights.str], 1)
+        artifact.signatures.weights <- strsplit(artifact.signatures.weights, ",")[[1]]
+    }
 
     if (signatures == "all") {
         df <- data.frame(list(signature = c(target.signatures, artifact.signatures),
@@ -771,12 +781,17 @@ PrepareArtifactualMutsOptimizationIterationsPlot <- function(data) { # Optional_
     for (i in 1:nrow(df.optimization.logs)) {
         curr.row <- df.optimization.logs[i,]
         curr.row.seq.art.sigs <- as.character(curr.row$artifactual.muts.sequencing.artifact.signatures)
-        if (nchar(curr.row.seq.art.sigs) > 0) {
+        if (is.na(curr.row.seq.art.sigs) == FALSE) {
             curr.row.seq.art.sigs <- strsplit(curr.row.seq.art.sigs, "\\,")[[1]]
-            artifactual.muts.seq.artifact.sigs <- c(artifactual.muts.seq.artifact.sigs, curr.row.seq.art.sigs
-            )
+            artifactual.muts.seq.artifact.sigs <- c(artifactual.muts.seq.artifact.sigs,
+                                                    curr.row.seq.art.sigs)
         }
     }
+
+    if (length(artifactual.muts.seq.artifact.sigs) == 0) {
+        return(NULL)
+    }
+
     artifactual.muts.seq.artifact.sigs <- unique(artifactual.muts.seq.artifact.sigs)
     # Create a dataframe with columns 'iteration', 'SBS<NUM>', 'SBS<NUM>', ...
     df.plot.data <- data.frame(
@@ -799,7 +814,7 @@ PrepareArtifactualMutsOptimizationIterationsPlot <- function(data) { # Optional_
                                          artifactual.muts.seq.artifact.sigs)
         df.plot.data.temp['iteration'] <- curr.row.iter
 
-        if (nchar(curr.row.seq.art.sigs) > 0) {
+        if (is.na(curr.row.seq.art.sigs) == FALSE) {
             curr.row.seq.art.sigs <-as.character(
                 strsplit(curr.row.seq.art.sigs, "\\,")[[1]])
             curr.row.seq.art.sigs.probs <- as.numeric(
@@ -1026,6 +1041,7 @@ ReportFIREVATResults <- function(data) {
                           params = list(data = data,
                                         report.items = report.items),
                           output_dir = data$output.dir,
+                          intermediates_dir = data$output.dir,
                           output_file = paste0(data$vcf.file.basename,
                                                "_FIREVAT_Report.html"))
     }

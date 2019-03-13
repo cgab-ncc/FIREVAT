@@ -8,7 +8,7 @@ library(FIREVAT)
 # takes about 5 minutes to complete
 
 # Output directory
-output.dir <- "/home/jinseoklee/Documents/Projects/FIREVAT-validation/data/Samples/firevat_results/20190307_193000_Euc_Exp_Weighted/"
+output.dir <- "/home/jinseoklee/Documents/Projects/FIREVAT-validation/data/Samples/firevat_results/20190312_090000/"
 
 # Sample VCF file
 sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
