@@ -75,6 +75,7 @@
         },
         "type": "float",
         "default": 10,
+        "range": [0, 60],
         "use_in_filter": true
     }
 ]
