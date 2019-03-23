@@ -6,20 +6,23 @@
 \usage{
 RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   target.mut.sigs, sequencing.artifact.mut.sigs, num.cores, output.dir,
-  mode = "ga", objective.fn = Default.Obj.Fn,
-  use.suggested.soln = TRUE, ga.pop.size = 200, ga.max.iter = 200,
-  ga.run = 50, ga.pmutation = 0.25, mutalisk.method = "all",
-  mutalisk.random.sampling.count = 20,
+  mode = "ga", init.artifact.stop = 0.05,
+  objective.fn = Default.Obj.Fn, use.suggested.soln = TRUE,
+  ga.type = "real-valued", ga.pop.size = 200, ga.max.iter = 200,
+  ga.run = 50, ga.pmutation = 0.25, mutalisk = TRUE,
+  mutalisk.method = "all", mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
   perform.strand.bias.analysis = TRUE,
   strand.bias.perform.fdr.correction = TRUE,
   strand.bias.fdr.correction.method = "BH",
   ref.forward.strand.var = NULL, ref.reverse.strand.var = NULL,
   alt.forward.strand.var = NULL, alt.reverse.strand.var = NULL,
-  report.format = "html", annotate = TRUE, df.annotation.db = NULL,
+  annotate = TRUE, df.annotation.db = NULL,
   annotated.columns.to.display = NULL,
   annotation.filter.key.value.pairs = NULL,
-  annotation.filter.condition = "AND", verbose = TRUE)
+  annotation.filter.condition = "AND", write.vcf = TRUE,
+  report = TRUE, save.rdata = TRUE, save.tsv = TRUE,
+  report.format = "html", verbose = TRUE)
 }
 \arguments{
 \item{vcf.file}{String value corresponding to input .vcf file. Please provide the full path.}
@@ -40,11 +43,19 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
 
 \item{mode}{String value. The value should be either 'ga' or 'manual'.}
 
+\item{init.artifact.stop}{Numeric value  less than 1. If the sum of sequencing artifact weights in the user-specified original VCF file (i.e. vcf.file)
+is less than or equal to this value then FIREVAT does not perform variant refinement.
+Default value is 0.05. Note that this option does not apply if 'mode' is 'manual'.}
+
 \item{objective.fn}{Objective value derivation function. Default: Default.Obj.Fn.}
 
 \item{use.suggested.soln}{Boolean value. If TRUE, then FIREVAT passes the default values
 of filter variables declared as 'use_in_filter' in the config file to the 'suggestions' parameter of
-the Genetic Algorithm package. If FALSE, then FIREVAT supplies NULL to the GA package 'suggestions' parameter.}
+the Genetic Algorithm package. If FALSE, then FIREVAT supplies NULL to the GA package 'suggestions' parameter.
+FIREVAT also computes baseline performance of each filter variable and uses fittest population from each variable
+as a suggested solution.}
+
+\item{ga.type}{String value. The value should be either 'binray' or 'real-valued'.}
 
 \item{ga.pop.size}{Integer value of the Genetic Algorithm 'population size' parameter. Default: 200.
 This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.}
@@ -56,6 +67,8 @@ This value should be set based on the number of filter parameters. Recommendatio
 This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.}
 
 \item{ga.pmutation}{Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.}
+
+\item{mutalisk}{If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.}
 
 \item{mutalisk.method}{Mutalisk signature identification method. Default: 'random.sampling'.
 The value can be either 'all' or 'random.sampling'.
@@ -84,8 +97,6 @@ Refer to 'p.adjust()' function method.}
 
 \item{alt.reverse.strand.var}{A string value,}
 
-\item{report.format}{The format of FIREVAT report. We currently only support 'html'.}
-
 \item{annotate}{A boolean value. Default value is TRUE.}
 
 \item{df.annotation.db}{A data.frame. Please refer to \code{\link{PrepareAnnotationDB}}}
@@ -95,6 +106,16 @@ Refer to 'p.adjust()' function method.}
 \item{annotation.filter.key.value.pairs}{A list.}
 
 \item{annotation.filter.condition}{'AND' or 'OR'.}
+
+\item{write.vcf}{If TRUE, write original/refined/artifact vcfs. Default: TRUE.}
+
+\item{report}{If TRUE, generate report. Default: TRUE.}
+
+\item{save.rdata}{If TRUE, save rdata. Default: TRUE.}
+
+\item{save.tsv}{If TRUE, save tsv. Default: TRUE.}
+
+\item{report.format}{The format of FIREVAT report. We currently only support 'html'.}
 
 \item{verbose}{If TRUE, provides process detail. Default: TRUE.}
 }
@@ -106,7 +127,6 @@ A list with the following elements
 }
 }
 \description{
-Runs FIREVAT using configuration data.Filters point mutations in the specified vcf.file based on mutational signature
-decomposition and outputs the refined and artifact vcf as well as metadata related to
-the refinement process.
+Runs FIREVAT using configuration data. Filters point mutations in the user-specified vcf file based on mutational signature
+identification and outputs the refined and artifact vcf files as well as metadata related to the refinement process.
 }

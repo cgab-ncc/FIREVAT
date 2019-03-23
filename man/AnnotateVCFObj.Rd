@@ -24,5 +24,5 @@ supplied.}
 An annotated vcf.obj
 }
 \description{
-Annotates a vcf.obj using df.variants.of.interest (from (\code{\link{PrepareAnnotationDB}})
+Annotates a vcf.obj using df.variants.of.interest (from \code{\link{PrepareAnnotationDB}})
 }

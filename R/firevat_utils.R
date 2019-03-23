@@ -146,3 +146,189 @@ EnumerateTriNucCounts <- function(spectrum) {
              T.to.C,
              T.to.G))
 }
+
+
+#' @title WriteFIREVATResultsToTSV
+#' @description Writes FIREVAT results to a csv file
+#'
+#' @param firevat.results List returned from RunFIREVAT
+#'
+#' @export
+WriteFIREVATResultsToTSV <- function(firevat.results) {
+    save.list <- list(vcf.file = NA,
+                      vcf.file.basename = NA,
+                      config.file = NA,
+                      start.datetime = NA,
+                      end.datetime = NA,
+                      variant.refinement.performed = NA,
+                      variant.refinement.terminiation.log = NA,
+                      original.muts.seq.art.weights.sum = NA,
+                      target.mut.sigs = NA,
+                      sequencing.artifact.mut.sigs = NA,
+                      output.dir = NA,
+                      ga.pop.size = NA,
+                      ga.max.iter = NA,
+                      ga.pmutation = NA,
+                      ga.run = NA,
+                      mutalisk.method = NA,
+                      mutalisk.random.sampling.count = NA,
+                      mutalisk.random.sampling.max.iter = NA,
+                      mode = NA,
+                      perform.strand.bias.analysis = NA,
+                      strand.bias.fdr.correction.method = NA,
+                      strand.bias.perform.fdr.correction = NA,
+                      raw.mutational.signatures = NA,
+                      raw.mutational.signatures.probs = NA,
+                      raw.mutational.signatures.cos.sim = NA,
+                      raw.mutational.signatures.rss = NA,
+                      refined.mutational.signatures = NA,
+                      refined.mutational.signatures.probs = NA,
+                      refined.mutational.signatures.cos.sim = NA,
+                      refined.mutational.signatures.rss = NA,
+                      artifactual.mutational.signatures = NA,
+                      artifactual.mutational.signatures.probs = NA,
+                      artifactual.mutational.signatures.cos.sim = NA,
+                      artifactual.mutational.signatures.rss = NA,
+                      refinement.filters = NA,
+                      refinement.filter.cutoffs = NA,
+                      refinement.filter.directions = NA)
+
+    if (is.null(firevat.results$vcf.file) == FALSE) {
+        save.list$vcf.file <- firevat.results$vcf.file
+    }
+    if (is.null(firevat.results$vcf.file.basename) == FALSE) {
+        save.list$vcf.file.basename <- firevat.results$vcf.file.basename
+    }
+    if (is.null(firevat.results$config.file) == FALSE) {
+        save.list$config.file <- firevat.results$config.file
+    }
+    if (is.null(firevat.results$start.datetime) == FALSE) {
+        save.list$start.datetime <- firevat.results$start.datetime
+    }
+    if (is.null(firevat.results$end.datetime) == FALSE) {
+        save.list$end.datetime <- firevat.results$end.datetime
+    }
+    if (is.null(firevat.results$variant.refinement.performed) == FALSE) {
+        save.list$variant.refinement.performed <- firevat.results$variant.refinement.performed
+    }
+    if (is.null(firevat.results$variant.refinement.terminiation.log) == FALSE) {
+        save.list$variant.refinement.terminiation.log <- firevat.results$variant.refinement.terminiation.log
+    }
+    if (is.null(firevat.results$original.muts.seq.art.weights.sum) == FALSE) {
+        save.list$original.muts.seq.art.weights.sum <- firevat.results$original.muts.seq.art.weights.sum
+    }
+    if (is.null(firevat.results$target.mut.sigs) == FALSE) {
+        save.list$target.mut.sigs <- paste0(firevat.results$target.mut.sigs, collapse = ",")
+    }
+    if (is.null(firevat.results$sequencing.artifact.mut.sigs) == FALSE) {
+        save.list$sequencing.artifact.mut.sigs <- paste0(firevat.results$sequencing.artifact.mut.sigs, collapse = ",")
+    }
+    if (is.null(firevat.results$output.dir) == FALSE) {
+        save.list$output.dir <- firevat.results$output.dir
+    }
+    if (is.null(firevat.results$ga.pop.size) == FALSE) {
+        save.list$ga.pop.size <- firevat.results$ga.pop.size
+    }
+    if (is.null(firevat.results$ga.max.iter) == FALSE) {
+        save.list$ga.max.iter <- firevat.results$ga.max.iter
+    }
+    if (is.null(firevat.results$ga.pmutation) == FALSE) {
+        save.list$ga.pmutation <- firevat.results$ga.pmutation
+    }
+    if (is.null(firevat.results$ga.run) == FALSE) {
+        save.list$ga.run <- firevat.results$ga.run
+    }
+    if (is.null(firevat.results$mutalisk.method) == FALSE) {
+        save.list$mutalisk.method <- firevat.results$mutalisk.method
+    }
+    if (is.null(firevat.results$mutalisk.random.sampling.count) == FALSE) {
+        save.list$mutalisk.random.sampling.count <- firevat.results$mutalisk.random.sampling.count
+    }
+    if (is.null(firevat.results$mutalisk.random.sampling.max.iter) == FALSE) {
+        save.list$mutalisk.random.sampling.max.iter <- firevat.results$mutalisk.random.sampling.max.iter
+    }
+    if (is.null(firevat.results$mode) == FALSE) {
+        save.list$mode <- firevat.results$mode
+    }
+    if (is.null(firevat.results$perform.strand.bias.analysis) == FALSE) {
+        save.list$perform.strand.bias.analysis <- firevat.results$perform.strand.bias.analysis
+    }
+    if (is.null(firevat.results$strand.bias.fdr.correction.method) == FALSE) {
+        save.list$strand.bias.fdr.correction.method <- firevat.results$strand.bias.fdr.correction.method
+    }
+    if (is.null(firevat.results$strand.bias.perform.fdr.correction) == FALSE) {
+        save.list$strand.bias.perform.fdr.correction <- firevat.results$strand.bias.perform.fdr.correction
+    }
+
+    # Raw/original mutations mutational signatures
+    if (is.null(firevat.results$raw.muts.mutalisk.results) == FALSE) {
+        if (is.null(firevat.results$raw.muts.mutalisk.results$identified.mut.sigs) == FALSE) {
+            save.list$raw.mutational.signatures <- paste0(firevat.results$raw.muts.mutalisk.results$identified.mut.sigs, collapse = ",")
+        }
+        if (is.null(firevat.results$raw.muts.mutalisk.results$identified.mut.sigs.probs) == FALSE) {
+            save.list$raw.mutational.signatures.probs <- paste0(firevat.results$raw.muts.mutalisk.results$identified.mut.sigs.probs, collapse = ",")
+        }
+        if (is.null(firevat.results$raw.muts.mutalisk.results$cos.sim.score) == FALSE) {
+            save.list$raw.mutational.signatures.cos.sim <- firevat.results$raw.muts.mutalisk.results$cos.sim.score
+        }
+        if (is.null(firevat.results$raw.muts.mutalisk.results$rss) == FALSE) {
+            save.list$raw.mutational.signatures.rss <- firevat.results$raw.muts.mutalisk.results$rss
+        }
+    }
+
+    # Refined mutations mutational signatures
+    if (is.null(firevat.results$refined.muts.mutalisk.results) == FALSE) {
+        if (is.null(firevat.results$refined.muts.mutalisk.results$identified.mut.sigs) == FALSE) {
+            save.list$refined.mutational.signatures <- paste0(firevat.results$refined.muts.mutalisk.results$identified.mut.sigs, collapse = ",")
+        }
+        if (is.null(firevat.results$refined.muts.mutalisk.results$identified.mut.sigs.probs) == FALSE) {
+            save.list$refined.mutational.signatures.probs <- paste0(firevat.results$refined.muts.mutalisk.results$identified.mut.sigs.probs, collapse = ",")
+        }
+        if (is.null(firevat.results$refined.muts.mutalisk.results$cos.sim.score) == FALSE) {
+            save.list$refined.mutational.signatures.cos.sim <- firevat.results$refined.muts.mutalisk.results$cos.sim.score
+        }
+        if (is.null(firevat.results$refined.muts.mutalisk.results$rss) == FALSE) {
+            save.list$refined.mutational.signatures.rss <- firevat.results$refined.muts.mutalisk.results$rss
+        }
+    }
+
+    # Artifactual mutations mutational signatures
+    if (is.null(firevat.results$artifactual.muts.mutalisk.results) == FALSE) {
+        if (is.null(firevat.results$artifactual.muts.mutalisk.results$identified.mut.sigs) == FALSE) {
+            save.list$artifactual.mutational.signatures <- paste0(firevat.results$artifactual.muts.mutalisk.results$identified.mut.sigs, collapse = ",")
+        }
+        if (is.null(firevat.results$artifactual.muts.mutalisk.results$identified.mut.sigs.probs) == FALSE) {
+            save.list$artifactual.mutational.signatures.probs <- paste0(firevat.results$artifactual.muts.mutalisk.results$identified.mut.sigs.probs, collapse = ",")
+        }
+        if (is.null(firevat.results$artifactual.muts.mutalisk.results$cos.sim.score) == FALSE) {
+            save.list$artifactual.mutational.signatures.cos.sim <- firevat.results$artifactual.muts.mutalisk.results$cos.sim.score
+        }
+        if (is.null(firevat.results$artifactual.muts.mutalisk.results$rss) == FALSE) {
+            save.list$artifactual.mutational.signatures.rss <- firevat.results$artifactual.muts.mutalisk.results$rss
+        }
+    }
+
+    refinement.filters <- c()
+    refinement.filter.cutoffs <- c()
+    refinement.filter.directions <- c()
+    for (curr.filter in names(firevat.results$vcf.filter)) {
+        curr.filter.cutoff <- as.numeric(firevat.results$x.solution.decimal[[curr.filter]])
+        curr.filter.direction <- firevat.results$config.obj[[curr.filter]]$direction
+        refinement.filters <- c(refinement.filters, curr.filter)
+        refinement.filter.cutoffs <- c(refinement.filter.cutoffs, curr.filter.cutoff)
+        if (curr.filter.direction == "POS") {
+            refinement.filter.directions <- c(refinement.filter.directions, ">=")
+        } else {
+            refinement.filter.directions <- c(refinement.filter.directions, "<=")
+        }
+    }
+    save.list$refinement.filters = paste0(refinement.filters, collapse = ",")
+    save.list$refinement.filter.cutoffs = paste0(refinement.filter.cutoffs, collapse = ",")
+    save.list$refinement.filter.directions = paste0(refinement.filter.directions, collapse = ",")
+
+    df.save <- data.frame(save.list,
+                          stringsAsFactors = F)
+    write.table(df.save,
+                paste0(firevat.results$output.dir, firevat.results$vcf.file.basename, "_FIREVAT_data.tsv"),
+                sep = "\t", row.names = F)
+}

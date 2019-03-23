@@ -1,7 +1,7 @@
 # FIREVAT Optimization Functions
 #
 # Last revised date:
-#   February 19, 2019
+#   March 22, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -9,8 +9,59 @@
 #   Bioinformatics Analysis Team, National Cancer Center Korea
 
 
+#' @title CheckIfVariantRefinementIsNecessary
+#' @description
+#' Checks if variant refinement is necessary by identifying mutational signatures
+#' related to sequencing artifact in the vcf.obj (set of original unrefined point mutations).
+#'
+#' @param vcf.obj A list from ReadVCF
+#' @param bsg BSgenome.Hsapiens.UCSC object
+#' @param df.mut.pat.ref.sigs A data.frame from MutPatParseRefMutSigs
+#' @param target.mut.sigs A character vector of target mutational signatures from reference mutational signatures.
+#' @param sequencing.artifact.mut.sigs A character vector of sequencing artifact mutational signatures from reference mutational signatures.
+#' @param init.artifact.stop
+#' Numeric value less than 1. If the sum of sequencing artifact weights in vcf.obj is less than or equal to this value then
+#' this function returns judgment = FALSE, otherwise returns judgment = TRUE.
+#' @param verbose If TRUE, provides process detail. Default value is TRUE.
+#'
+#' @return A list with the following elements
+#' \itemize{
+#'  \item{judgment}{A boolean value}
+#'  \item{seq.art.sigs.weights.sum}{A numeric value. Sum of sequencing artifact weights.}
+#' }
+#'
+#' @export
+CheckIfVariantRefinementIsNecessary <- function(vcf.obj,
+                                                bsg,
+                                                df.mut.pat.ref.sigs,
+                                                target.mut.sigs,
+                                                sequencing.artifact.mut.sigs,
+                                                init.artifact.stop = 0.05,
+                                                verbose = TRUE) {
+    mut.pat.input <- MutPatParseVCFObj(vcf.obj, bsg = bsg)
+    mut.pat.results <- RunMutPat(mut.pat.input = mut.pat.input,
+                                 df.mut.pat.ref.sigs = df.mut.pat.ref.sigs,
+                                 target.mut.sigs = unique(c(target.mut.sigs, sequencing.artifact.mut.sigs)),
+                                 verbose = verbose)
+    df.sigs <- data.frame(sig = mut.pat.results$identified.mut.sigs,
+                          weight = mut.pat.results$identified.mut.sigs.contribution.weights,
+                          stringsAsFactors = F)
+    df.sigs.seq.art <- df.sigs[(df.sigs$sig %in% sequencing.artifact.mut.sigs), ]
+    seq.art.sigs.weights <- df.sigs.seq.art$weight
+    seq.art.sigs.weights <- seq.art.sigs.weights / sum(mut.pat.results$identified.mut.sigs.contribution.weights)
+    seq.art.sigs.weights.sum <- sum(seq.art.sigs.weights)
+    if (seq.art.sigs.weights.sum <= init.artifact.stop) {
+        return(list(judgment = FALSE,
+                    seq.art.sigs.weights.sum = seq.art.sigs.weights.sum))
+    } else {
+        return(list(judgment = TRUE,
+                    seq.art.sigs.weights.sum = seq.art.sigs.weights.sum))
+    }
+}
+
+
 #' @title ParameterToBits
-#' @description Calculate the number of bits needed to conduct FIREVAT GA optimization.
+#' @description Calculate the number of bits needed to conduct FIREVAT GA binary optimization.
 #'
 #' @param vcf.obj A list from ReadVCF
 #' @param vcf.filter A list from MakeMuTect2Filter
@@ -21,8 +72,10 @@
 #' vcf.obj$data: if max(vcf.obj$data[[param]]) < 1, then multiply multiplier to the vector
 #'
 #' @return A list with the elements
-#' 'params.bit.len' containing the bit lengths of each parameter
-#' 'vcf.obj' with updated data
+#' \itemize{
+#'  \item{params.bit.len}{A numeric vector. Each element is the bit length of each parameter value}
+#'  \item{vcf.obj}{A vcf.obj (\code{\link{ReadVCF}}) with updated data}
+#' }
 #'
 #' @export
 #' @importFrom GA decimal2binary
@@ -49,6 +102,61 @@ ParameterToBits <- function(vcf.obj, config.obj, vcf.filter, multiplier = 100) {
     }
     names(params.bit.len) <- names(vcf.filter)
     return(list(params.bit.len = params.bit.len, vcf.obj = vcf.obj))
+}
+
+#' @title GetParameterLowerUpperVector
+#' @description Return a lower/upper vector needed to conduct FIREVAT GA real-valued optimization.
+#'
+#' @param vcf.obj A list from ReadVCF
+#' @param vcf.filter A list from MakeMuTect2Filter
+#' @param config.obj A list from ParseConfigFile
+#' @param multiplier A multiplier for convert fraction to integer (default = 100)
+#'
+#' @details
+#' vcf.obj$data: if max(vcf.obj$data[[param]]) < 1, then multiply multiplier to the vector
+#'
+#' @return A list with the elements
+#' \itemize{
+#'  \item{lower.vector}{ A numeric vector. Each element is the minimum value of each parameter}
+#'  \item{upper.vector}{ A numeric vector. Each element is the maximum value of each parameter}
+#'  \item{vcf.obj}{ vcf.obj with updated data}
+#' }
+#' @export
+GetParameterLowerUpperVector <- function(vcf.obj, config.obj, vcf.filter, multiplier = 100) {
+    # Make empty vectors
+    lower.vector <- rep(0, length(vcf.filter))
+    upper.vector <- rep(0, length(vcf.filter))
+
+    for (i in 1:length(vcf.filter)) {
+        param <- names(vcf.filter)[i]
+        # If custom range is given in config.obj,
+        # return lower/upper vectors with the given range.
+        if ("range"%in% names(config.obj[[param]])) {
+            param.range <- unlist(config.obj[[param]]["range"])
+            if (max(vcf.obj$data[[param]]) > 1) {
+                lower.vector[i] <- max(min(vcf.obj$data[[param]]), param.range[[1]])
+                upper.vector[i] <- min(max(vcf.obj$data[[param]]), param.range[[2]])
+            } else {
+                vcf.obj$data[[param]] <- multiplier * vcf.obj$data[[param]]
+                lower.vector[i] <- max(min(vcf.obj$data[[param]]), param.range[[1]])
+                upper.vector[i] <- min(max(vcf.obj$data[[param]]), param.range[[2]])
+            }
+        } else {
+            if (max(vcf.obj$data[[param]]) > 1) {
+                lower.vector[i] <- min(vcf.obj$data[[param]])
+                upper.vector[i] <- max(vcf.obj$data[[param]])
+            } else {
+                # If max(vcf.obj$data[[param]]) <= 1,
+                # then multiply multiplier to value
+                vcf.obj$data[[param]] <- multiplier * vcf.obj$data[[param]]
+                lower.vector[i] <- min(vcf.obj$data[[param]])
+                upper.vector[i] <- max(vcf.obj$data[[param]])
+            }
+        }
+    }
+    names(lower.vector) <- names(vcf.filter)
+    names(upper.vector) <- names(vcf.filter)
+    return(list(lower.vector = lower.vector, upper.vector = upper.vector, vcf.obj = vcf.obj))
 }
 
 
@@ -85,7 +193,7 @@ GADecodeBinaryString <- function(string, data) {
 #' @title GAOptimizationObjFnHelper
 #' @description Objective helper function for FIREVAT optimization
 #'
-#' @param string = binary representation of parameter values
+#' @param params.x = representation of parameter values
 #' @param data A list with the following data
 #' \itemize{
 #'  \item{"vcf.obj"}{\code{\link{ReadVCF}}}
@@ -115,11 +223,17 @@ GADecodeBinaryString <- function(string, data) {
 #' }
 #'
 #' @keywords internal
-GAOptimizationObjFnHelper <- function(string, data) {
-    # Convert binary string representation of filter parameters to integers
-    x <- GADecodeBinaryString(string = string, data = data)
+GAOptimizationObjFnHelper <- function(params.x, data) {
+    # Check ga.type and convert params.x
+    if (data$ga.type == "binary") {
+        # Convert binary string representation of filter parameters to integers
+        x <- GADecodeBinaryString(string = params.x, data = data)
+    } else if (data$ga.type == "real-valued") {
+        # Convert numeric to integer
+        x <- floor(params.x)
+    }
 
-    # Update MuTect2 filter
+    # Update filter
     vcf.filter <- UpdateFilter(vcf.filter = data$vcf.filter, param.values = x)
 
     # Filter vcf.data based on the updated vcf.filter
@@ -144,7 +258,7 @@ GAOptimizationObjFnHelper <- function(string, data) {
                                                bsg = data$bsg)
     refined.muts.mut.pat.results <- RunMutPat(mut.pat.input = refined.mut.pat.input,
                                               df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
-                                              target.mut.sigs = data$target.mut.sigs,
+                                              target.mut.sigs = unique(c(data$target.mut.sigs, data$sequencing.artifact.mut.sigs)),
                                               verbose = FALSE)
 
     # Extract Mutational Patterns data
@@ -180,7 +294,7 @@ GAOptimizationObjFnHelper <- function(string, data) {
     # P.value.artifactual
     artifactual.muts.mut.pat.results <- RunMutPat(mut.pat.input = artifact.mut.pat.input,
                                                   df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
-                                                  target.mut.sigs = data$target.mut.sigs,
+                                                  target.mut.sigs = unique(c(data$target.mut.sigs, data$sequencing.artifact.mut.sigs)),
                                                   verbose = FALSE)
 
     # Extract Mutational Patterns data
@@ -205,6 +319,11 @@ GAOptimizationObjFnHelper <- function(string, data) {
                                  A.refined = A.value.refined,
                                  C.artifactual = C.value.artifactual,
                                  A.artifactual = A.value.artifactual)
+
+    # A.value.refined must be lower than the sum of sequencing artifact weights in the original vcf file
+    if (A.value.refined > data$original.muts.seq.art.weights.sum) {
+        obj.val <- 0
+    }
 
     return(list(valid = TRUE,
                 x = x,
@@ -247,8 +366,8 @@ GAOptimizationObjFnHelper <- function(string, data) {
 #' @return A numeric value corresponding to the optimization objective value
 #'
 #' @keywords internal
-GAOptimizationObjFn <- function(string, data) {
-    results <- GAOptimizationObjFnHelper(string = string, data = data)
+GAOptimizationObjFn <- function(params.x, data) {
+    results <- GAOptimizationObjFnHelper(params.x = params.x, data = data)
     return(results$objective.val)
 }
 
@@ -274,7 +393,7 @@ GAMonitorFn <- function(obj, data) {
     max.fitness <- max(obj@fitness)
     max.fitness.index <- which(obj@fitness == max.fitness)
     max.fitness.pop <- unique(as.data.frame(obj@population)[max.fitness.index,])
-    results <- GAOptimizationObjFnHelper(string = as.numeric(max.fitness.pop[1,]), data = data)
+    results <- GAOptimizationObjFnHelper(params.x = as.numeric(max.fitness.pop[1,]), data = data)
 
     if (data$verbose == TRUE) {
         cat("\n")
@@ -288,9 +407,9 @@ GAMonitorFn <- function(obj, data) {
         param <- names(data$vcf.filter)[i]
         direction <- data$config.obj[[param]]["direction"]
         if (direction == "POS") {
-            inequal.sign <- "(>)"
+            inequal.sign <- "(>=)"
         } else if (direction == "NEG") {
-            inequal.sign <- "(<)"
+            inequal.sign <- "(<=)"
         }
 
         if (data$verbose == TRUE) {

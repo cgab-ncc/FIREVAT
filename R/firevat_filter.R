@@ -1,7 +1,7 @@
 # FIREVAT Filtering Functions
 #
 # Last revised date:
-#   February 19, 2019
+#   March 22, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -111,9 +111,9 @@ FilterVCF <- function(vcf.obj,
             # "POS": pass values bigger than cutoff
             # "NEG": pass values smaller than cutoff
             if (direction == "POS") {
-                condition.list[[param]] <- vcf.obj$data[[param]] > vcf.filter[[param]]
+                condition.list[[param]] <- vcf.obj$data[[param]] >= vcf.filter[[param]]
             } else if (direction == "NEG") {
-                condition.list[[param]] <- vcf.obj$data[[param]] < vcf.filter[[param]]
+                condition.list[[param]] <- vcf.obj$data[[param]] <= vcf.filter[[param]]
             }
         }
 

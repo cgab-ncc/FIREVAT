@@ -17,11 +17,13 @@ ParameterToBits(vcf.obj, config.obj, vcf.filter, multiplier = 100)
 }
 \value{
 A list with the elements
-'params.bit.len' containing the bit lengths of each parameter
-'vcf.obj' with updated data
+\itemize{
+ \item{params.bit.len}{A numeric vector. Each element is the bit length of each parameter value}
+ \item{vcf.obj}{A vcf.obj (\code{\link{ReadVCF}}) with updated data}
+}
 }
 \description{
-Calculate the number of bits needed to conduct FIREVAT GA optimization.
+Calculate the number of bits needed to conduct FIREVAT GA binary optimization.
 }
 \details{
 vcf.obj$data: if max(vcf.obj$data[[param]]) < 1, then multiply multiplier to the vector

@@ -118,7 +118,7 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
+        "range": [0, 20],
         "use_in_filter": true
     },
     {
@@ -132,7 +132,7 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
+        "range": [0, 20],
         "use_in_filter": true
     },
     {
@@ -144,7 +144,7 @@
         },
         "type": "integer",
         "default": 5,
-        "range": [0, 30],
+        "range": [0, 10],
         "use_in_filter": true
     },
     {
@@ -155,8 +155,8 @@
             "args": ["PrimaryDP", "PrimaryDPAltForward", "PrimaryDPAltReverse"]
         },
         "type": "float",
-        "default": 10,
-        "range": [0, 30],
+        "default": 0,
+        "range": [0, 10],
         "use_in_filter": true
     }
 ]

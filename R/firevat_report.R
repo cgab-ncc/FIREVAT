@@ -124,8 +124,8 @@ PrepareFilterCutoffsTable <- function(data) { # COMMON_1
     filter.direction <- sapply(
         names(data$vcf.filter), function(x) return(data$config.obj[[x]]["direction"])
     )
-    filter.direction <- replace(filter.direction, filter.direction=="POS", ">")
-    filter.direction <- replace(filter.direction, filter.direction=="NEG", "<")
+    filter.direction <- replace(filter.direction, filter.direction=="POS", ">=")
+    filter.direction <- replace(filter.direction, filter.direction=="NEG", "<=")
 
     # Filter Variable       Filter Direction    Optimized Cutoff
     # Variable.1                 > or <             value
@@ -733,7 +733,10 @@ PrepareRefinedMutsOptimizationIterationsPlot <- function(data) { # Optional_2
         "refined.muts.proportion",
         "objective.value"
     )]
-    max.obj.val <- max(df.temp$objective.value)
+    max.val <- max(df.temp$objective.value,
+                   df.temp$refined.muts.sequencing.artifact.signatures.weights.sum,
+                   df.temp$refined.muts.cosine.similarity.score,
+                   df.temp$refined.muts.proportion)
     colnames(df.temp) <- c(
         "iteration",
         "Refined Mutations Artifact Signatures Weights Sum",
@@ -750,7 +753,7 @@ PrepareRefinedMutsOptimizationIterationsPlot <- function(data) { # Optional_2
         x.axis.var = "iteration",
         x.axis.title = "Iteration",
         y.axis.title = "Value",
-        y.max = 1.3 * max.obj.val,
+        y.max = 1.3 * max.val,
         title = "Objective Function Optimization",
         x.max = max(df.temp$iteration),
         legend.ncol = 2,

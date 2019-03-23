@@ -10,7 +10,7 @@ PrepareAnnotationDB(annotation.vcf.obj)
 \item{annotation.vcf.obj}{vcf.obj of COSMIC or ClinVar vcf file}
 }
 \value{
-A data.frame with the columns specified in columns.to.include
+A data.frame of annotation.vcf.obj
 }
 \description{
 Prepares df.genes.of.interest from a vcf.obj (\code{\link{ReadVCF}})

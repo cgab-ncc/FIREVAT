@@ -8,7 +8,7 @@ library(FIREVAT)
 # takes about 5 minutes to complete
 
 # Output directory
-output.dir <- "/home/jinseoklee/Documents/Projects/FIREVAT-validation/data/Samples/firevat_results/20190312_090000/"
+output.dir <- "/home/jinseoklee/Documents/Projects/FIREVAT-validation/data/Samples/firevat_results/DCC_PCAWG_Cell_Lines_HCC1954/"
 
 # Sample VCF file
 sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
@@ -33,12 +33,12 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
                       target.mut.sigs = GetPCAWGMutSigsNames(),
                       sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
                       output.dir = output.dir,
-                      objective.fn = Euc.Exp.Weighted.Obj.Fn,
+                      objective.fn = Exp.Weighted.Obj.Fn.2,
                       num.cores = 6,
-                      ga.pop.size = 200,
-                      ga.max.iter = 30,
-                      ga.run = 20,
-                      ga.pmutation = 0.25,
+                      ga.pop.size = 100,
+                      ga.max.iter = 50,
+                      ga.run = 50,
+                      ga.pmutation = 0.1,
                       mutalisk.method = "all",
                       perform.strand.bias.analysis = TRUE,
                       ref.forward.strand.var = "TumorDPRefForward",

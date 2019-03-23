@@ -1,7 +1,7 @@
 # FIREVAT Main Functions
 #
 # Last revised date:
-#   February 19, 2019
+#   March 22, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -11,9 +11,8 @@
 
 #' @title RunFIREVAT
 #' @description
-#' Runs FIREVAT using configuration data.Filters point mutations in the specified vcf.file based on mutational signature
-#' decomposition and outputs the refined and artifact vcf as well as metadata related to
-#' the refinement process.
+#' Runs FIREVAT using configuration data. Filters point mutations in the user-specified vcf file based on mutational signature
+#' identification and outputs the refined and artifact vcf files as well as metadata related to the refinement process.
 #'
 #' @param vcf.file String value corresponding to input .vcf file. Please provide the full path.
 #' @param vcf.file.genome Genome assembly of the input .vcf file. The value should be eitehr 'hg19' or 'hg38'.
@@ -24,10 +23,17 @@
 #' @param num.cores Number of cores to allocate
 #' @param output.dir String value of the desired output directory
 #' @param mode String value. The value should be either 'ga' or 'manual'.
+#' @param init.artifact.stop
+#' Numeric value  less than 1. If the sum of sequencing artifact weights in the user-specified original VCF file (i.e. vcf.file)
+#' is less than or equal to this value then FIREVAT does not perform variant refinement.
+#' Default value is 0.05. Note that this option does not apply if 'mode' is 'manual'.
+#' @param ga.type String value. The value should be either 'binray' or 'real-valued'.
 #' @param objective.fn Objective value derivation function. Default: Default.Obj.Fn.
 #' @param use.suggested.soln Boolean value. If TRUE, then FIREVAT passes the default values
 #' of filter variables declared as 'use_in_filter' in the config file to the 'suggestions' parameter of
 #' the Genetic Algorithm package. If FALSE, then FIREVAT supplies NULL to the GA package 'suggestions' parameter.
+#' FIREVAT also computes baseline performance of each filter variable and uses fittest population from each variable
+#' as a suggested solution.
 #' @param ga.pop.size Integer value of the Genetic Algorithm 'population size' parameter. Default: 200.
 #' This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.
 #' @param ga.max.iter Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 200.
@@ -35,6 +41,7 @@
 #' @param ga.run Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
 #' This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.
 #' @param ga.pmutation Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.
+#' @param mutalisk If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.
 #' @param mutalisk.method Mutalisk signature identification method. Default: 'random.sampling'.
 #' The value can be either 'all' or 'random.sampling'.
 #' 'all' uses all target.mut.sigs to identify mutational signatures.
@@ -43,7 +50,6 @@
 #' The number of signatures to sample from target.mut.sigs
 #' @param mutalisk.random.sampling.max.iter Mutalisk random sampling maximum iteration. Default: 10.
 #' The number of times Mutalisk randomly samples from target.mut.sigs before determining the candidate signatures.
-#' @param report.format The format of FIREVAT report. We currently only support 'html'.
 #' @param perform.strand.bias.analysis If TRUE, then performs strand bias analysis.
 #' @param strand.bias.perform.fdr.correction If TRUE, then performs false discovery rate
 #' correction for strand bias analysis.
@@ -59,6 +65,11 @@
 #' @param annotated.columns.to.display A character vector.
 #' @param annotation.filter.key.value.pairs A list.
 #' @param annotation.filter.condition 'AND' or 'OR'.
+#' @param write.vcf If TRUE, write original/refined/artifact vcfs. Default: TRUE.
+#' @param report If TRUE, generate report. Default: TRUE.
+#' @param report.format The format of FIREVAT report. We currently only support 'html'.
+#' @param save.rdata If TRUE, save rdata. Default: TRUE.
+#' @param save.tsv If TRUE, save tsv. Default: TRUE.
 #'
 #' @return A list with the following elements
 #' \itemize{
@@ -77,15 +88,21 @@ RunFIREVAT <- function(vcf.file,
                        num.cores,
                        output.dir,
                        mode = "ga",
+                       init.artifact.stop = 0.05,
+                       # GA parameters
                        objective.fn = Default.Obj.Fn,
                        use.suggested.soln = TRUE,
+                       ga.type = "real-valued",
                        ga.pop.size = 200,
                        ga.max.iter = 200,
                        ga.run = 50,
                        ga.pmutation = 0.25,
+                       # Mutalisk parameters
+                       mutalisk = TRUE,
                        mutalisk.method = "all",
                        mutalisk.random.sampling.count = 20,
                        mutalisk.random.sampling.max.iter = 10,
+                       # Strand bias analysis parameters
                        perform.strand.bias.analysis = TRUE,
                        strand.bias.perform.fdr.correction = TRUE,
                        strand.bias.fdr.correction.method = "BH",
@@ -93,14 +110,19 @@ RunFIREVAT <- function(vcf.file,
                        ref.reverse.strand.var = NULL,
                        alt.forward.strand.var = NULL,
                        alt.reverse.strand.var = NULL,
-                       report.format = "html",
+                       # Annotation parameters
                        annotate = TRUE,
                        df.annotation.db = NULL,
                        annotated.columns.to.display = NULL,
                        annotation.filter.key.value.pairs = NULL,
                        annotation.filter.condition = "AND",
+                       write.vcf = TRUE,
+                       report = TRUE,
+                       save.rdata = TRUE,
+                       save.tsv = TRUE,
+                       report.format = "html",
                        verbose = TRUE) {
-    # Check input parameters
+    # 0.1. Check input parameters
     if (is.character(vcf.file) == FALSE) {
         stop("The parameter 'vcf.file' must be a string")
     }
@@ -114,10 +136,10 @@ RunFIREVAT <- function(vcf.file,
         stop("The parameter 'df.ref.mut.sigs' must be a data.frame")
     }
     if (all(target.mut.sigs %in% colnames(df.ref.mut.sigs)) == FALSE)  {
-        stop("The parameter 'target.mut.sigs' must be present in df.ref.mut.sigs columns")
+        stop("All elements of the parameter 'target.mut.sigs' must be present in 'df.ref.mut.sigs' columns")
     }
     if (all(sequencing.artifact.mut.sigs %in% colnames(df.ref.mut.sigs)) == FALSE)  {
-        stop("The parameter 'sequencing.artifact.mut.sigs' must be present in df.ref.mut.sigs columns")
+        stop("All elements of the parameter 'sequencing.artifact.mut.sigs' must be present in 'df.ref.mut.sigs' columns")
     }
     if (is.numeric(num.cores) == FALSE || num.cores <= 0)  {
         stop("The parameter 'num.cores' must be an integer and be greater than 0")
@@ -127,6 +149,9 @@ RunFIREVAT <- function(vcf.file,
     }
     if (mode != "ga" && mode != "manual")  {
         stop("The parameter 'mode' must be either 'ga' or 'manual'")
+    }
+    if (is.numeric(init.artifact.stop) == FALSE || init.artifact.stop >= 1) {
+        stop("The parameter 'init.artifact.stop' must be a numeric value less than 1.")
     }
     if (is.numeric(ga.pop.size) == FALSE || ga.pop.size <= 0)  {
         stop("The parameter 'ga.pop.size' must be an integer and be greater than 0")
@@ -150,7 +175,7 @@ RunFIREVAT <- function(vcf.file,
         print("Initializing FIREVAT variant filtering pipeline")
     }
 
-    # Create the output directory
+    # 0.2. Create the output directory
     if (dir.exists(output.dir) == FALSE) {
         dir.create(output.dir, recursive = T)
     } else {
@@ -172,30 +197,11 @@ RunFIREVAT <- function(vcf.file,
                               verbose = verbose)
     vcf.obj <- vcf.objs$vcf.obj.filtered
 
-    # FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
-    if (nrow(vcf.obj$data) <= 50) {
-        print("FIREVAT must have at least 50 mutations to run. Returning without running FIREVAT.")
-        return(NULL)
-    } else {
-        if (verbose == TRUE) {
-            print(paste0("Starting with ", nrow(vcf.obj$data), " point mutations"))
-        }
-    }
-
     # 4. Make filter from config file
     vcf.filter <- MakeFilter(config.obj)
 
-    # 5. Convert filter parameters to bits
-    bits.list <- ParameterToBits(vcf.obj, config.obj, vcf.filter)
-    params.bit.len <- bits.list$params.bit.len
-    vcf.obj <- bits.list$vcf.obj
-    n.bits <- sum(params.bit.len)
-
-    # 6. Prepare data for optimization
+    # 5.1. Prepare data for optimization
     data = list(start.datetime = start.datetime,
-                objective.fn = objective.fn,
-                n.bits = n.bits,
-                params.bit.len = params.bit.len,
                 vcf.file = vcf.file,
                 vcf.file.basename = gsub("\\.vcf", "", basename(vcf.file)),
                 vcf.obj = vcf.obj,
@@ -206,10 +212,15 @@ RunFIREVAT <- function(vcf.file,
                 target.mut.sigs = target.mut.sigs,
                 sequencing.artifact.mut.sigs = sequencing.artifact.mut.sigs,
                 output.dir = output.dir,
+                init.artifact.stop = init.artifact.stop,
+                # GA parameters
+                objective.fn = objective.fn,
+                ga.type = ga.type,
                 ga.pmutation = ga.pmutation,
                 ga.pop.size = ga.pop.size,
                 ga.max.iter = ga.max.iter,
                 ga.run = ga.run,
+                # Mutalisk parameters
                 mutalisk.method = mutalisk.method,
                 mutalisk.random.sampling.count = mutalisk.random.sampling.count,
                 mutalisk.random.sampling.max.iter = mutalisk.random.sampling.max.iter,
@@ -219,16 +230,30 @@ RunFIREVAT <- function(vcf.file,
                 num.cores = num.cores,
                 verbose = verbose)
 
-    # 7. Optimize filter parameters
+    # 5.2. FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
+    # TODO: NEED TEST 50 or 100
+    if (nrow(vcf.obj$data) <= 50) {
+        print("FIREVAT must have at least 50 mutations to run. Returning without running FIREVAT.")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.performed <- FALSE
+        data$variant.refinement.terminiation.log <- "Not enough point mutations (less than or equal 50)"
+        if (save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    } else {
+        if (verbose == TRUE) {
+            print(paste0("Starting with ", nrow(vcf.obj$data), " point mutations"))
+        }
+    }
+
+    # 6. Optimize filter parameters
     if (mode == "ga") {
         if (verbose == TRUE) {
             print("Started running FIREVAT Genetic Algorithm optimization")
-        }
-        # Suggestions
-        if (use.suggested.soln == TRUE) { # use default parameters as suggestions
-            suggestions =  NULL # TODO use the real GetDefaultValues() function
-        } else {
-            suggestions = NULL
         }
 
         # Prepare data for Mutational Patterns (memoization)
@@ -241,31 +266,126 @@ RunFIREVAT <- function(vcf.file,
             data$bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
         }
 
-        ga.results <- ga(type = "binary",
-                         fitness =  function(string) GAOptimizationObjFn(string, data),
-                         nBits = n.bits,
-                         popSize = ga.pop.size,
-                         maxiter = ga.max.iter,
-                         parallel = num.cores,
-                         run = ga.run,
-                         pmutation = ga.pmutation,
-                         suggestions = suggestions,
-                         monitor = function(obj) GAMonitorFn(obj, data),
-                         keepBest = TRUE)
+        # Check if refinement is necessary based on the sum of sequencing artifact weights in the original VCF file
+        is.variant.refinement.necessary <- CheckIfVariantRefinementIsNecessary(vcf.obj = data$vcf.obj,
+                                                                               bsg = data$bsg,
+                                                                               df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
+                                                                               target.mut.sigs = data$target.mut.sigs,
+                                                                               sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
+                                                                               init.artifact.stop = data$init.artifact.stop,
+                                                                               verbose = data$verbose)
+        data$original.muts.seq.art.weights.sum <- is.variant.refinement.necessary$seq.art.sigs.weights.sum
+
+        if (is.variant.refinement.necessary$judgment == TRUE) {
+            data$variant.refinement.performed <- TRUE
+            print(paste0("The sum of sequencing artifact weights is ",
+                         is.variant.refinement.necessary$seq.art.sigs.weights.sum,
+                         ", which is greater than the ",
+                         "'init.artifact.stop' parameter that you set (", data$init.artifact.stop,
+                         "). FIREVAT will therefore now begin performing variant refinement."))
+        } else {
+            print(paste0("The sum of sequencing artifact weights is ",
+                         is.variant.refinement.necessary$seq.art.sigs.weights.sum,
+                         " in the original vcf file that you supplied.",
+                         " FIREVAT therefore returns without performing variant refinement."))
+            data$end.datetime <- Sys.time()
+            data$variant.refinement.performed <- FALSE
+            data$variant.refinement.terminiation.log <- "Initial sequencing artifact weights sum is less than or equal to init.artifact.stop"
+            if (save.rdata == TRUE) {
+                save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+            }
+            if (save.tsv == TRUE) {
+                WriteFIREVATResultsToTSV(firevat.results = data)
+            }
+            return(data)
+        }
+
+        # Get lower / upper vectors from config file
+        lower.upper.list <- GetParameterLowerUpperVector(vcf.obj, config.obj, vcf.filter)
+        data$vcf.obj <- lower.upper.list$vcf.obj
+        lower.vector <- lower.upper.list$lower.vector
+        upper.vector <- lower.upper.list$upper.vector
+        data$lower.vector <- lower.vector
+        data$upper.vector <- upper.vector
+
+        # Suggestions
+        if (use.suggested.soln == TRUE) { # use default parameters as suggestions
+            suggested.solutions <- GetGASuggestedSolutions(vcf.obj = data$vcf.obj,
+                                                           bsg = data$bsg,
+                                                           config.obj = data$config.obj,
+                                                           lower.upper.list = lower.upper.list,
+                                                           df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
+                                                           target.mut.sigs = data$target.mut.sigs,
+                                                           sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
+                                                           objective.fn = data$objective.fn,
+                                                           original.muts.seq.art.weights.sum = data$original.muts.seq.art.weights.sum,
+                                                           verbose = data$verbose)
+            data$df.suggested.solutions <- suggested.solutions$df.suggested.solutions
+            data$suggested.solutions.matrix <- suggested.solutions$suggested.solutions.matrix
+            suggestions <- data$suggested.solutions.matrix
+        } else {
+            suggestions <- NULL
+        }
+
+        if (ga.type == "binary") {
+            # Convert filter parameters to bits
+            bits.list <- ParameterToBits(vcf.obj, config.obj, vcf.filter)
+            params.bit.len <- bits.list$params.bit.len
+            data$vcf.obj <- bits.list$vcf.obj
+            n.bits <- sum(params.bit.len)
+            data$n.bits <- n.bits
+            data$params.bit.len <- params.bit.len
+            # Run GA with binary type
+            ga.results <- ga(type = "binary",
+                             fitness =  function(string) GAOptimizationObjFn(string, data),
+                             nBits = n.bits,
+                             popSize = ga.pop.size,
+                             maxiter = ga.max.iter,
+                             parallel = num.cores,
+                             run = ga.run,
+                             pmutation = ga.pmutation,
+                             suggestions = NULL,
+                             monitor = function(obj) GAMonitorFn(obj, data),
+                             keepBest = TRUE)
+
+        } else if (ga.type == "real-valued") {
+            # Run GA with real-valued type
+            ga.results <- ga(type = "real-valued",
+                             fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
+                             lower = lower.vector, # <-- vector from config
+                             upper = upper.vector, # <-- vector from config
+                             popSize = ga.pop.size,
+                             maxiter = ga.max.iter,
+                             parallel = num.cores,
+                             run = ga.run,
+                             pmutation = ga.pmutation,
+                             suggestions = suggestions,
+                             monitor = function(obj) GAMonitorFn(obj, data),
+                             keepBest = TRUE)
+        }
+
         if (verbose == TRUE) {
             print("Finished running FIREVAT Genetic Algorithm optimization")
         }
 
         # Parse optimized results
-        data$x.solution.binary <- as.numeric(ga.results@solution[1,])
-        data$x.solution.decimal <- GADecodeBinaryString(string = data$x.solution.binary,
-                                                        data = data)
+        if (data$ga.type == "binary") {
+            data$x.solution.binary <- as.numeric(ga.results@solution[1,])
+            data$x.solution.decimal <- GADecodeBinaryString(string = data$x.solution.binary,
+                                                            data = data)
+        } else if (data$ga.type == "real-valued"){
+            data$x.solution.decimal <- floor(as.numeric(ga.results@solution[1,]))
+            names(data$x.solution.decimal) <- names(data$vcf.filter)
+        }
+
         if (verbose == TRUE) {
             print("FIREVAT results")
             print(summary(ga.results))
-            print("FIREVAT optimized binary values of filter parameters")
-            print(data$x.solution.binary)
-            print("FIREVAT Optimized decimal values of filter parameters")
+            if (data$ga.type == "binary") {
+                print("FIREVAT optimized binary values of filter parameters")
+                print(data$x.solution.binary)
+            }
+            print("FIREVAT Optimized integer values of filter parameters")
             print(data$x.solution.decimal)
         }
     } else if (mode == "manual") {
@@ -275,7 +395,7 @@ RunFIREVAT <- function(vcf.file,
         data$x.solution.decimal <- unlist(data$vcf.filter) # default values
     }
 
-    # 8. Filter vcf.data based on the updated vcf.filter
+    # 7. Filter vcf.data based on the updated vcf.filter
     data$vcf.filter <- UpdateFilter(vcf.filter = data$vcf.filter,
                                     param.values = data$x.solution.decimal)
     optimized.vcf.objs <- FilterVCF(vcf.obj = data$vcf.obj,
@@ -286,7 +406,34 @@ RunFIREVAT <- function(vcf.file,
     data$refined.vcf.obj <- optimized.vcf.objs$vcf.obj.filtered
     data$artifactual.vcf.obj <- optimized.vcf.objs$vcf.obj.artifact
 
-    # 9. Strand bias analysis
+    # Check if point mutations remaining in either refined.vcf.obj or artifactual.vcf.obj.
+    # Either refinement is too liberal or too stringent. Return with a message.
+    if (nrow(data$refined.vcf.obj$data) == 0) {
+        print("After performing variant refinement there are no mutations remaining in the refined set.")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the refined set"
+        if (save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+    if (nrow(data$artifactual.vcf.obj$data) == 0) {
+        print("After performing variant refinement there are no mutations remaining in the artifactual set.")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the artifactual set"
+        if (save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+
+    # 8. Strand bias analysis
     data$perform.strand.bias.analysis <- perform.strand.bias.analysis
     data$ref.forward.strand.var <- ref.forward.strand.var
     data$ref.reverse.strand.var <- ref.reverse.strand.var
@@ -314,7 +461,7 @@ RunFIREVAT <- function(vcf.file,
             fdr.correction.method = data$strand.bias.fdr.correction.method)
     }
 
-    # 10. Annotate
+    # 9. Annotate
     data$annotate = annotate
     data$df.annotation.db = df.annotation.db
     data$annotated.columns.to.display = annotated.columns.to.display
@@ -342,92 +489,104 @@ RunFIREVAT <- function(vcf.file,
                                                                         filter.condition = data$annotation.filter.condition)
     }
 
-    # 11. Run Mutalisk
+    # 10. Run Mutalisk
     # Identify target mutational signatures
     # Here we fetch all signatures ever identified by Mutational Patterns
-    df.optimization.logs <- ReadOptimizationIterationReport(data = data)
-    Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
-        include <- rep(TRUE, length(sigs))
-        include[which(sigs == "")] <- FALSE
-        include[is.na(sigs)] <- FALSE
+    if (mutalisk == TRUE) {
+        df.optimization.logs <- ReadOptimizationIterationReport(data = data)
+        Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
+            include <- rep(TRUE, length(sigs))
+            include[which(sigs == "")] <- FALSE
+            include[is.na(sigs)] <- FALSE
 
-        sigs <- as.character(sigs[include])
-        weights <- as.character(weights[include])
-        sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
-        weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
+            sigs <- as.character(sigs[include])
+            weights <- as.character(weights[include])
+            sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
+            weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
 
-        if (length(sigs) == 0) {
-            return(c())
+            if (length(sigs) == 0) {
+                return(c())
+            }
+
+            candidate.sigs <- c()
+            for (i in 1:length(sigs)) {
+                df <- data.frame(sig = sigs[[i]],
+                                 weight = weights[[i]],
+                                 stringsAsFactors = F)
+                df <- df[df$weight >= cutoff, ]
+                candidate.sigs <- c(candidate.sigs, df$sig)
+            }
+            return(candidate.sigs)
         }
+        sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
+                            weights = df.optimization.logs$refined.muts.target.signatures.weights)
+        sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
+                            weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
+        sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
+                            weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
+        sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
+                            weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
+        data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
 
-        candidate.sigs <- c()
-        for (i in 1:length(sigs)) {
-            df <- data.frame(sig = sigs[[i]],
-                             weight = weights[[i]],
-                             stringsAsFactors = F)
-            df <- df[df$weight >= cutoff, ]
-            candidate.sigs <- c(candidate.sigs, df$sig)
-        }
-        return(candidate.sigs)
-    }
-    sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
-                        weights = df.optimization.logs$refined.muts.target.signatures.weights)
-    sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
-                        weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
-    sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
-                        weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
-    sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
-                        weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
-    data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
-
-    # Original vcf
-    data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
-                                                  df.ref.mut.sigs = data$df.ref.mut.sigs,
-                                                  target.mut.sigs = data$mut.pat.target.sigs,
-                                                  method = data$mutalisk.method,
-                                                  n.sample = data$mutalisk.random.sampling.count,
-                                                  n.iter = data$mutalisk.random.sampling.max.iter,
-                                                  verbose = data$verbose)
-    # Refined vcf
-    data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
-                                                      df.ref.mut.sigs = df.ref.mut.sigs,
+        # Original vcf
+        data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
+                                                      df.ref.mut.sigs = data$df.ref.mut.sigs,
                                                       target.mut.sigs = data$mut.pat.target.sigs,
                                                       method = data$mutalisk.method,
                                                       n.sample = data$mutalisk.random.sampling.count,
                                                       n.iter = data$mutalisk.random.sampling.max.iter,
                                                       verbose = data$verbose)
-    # Artifact vcf
-    data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+        # Refined vcf
+        data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
                                                           df.ref.mut.sigs = df.ref.mut.sigs,
                                                           target.mut.sigs = data$mut.pat.target.sigs,
                                                           method = data$mutalisk.method,
                                                           n.sample = data$mutalisk.random.sampling.count,
                                                           n.iter = data$mutalisk.random.sampling.max.iter,
                                                           verbose = data$verbose)
+        # Artifact vcf
+        data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+                                                              df.ref.mut.sigs = df.ref.mut.sigs,
+                                                              target.mut.sigs = data$mut.pat.target.sigs,
+                                                              method = data$mutalisk.method,
+                                                              n.sample = data$mutalisk.random.sampling.count,
+                                                              n.iter = data$mutalisk.random.sampling.max.iter,
+                                                              verbose = data$verbose)
+    }
 
     # 12. Write VCF Files
-    WriteVCF(vcf.obj = data$vcf.obj,
-             save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
-    WriteVCF(vcf.obj = data$refined.vcf.obj,
-             save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
-    WriteVCF(vcf.obj = data$artifactual.vcf.obj,
-             save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
-    if (data$annotate == TRUE) {
-        WriteVCF(vcf.obj = data$data$vcf.obj.annotated,
-                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original_Annotated.vcf"))
-        WriteVCF(vcf.obj = data$refined.vcf.obj.annotated,
-                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined_Annotated.vcf"))
-        WriteVCF(vcf.obj = data$artifactual.vcf.obj.annotated,
-                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact_Annotated.vcf"))
+    if (write.vcf == TRUE){
+        WriteVCF(vcf.obj = data$vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
+        WriteVCF(vcf.obj = data$refined.vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
+        WriteVCF(vcf.obj = data$artifactual.vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
+        if (data$annotate == TRUE) {
+            WriteVCF(vcf.obj = data$data$vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original_Annotated.vcf"))
+            WriteVCF(vcf.obj = data$refined.vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined_Annotated.vcf"))
+            WriteVCF(vcf.obj = data$artifactual.vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact_Annotated.vcf"))
+        }
     }
 
     data$end.datetime <- Sys.time()
+    data$variant.refinement.terminiation.log <- "Successful"
 
     # 13. Report results
-    data <- ReportFIREVATResults(data = data)
+    if (report == TRUE) {
+        data <- ReportFIREVATResults(data = data)
+    }
 
     # 14. Save data
-    save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+    if (save.rdata == TRUE) {
+        save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+    }
+    if (save.tsv == TRUE) {
+        WriteFIREVATResultsToTSV(firevat.results = data)
+    }
 
     return(data)
 }

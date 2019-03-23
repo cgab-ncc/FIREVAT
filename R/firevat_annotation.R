@@ -16,7 +16,7 @@
 #'
 #' @param annotation.vcf.obj vcf.obj of COSMIC or ClinVar vcf file
 #'
-#' @return A data.frame with the columns specified in columns.to.include
+#' @return A data.frame of annotation.vcf.obj
 #'
 #' @export
 PrepareAnnotationDB <- function(annotation.vcf.obj) {
@@ -27,7 +27,7 @@ PrepareAnnotationDB <- function(annotation.vcf.obj) {
 
 #' @title AnnotateVCFObj
 #' @description
-#' Annotates a vcf.obj using df.variants.of.interest (from (\code{\link{PrepareAnnotationDB}})
+#' Annotates a vcf.obj using df.variants.of.interest (from \code{\link{PrepareAnnotationDB}})
 #'
 #' @param vcf.obj \code{\link{ReadVCF}}
 #' @param df.annotation.db A data.frame from \code{\link{PrepareAnnotationDB}}.

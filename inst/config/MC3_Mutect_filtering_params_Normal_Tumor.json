@@ -8,6 +8,8 @@
             "index": 1
         },
         "type": "integer",
+        "default": 20,
+        "range": [0, 30],
         "use_in_filter": true
     },
     {
@@ -21,7 +23,7 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
+        "range": [0, 20],
         "use_in_filter": true
     },
     {
@@ -35,7 +37,7 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
+        "range": [0, 10],
         "use_in_filter": true
     },
     {
@@ -49,7 +51,7 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
+        "range": [0, 20],
         "use_in_filter": true
     },
     {
@@ -63,7 +65,7 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
+        "range": [0, 10],
         "use_in_filter": true
     },
     {
@@ -74,8 +76,8 @@
             "args": ["PrimaryADRef", "PrimaryADAlt"]
         },
         "type": "float",
-        "default": 10,
-        "range": [0, 30],
+        "default": 0,
+        "range": [0, 10],
         "use_in_filter": true
     }
 ]

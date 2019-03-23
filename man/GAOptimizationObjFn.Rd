@@ -4,11 +4,9 @@
 \alias{GAOptimizationObjFn}
 \title{GAOptimizationObjFn}
 \usage{
-GAOptimizationObjFn(string, data)
+GAOptimizationObjFn(params.x, data)
 }
 \arguments{
-\item{string}{= binary representation of parameter values}
-
 \item{data}{= A list with the following data
 \itemize{
  \item{"vcf.obj"}{\code{\link{ReadVCF}}}
@@ -19,6 +17,8 @@ GAOptimizationObjFn(string, data)
  \item{"sequencing.artifact.mut.sigs"}{a charcter vector}
  \item{"config.obj"}{\code{\link{ParseConfigFile}}}
 }}
+
+\item{string}{= binary representation of parameter values}
 }
 \value{
 A numeric value corresponding to the optimization objective value

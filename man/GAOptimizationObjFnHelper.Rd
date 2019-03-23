@@ -4,10 +4,10 @@
 \alias{GAOptimizationObjFnHelper}
 \title{GAOptimizationObjFnHelper}
 \usage{
-GAOptimizationObjFnHelper(string, data)
+GAOptimizationObjFnHelper(params.x, data)
 }
 \arguments{
-\item{string}{= binary representation of parameter values}
+\item{params.x}{= representation of parameter values}
 
 \item{data}{A list with the following data
 \itemize{
