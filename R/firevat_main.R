@@ -350,18 +350,33 @@ RunFIREVAT <- function(vcf.file,
 
         } else if (ga.type == "real-valued") {
             # Run GA with real-valued type
-            ga.results <- ga(type = "real-valued",
-                             fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
-                             lower = lower.vector, # <-- vector from config
-                             upper = upper.vector, # <-- vector from config
-                             popSize = ga.pop.size,
-                             maxiter = ga.max.iter,
-                             parallel = num.cores,
-                             run = ga.run,
-                             pmutation = ga.pmutation,
-                             suggestions = suggestions,
-                             monitor = function(obj) GAMonitorFn(obj, data),
-                             keepBest = TRUE)
+            if (packageVersion("GA") >= '3.1') {
+                ga.results <- ga(type = "real-valued",
+                                 fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
+                                 lower = lower.vector, # <-- vector from config
+                                 upper = upper.vector, # <-- vector from config
+                                 popSize = ga.pop.size,
+                                 maxiter = ga.max.iter,
+                                 parallel = num.cores,
+                                 run = ga.run,
+                                 pmutation = ga.pmutation,
+                                 suggestions = suggestions,
+                                 monitor = function(obj) GAMonitorFn(obj, data),
+                                 keepBest = TRUE)
+            } else {
+                ga.results <- ga(type = "real-valued",
+                                 fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
+                                 min = lower.vector, # <-- vector from config
+                                 max = upper.vector, # <-- vector from config
+                                 popSize = ga.pop.size,
+                                 maxiter = ga.max.iter,
+                                 parallel = num.cores,
+                                 run = ga.run,
+                                 pmutation = ga.pmutation,
+                                 suggestions = suggestions,
+                                 monitor = function(obj) GAMonitorFn(obj, data),
+                                 keepBest = TRUE)
+            }
         }
 
         if (verbose == TRUE) {

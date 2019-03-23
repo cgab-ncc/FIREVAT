@@ -52,10 +52,8 @@ GetGASuggestedSolutions <- function(vcf.obj,
         curr.filter.param.temp.direction <- config.obj[[curr.filter.param.temp]]$direction
         if (curr.filter.param.temp.direction == "POS") {
             param.values <- c(param.values, lower.vector[curr.filter.param.temp])
-            # param.values <- c(param.values, -Inf)
         } else { # NEG
             param.values <- c(param.values, upper.vector[curr.filter.param.temp])
-            # param.values <- c(param.values, Inf)
         }
     }
     names(param.values) <- vcf.filter.params
