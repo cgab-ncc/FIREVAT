@@ -8,6 +8,7 @@
 #   Hyunbin Kim (khb7840@ncc.re.kr)
 #   Bioinformatics Analysis Team, National Cancer Center Korea
 
+
 #' @title PerformStrandBiasAnalysis
 #' @description Performs strand bias analysis
 #'

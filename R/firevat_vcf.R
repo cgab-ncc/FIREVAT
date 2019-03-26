@@ -262,3 +262,43 @@ GetVCFValues <- function(vcf.obj, vcf.filter) {
     output.list <- vcf.obj$data[, vcf.params, with=FALSE]
     return(output.list)
 }
+
+
+#' @title FilterByStrandBiasAnalysis
+#' @description Filters refined.vcf.obj by strand bias analysis and
+#' moves these filtered variants to artifactual.vcf.obj
+#'
+#' @param refined.vcf.obj A list of vcf data
+#' @param artifactual.vcf.obj A list of vcf data
+#' @param perform.fdr.correction A boolean value.
+#' @param filter.by.strand.bias.analysis.cutoff A numeric value.
+#'
+#' @return A list with filtering parameter values
+#' \itemize{
+#'  \item{refined.vcf.obj}{ updated refined.vcf.obj}
+#'  \item{artifactual.vcf.obj}{ updated artifactual.vcf.obj}
+#' }
+#'
+#' @export
+FilterByStrandBiasAnalysis <- function(refined.vcf.obj,
+                                       artifactual.vcf.obj,
+                                       perform.fdr.correction,
+                                       filter.by.strand.bias.analysis.cutoff) {
+    if (perform.fdr.correction == TRUE) { # filter by q value
+        refined.vcf.obj.temp <- refined.vcf.obj
+        refined.vcf.obj.temp$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasQValue < filter.by.strand.bias.analysis.cutoff,]
+        refined.vcf.obj.temp$data <- refined.vcf.obj.temp$data[, !(colnames(refined.vcf.obj.temp$data) %in% c('StrandBiasQValue'))]
+        artifactual.vcf.obj$data <- rbind(artifactual.vcf.obj$data, refined.vcf.obj.temp$data)
+        refined.vcf.obj$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasQValue >= filter.by.strand.bias.analysis.cutoff,]
+    } else { # filter by p value
+        refined.vcf.obj.temp <- refined.vcf.obj
+        refined.vcf.obj.temp$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasPValue < filter.by.strand.bias.analysis.cutoff,]
+        refined.vcf.obj.temp$data <- refined.vcf.obj.temp$data[, !(colnames(refined.vcf.obj.temp$data) %in% c('StrandBiasPValue'))]
+        artifactual.vcf.obj$data <- rbind(artifactual.vcf.obj$data, refined.vcf.obj.temp$data)
+        refined.vcf.obj$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasPValue >= filter.by.strand.bias.analysis.cutoff,]
+    }
+    return(list(refined.vcf.obj = refined.vcf.obj,
+                artifactual.vcf.obj = artifactual.vcf.obj))
+}
+
+

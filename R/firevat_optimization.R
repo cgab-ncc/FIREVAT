@@ -121,6 +121,8 @@ ParameterToBits <- function(vcf.obj, config.obj, vcf.filter, multiplier = 100) {
 #'  \item{upper.vector}{ A numeric vector. Each element is the maximum value of each parameter}
 #'  \item{vcf.obj}{ vcf.obj with updated data}
 #' }
+#'
+#' @importFrom IRanges IRanges intersect
 #' @export
 GetParameterLowerUpperVector <- function(vcf.obj, config.obj, vcf.filter, multiplier = 100) {
     # Make empty vectors
@@ -131,32 +133,41 @@ GetParameterLowerUpperVector <- function(vcf.obj, config.obj, vcf.filter, multip
         param <- names(vcf.filter)[i]
         # If custom range is given in config.obj,
         # return lower/upper vectors with the given range.
-        if ("range"%in% names(config.obj[[param]])) {
+        if ("range" %in% names(config.obj[[param]])) {
             param.range <- unlist(config.obj[[param]]["range"])
-            if (max(vcf.obj$data[[param]]) > 1) {
-                lower.vector[i] <- max(min(vcf.obj$data[[param]]), param.range[[1]])
-                upper.vector[i] <- min(max(vcf.obj$data[[param]]), param.range[[2]])
-            } else {
+            if (max(vcf.obj$data[[param]]) <= 1) {
                 vcf.obj$data[[param]] <- multiplier * vcf.obj$data[[param]]
-                lower.vector[i] <- max(min(vcf.obj$data[[param]]), param.range[[1]])
-                upper.vector[i] <- min(max(vcf.obj$data[[param]]), param.range[[2]])
+            }
+            user.specified.range <- IRanges(start = c(param.range[[1]]), end = c(param.range[[2]]))
+            data.range <- IRanges(start = c(min(vcf.obj$data[[param]])), end = c(max(vcf.obj$data[[param]])))
+            range.intersection <- intersect(user.specified.range, data.range)
+            if (length(range.intersection) > 0) {
+                lower.vector[i] <- range.intersection@start
+                upper.vector[i] <- (range.intersection@start + range.intersection@width) - 1
+            } else {
+                print(paste0("The range for the filter parameter ", param, " is invalid.\n",
+                             "The actual data do not reflect this range.\n",
+                             "config file min = ", param.range[[1]], "\n",
+                             "vcf file min = ", min(vcf.obj$data[[param]]), "\n",
+                             "config file max = ", param.range[[2]], "\n",
+                             "vcf file max = ", max(vcf.obj$data[[param]]), "\n",
+                             "Returning prematurely."))
+                return(list(valid = FALSE))
             }
         } else {
-            if (max(vcf.obj$data[[param]]) > 1) {
-                lower.vector[i] <- min(vcf.obj$data[[param]])
-                upper.vector[i] <- max(vcf.obj$data[[param]])
-            } else {
-                # If max(vcf.obj$data[[param]]) <= 1,
-                # then multiply multiplier to value
+            if (max(vcf.obj$data[[param]]) <= 1) {
                 vcf.obj$data[[param]] <- multiplier * vcf.obj$data[[param]]
-                lower.vector[i] <- min(vcf.obj$data[[param]])
-                upper.vector[i] <- max(vcf.obj$data[[param]])
+
             }
+            lower.vector[i] <- min(vcf.obj$data[[param]])
+            upper.vector[i] <- max(vcf.obj$data[[param]])
         }
     }
     names(lower.vector) <- names(vcf.filter)
     names(upper.vector) <- names(vcf.filter)
-    return(list(lower.vector = lower.vector, upper.vector = upper.vector, vcf.obj = vcf.obj))
+    return(list(valid = TRUE,
+                lower.vector = lower.vector,
+                upper.vector = upper.vector, vcf.obj = vcf.obj))
 }
 
 

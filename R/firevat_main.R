@@ -51,6 +51,8 @@
 #' @param mutalisk.random.sampling.max.iter Mutalisk random sampling maximum iteration. Default: 10.
 #' The number of times Mutalisk randomly samples from target.mut.sigs before determining the candidate signatures.
 #' @param perform.strand.bias.analysis If TRUE, then performs strand bias analysis.
+#' @param filter.by.strand.bias.analysis If TRUE, then filters out variants in refined vcf based on strand bias analysis results
+#' @param filter.by.strand.bias.analysis.cutoff The p.value or q value cutoff for filtering out variants.
 #' @param strand.bias.perform.fdr.correction If TRUE, then performs false discovery rate
 #' correction for strand bias analysis.
 #' @param strand.bias.fdr.correction.method A string value. Default value is 'BH'.
@@ -104,6 +106,8 @@ RunFIREVAT <- function(vcf.file,
                        mutalisk.random.sampling.max.iter = 10,
                        # Strand bias analysis parameters
                        perform.strand.bias.analysis = TRUE,
+                       filter.by.strand.bias.analysis = TRUE,
+                       filter.by.strand.bias.analysis.cutoff = 0.25,
                        strand.bias.perform.fdr.correction = TRUE,
                        strand.bias.fdr.correction.method = "BH",
                        ref.forward.strand.var = NULL,
@@ -302,6 +306,18 @@ RunFIREVAT <- function(vcf.file,
 
         # Get lower / upper vectors from config file
         lower.upper.list <- GetParameterLowerUpperVector(vcf.obj, config.obj, vcf.filter)
+        if (lower.upper.list$valid == FALSE) {
+            data$end.datetime <- Sys.time()
+            data$variant.refinement.performed <- FALSE
+            data$variant.refinement.terminiation.log <- "Config file parameter filter range is invalid."
+            if (save.rdata == TRUE) {
+                save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+            }
+            if (save.tsv == TRUE) {
+                WriteFIREVATResultsToTSV(firevat.results = data)
+            }
+            return(data)
+        }
         data$vcf.obj <- lower.upper.list$vcf.obj
         lower.vector <- lower.upper.list$lower.vector
         upper.vector <- lower.upper.list$upper.vector
@@ -450,6 +466,8 @@ RunFIREVAT <- function(vcf.file,
 
     # 8. Strand bias analysis
     data$perform.strand.bias.analysis <- perform.strand.bias.analysis
+    data$filter.by.strand.bias.analysis <- filter.by.strand.bias.analysis
+    data$filter.by.strand.bias.analysis.cutoff <- filter.by.strand.bias.analysis.cutoff
     data$ref.forward.strand.var <- ref.forward.strand.var
     data$ref.reverse.strand.var <- ref.reverse.strand.var
     data$alt.forward.strand.var <- alt.forward.strand.var
@@ -466,6 +484,17 @@ RunFIREVAT <- function(vcf.file,
             alt.reverse.strand.var = data$alt.reverse.strand.var,
             perform.fdr.correction = data$strand.bias.perform.fdr.correction,
             fdr.correction.method = data$strand.bias.fdr.correction.method)
+
+        if (data$filter.by.strand.bias.analysis == TRUE) {
+            filtered.vcf.objs <- FilterByStrandBiasAnalysis(
+                refined.vcf.obj = data$refined.vcf.obj,
+                artifactual.vcf.obj = data$artifactual.vcf.obj,
+                perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+                filter.by.strand.bias.analysis.cutoff = data$filter.by.strand.bias.analysis.cutoff)
+            data$refined.vcf.obj <- filtered.vcf.objs$refined.vcf.obj
+            data$artifactual.vcf.obj <- filtered.vcf.objs$artifactual.vcf.obj
+        }
+
         data$artifactual.vcf.obj <- PerformStrandBiasAnalysis(
             vcf.obj = data$artifactual.vcf.obj,
             ref.forward.strand.var = data$ref.forward.strand.var,

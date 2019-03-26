@@ -200,7 +200,7 @@
             "args": ["PrimaryDP", "PrimaryDPAltForward", "PrimaryDPAltReverse"]
         },
         "type": "float",
-        "default": 0,
+        "default": 5,
         "range": [0, 10],
         "use_in_filter": true
     },
@@ -228,7 +228,6 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 20],
         "use_in_filter": true
     },
     {
@@ -242,7 +241,6 @@
         },
         "type": "integer",
         "default": 10,
-        "range": [0, 30],
         "use_in_filter": true
     },
     {

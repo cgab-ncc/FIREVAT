@@ -13,6 +13,8 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   mutalisk.method = "all", mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
   perform.strand.bias.analysis = TRUE,
+  filter.by.strand.bias.analysis = TRUE,
+  filter.by.strand.bias.analysis.cutoff = 0.25,
   strand.bias.perform.fdr.correction = TRUE,
   strand.bias.fdr.correction.method = "BH",
   ref.forward.strand.var = NULL, ref.reverse.strand.var = NULL,
@@ -82,6 +84,10 @@ The number of signatures to sample from target.mut.sigs}
 The number of times Mutalisk randomly samples from target.mut.sigs before determining the candidate signatures.}
 
 \item{perform.strand.bias.analysis}{If TRUE, then performs strand bias analysis.}
+
+\item{filter.by.strand.bias.analysis}{If TRUE, then filters out variants in refined vcf based on strand bias analysis results}
+
+\item{filter.by.strand.bias.analysis.cutoff}{The p.value or q value cutoff for filtering out variants.}
 
 \item{strand.bias.perform.fdr.correction}{If TRUE, then performs false discovery rate
 correction for strand bias analysis.}
