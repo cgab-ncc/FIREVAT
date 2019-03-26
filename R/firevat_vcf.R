@@ -287,13 +287,15 @@ FilterByStrandBiasAnalysis <- function(refined.vcf.obj,
     if (perform.fdr.correction == TRUE) { # filter by q value
         refined.vcf.obj.temp <- refined.vcf.obj
         refined.vcf.obj.temp$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasQValue < filter.by.strand.bias.analysis.cutoff,]
-        refined.vcf.obj.temp$data <- refined.vcf.obj.temp$data[, !(colnames(refined.vcf.obj.temp$data) %in% c('StrandBiasQValue'))]
+        keep.columns <- colnames(refined.vcf.obj.temp$data)[!(colnames(refined.vcf.obj.temp$data) %in% c('StrandBiasQValue', 'StrandBiasPValue'))]
+        refined.vcf.obj.temp$data <- refined.vcf.obj.temp$data[, ..keep.columns]
         artifactual.vcf.obj$data <- rbind(artifactual.vcf.obj$data, refined.vcf.obj.temp$data)
         refined.vcf.obj$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasQValue >= filter.by.strand.bias.analysis.cutoff,]
     } else { # filter by p value
         refined.vcf.obj.temp <- refined.vcf.obj
         refined.vcf.obj.temp$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasPValue < filter.by.strand.bias.analysis.cutoff,]
-        refined.vcf.obj.temp$data <- refined.vcf.obj.temp$data[, !(colnames(refined.vcf.obj.temp$data) %in% c('StrandBiasPValue'))]
+        keep.columns <- colnames(refined.vcf.obj$data)[!(colnames(refined.vcf.obj$data) %in% c('StrandBiasPValue'))]
+        refined.vcf.obj.temp$data <- refined.vcf.obj.temp$data[, ..keep.columns]
         artifactual.vcf.obj$data <- rbind(artifactual.vcf.obj$data, refined.vcf.obj.temp$data)
         refined.vcf.obj$data <- refined.vcf.obj$data[refined.vcf.obj$data$StrandBiasPValue >= filter.by.strand.bias.analysis.cutoff,]
     }
