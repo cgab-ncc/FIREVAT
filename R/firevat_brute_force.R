@@ -21,6 +21,8 @@
 #' @param sequencing.artifact.mut.sigs A character vector of the sequencing artifact mutational signatures from reference mutational signatures.
 #' @param objective.fn Objective value derivation function.
 #' @param original.muts.seq.art.weights.sum A numeric value. 'seq.art.sigs.weights.sum' from CheckIfVariantRefinementIsNecessary
+#' @param ga.preemptive.killing If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
+#' compared to the original mutatational signatures analysis
 #' @param verbose If TRUE, provides process detail. Default value is TRUE.
 #'
 #' @return A list with the following elements
@@ -39,6 +41,7 @@ GetGASuggestedSolutions <- function(vcf.obj,
                                     sequencing.artifact.mut.sigs,
                                     objective.fn,
                                     original.muts.seq.art.weights.sum,
+                                    ga.preemptive.killing,
                                     verbose = TRUE) {
     vcf.filter <- MakeFilter(config.obj = config.obj)
     vcf.filter.params <- names(vcf.filter)
@@ -69,6 +72,7 @@ GetGASuggestedSolutions <- function(vcf.obj,
                       sequencing.artifact.mut.sigs = sequencing.artifact.mut.sigs,
                       original.muts.seq.art.weights.sum = original.muts.seq.art.weights.sum,
                       objective.fn = objective.fn,
+                      ga.preemptive.killing = ga.preemptive.killing,
                       verbose = verbose)
 
     df.suggested.solutions <- data.frame()

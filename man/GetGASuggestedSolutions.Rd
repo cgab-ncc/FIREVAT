@@ -6,7 +6,8 @@
 \usage{
 GetGASuggestedSolutions(vcf.obj, bsg, config.obj, lower.upper.list,
   df.mut.pat.ref.sigs, target.mut.sigs, sequencing.artifact.mut.sigs,
-  objective.fn, original.muts.seq.art.weights.sum, verbose = TRUE)
+  objective.fn, original.muts.seq.art.weights.sum, ga.preemptive.killing,
+  verbose = TRUE)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}
@@ -26,6 +27,9 @@ GetGASuggestedSolutions(vcf.obj, bsg, config.obj, lower.upper.list,
 \item{objective.fn}{Objective value derivation function.}
 
 \item{original.muts.seq.art.weights.sum}{A numeric value. 'seq.art.sigs.weights.sum' from CheckIfVariantRefinementIsNecessary}
+
+\item{ga.preemptive.killing}{If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
+compared to the original mutatational signatures analysis}
 
 \item{verbose}{If TRUE, provides process detail. Default value is TRUE.}
 }

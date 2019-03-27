@@ -332,8 +332,10 @@ GAOptimizationObjFnHelper <- function(params.x, data) {
                                  A.artifactual = A.value.artifactual)
 
     # A.value.refined must be lower than the sum of sequencing artifact weights in the original vcf file
-    if (A.value.refined > data$original.muts.seq.art.weights.sum) {
-        obj.val <- 0
+    if (data$ga.preemptive.killing == TRUE) {
+        if (A.value.refined > data$original.muts.seq.art.weights.sum) {
+            obj.val <- 0
+        }
     }
 
     return(list(valid = TRUE,

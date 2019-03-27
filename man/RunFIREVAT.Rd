@@ -9,8 +9,9 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   mode = "ga", init.artifact.stop = 0.05,
   objective.fn = Default.Obj.Fn, use.suggested.soln = TRUE,
   ga.type = "real-valued", ga.pop.size = 200, ga.max.iter = 200,
-  ga.run = 50, ga.pmutation = 0.25, mutalisk = TRUE,
-  mutalisk.method = "all", mutalisk.random.sampling.count = 20,
+  ga.run = 50, ga.pmutation = 0.25, ga.preemptive.killing = FALSE,
+  mutalisk = TRUE, mutalisk.method = "all",
+  mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
   perform.strand.bias.analysis = TRUE,
   filter.by.strand.bias.analysis = TRUE,
@@ -69,6 +70,9 @@ This value should be set based on the number of filter parameters. Recommendatio
 This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.}
 
 \item{ga.pmutation}{Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.}
+
+\item{ga.preemptive.killing}{If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
+compared to the original mutatational signatures analysis}
 
 \item{mutalisk}{If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.}
 

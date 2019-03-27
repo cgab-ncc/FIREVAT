@@ -41,6 +41,8 @@
 #' @param ga.run Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
 #' This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.
 #' @param ga.pmutation Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.
+#' @param ga.preemptive.killing If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
+#' compared to the original mutatational signatures analysis
 #' @param mutalisk If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.
 #' @param mutalisk.method Mutalisk signature identification method. Default: 'random.sampling'.
 #' The value can be either 'all' or 'random.sampling'.
@@ -99,6 +101,7 @@ RunFIREVAT <- function(vcf.file,
                        ga.max.iter = 200,
                        ga.run = 50,
                        ga.pmutation = 0.25,
+                       ga.preemptive.killing = FALSE,
                        # Mutalisk parameters
                        mutalisk = TRUE,
                        mutalisk.method = "all",
@@ -224,6 +227,7 @@ RunFIREVAT <- function(vcf.file,
                 ga.pop.size = ga.pop.size,
                 ga.max.iter = ga.max.iter,
                 ga.run = ga.run,
+                ga.preemptive.killing = ga.preemptive.killing,
                 # Mutalisk parameters
                 mutalisk.method = mutalisk.method,
                 mutalisk.random.sampling.count = mutalisk.random.sampling.count,
@@ -232,6 +236,7 @@ RunFIREVAT <- function(vcf.file,
                 mode = mode,
                 use.suggested.soln = use.suggested.soln,
                 num.cores = num.cores,
+                firevat.version = packageVersion("FIREVAT"),
                 verbose = verbose)
 
     # 5.2. FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
@@ -335,6 +340,7 @@ RunFIREVAT <- function(vcf.file,
                                                            sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
                                                            objective.fn = data$objective.fn,
                                                            original.muts.seq.art.weights.sum = data$original.muts.seq.art.weights.sum,
+                                                           ga.preemptive.killing = data$ga.preemptive.killing,
                                                            verbose = data$verbose)
             data$df.suggested.solutions <- suggested.solutions$df.suggested.solutions
             data$suggested.solutions.matrix <- suggested.solutions$suggested.solutions.matrix

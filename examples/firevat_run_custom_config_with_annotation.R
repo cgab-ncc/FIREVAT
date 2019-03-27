@@ -1,11 +1,11 @@
 library(FIREVAT)
 
 
-# If you wish to run the sample code, just change the 'output.dir' parameter
+# If you wish to run the sample code, change the 'output.dir' parameter
 # and run the whole script.
 
 # With 2 cores (each with 3.5GHz clock speed) this sample script
-# takes about 5 minutes to complete
+# takes about 10 minutes to complete
 
 # Output directory
 output.dir <- "/home/jinseoklee/Documents/Projects/FIREVAT-validation/data/Samples/firevat_results/DCC_PCAWG_Cell_Lines_HCC1954/"
@@ -34,11 +34,12 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
                       sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
                       output.dir = output.dir,
                       objective.fn = Exp.Weighted.Obj.Fn.2,
-                      num.cores = 6,
+                      num.cores = 2,
                       ga.pop.size = 100,
-                      ga.max.iter = 10,
-                      ga.run = 50,
+                      ga.max.iter = 5,
+                      ga.run = 5,
                       ga.pmutation = 0.1,
+                      ga.preemptive.killing = TRUE,
                       mutalisk.method = "all",
                       perform.strand.bias.analysis = TRUE,
                       ref.forward.strand.var = "TumorDPRefForward",

@@ -226,3 +226,61 @@ Exp.Weighted.Refined.Seq.Art.Only.Obj.Fn <- function(C.refined, A.refined, C.art
 }
 
 
+#' @title Test.Obj.Fn.1
+#' @description
+#' Test objective function 1
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Test.Obj.Fn.1 <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    # Logarithmic weight
+    # y = log10(0.9x + 0.1) + 1
+    #
+    # Exponential weight
+    # y = (10^(x-1) - 0.1) / 0.9
+    #
+    # Calculates the Euclidean distance from the reference point
+
+    C.refined <- log(((0.9* C.refined) + 0.1), base = 10) + 1
+    A.refined <- 1 - A.refined
+    obj.val <- C.refined * A.refined * C.artifactual
+    return(obj.val)
+}
+
+
+#' @title Test.Obj.Fn.2
+#' @description
+#' Test objective function 2
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Test.Obj.Fn.2 <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    # Logarithmic weight
+    # y = log10(0.9x + 0.1) + 1
+    #
+    # Exponential weight
+    # y = (10^(x-1) - 0.1) / 0.9
+    #
+    # Calculates the Euclidean distance from the reference point
+
+
+    C.refined <- log(((0.9* C.refined) + 0.1), base = 10) + 1
+    A.refined <- (10**((1 - A.refined) - 1) - 0.1) / 0.9
+    C.artifactual <- (10**(C.artifactual - 1) - 0.1) / 0.9
+
+    obj.val <- C.refined * A.refined * C.artifactual
+    return(obj.val)
+}
+
