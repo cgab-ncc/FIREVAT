@@ -10,7 +10,7 @@
 
 
 #' @title Constant
-#' @description 
+#' @description
 #' PCAWG target mutational signatures reported to be unrelated to sequencing artifacts
 #' @export
 PCAWG.Target.Mutational.Signatures <- c("SBS1","SBS2","SBS3","SBS4","SBS5","SBS6",
@@ -18,9 +18,9 @@ PCAWG.Target.Mutational.Signatures <- c("SBS1","SBS2","SBS3","SBS4","SBS5","SBS6
                                         "SBS10a","SBS10b","SBS11","SBS12","SBS13","SBS14",
                                         "SBS15","SBS16","SBS17a","SBS17b","SBS18","SBS19",
                                         "SBS20","SBS21","SBS22","SBS23","SBS24","SBS25","SBS26",
-                                        "SBS27","SBS28","SBS29","SBS30","SBS31","SBS32","SBS33",
+                                        "SBS28","SBS29","SBS30","SBS31","SBS32","SBS33",
                                         "SBS34","SBS35","SBS36","SBS37","SBS38","SBS39","SBS40",
-                                        "SBS41","SBS42","SBS44","SBS45")
+                                        "SBS41","SBS42","SBS44")
 
 
 #' @title Constant
@@ -34,15 +34,10 @@ PCAWG.Known.Sequencing.Artifact.Signatures <- c("SBS60")
 #' @description
 #' PCAWG mutational signatures reported to be associated with sequencing artifacts
 #' @export
-PCAWG.Likely.Sequencing.Artifact.Signatures <- c("SBS46","SBS47", "SBS48","SBS50","SBS53")
-
-
-#' @title Constant
-#' @description
-#' PCAWG mutational signatures reported to be associated with sequencing artifacts
-#' @export
-PCAWG.Possible.Sequencing.Artifact.Signatures <- c("SBS27","SBS43","SBS49","SBS51","SBS52",
-                                                   "SBS54","SBS55","SBS56","SBS57","SBS58",
+PCAWG.Possible.Sequencing.Artifact.Signatures <- c("SBS27","SBS43","SBS45","SBS46",
+                                                   "SBS47","SBS48","SBS49","SBS50",
+                                                   "SBS51","SBS52","SBS53","SBS54",
+                                                   "SBS55","SBS56","SBS57","SBS58",
                                                    "SBS59")
 
 
@@ -51,7 +46,6 @@ PCAWG.Possible.Sequencing.Artifact.Signatures <- c("SBS27","SBS43","SBS49","SBS5
 #' PCAWG mutational signatures reported to be associated with sequencing artifacts
 #' @export
 PCAWG.All.Sequencing.Artifact.Signatures <- c(PCAWG.Known.Sequencing.Artifact.Signatures,
-                                              PCAWG.Likely.Sequencing.Artifact.Signatures,
                                               PCAWG.Possible.Sequencing.Artifact.Signatures)
 
 
@@ -69,7 +63,7 @@ TriNuc.Mutation.Type.Hex.Colors <- c("#029ACE", # C>A
 
 #' @title Constant
 #' @description
-#' Chromosome names for FIREVAT. 
+#' Chromosome names for FIREVAT.
 #' Chromosome names should be given in the format of "chr" + chromosome number.
 #' @export
 Chromosome.Names <- c("chr1","chr2","chr3","chr4","chr5","chr6","chr7",

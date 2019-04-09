@@ -46,21 +46,21 @@ SBS37,Unknown,#808080
 SBS39,Unknown,#808080
 SBS40,Unknown,#808080
 SBS41,Unknown,#808080
-SBS60,Known Sequencing Artifact,#CA302F
-SBS45,OxoG Sequencing Artifact,#CA302F
+SBS60,Possible Sequencing Artifact,#D10161
+SBS45,Possible Sequencing Artifact,#D10161
 SBS27,Possible Sequencing Artifact,#D10161
 SBS43,Possible Sequencing Artifact,#D10161
 SBS49,Possible Sequencing Artifact,#D10161
 SBS51,Possible Sequencing Artifact,#D10161
 SBS52,Possible Sequencing Artifact,#D10161
-SBS46,Likely Sequencing Artifact,#D10161
-SBS47,Likely Sequencing Artifact,#D10161
-SBS48,Likely Sequencing Artifact,#D10161
-SBS50,Likely Sequencing Artifact,#D10161
-SBS53,Likely Sequencing Artifact,#D10161
-SBS54,Potential Sequencing Artifact,#D10161
-SBS55,Potential Sequencing Artifact,#D10161
-SBS56,Potential Sequencing Artifact,#D10161
-SBS57,Potential Sequencing Artifact,#D10161
-SBS58,Potential Sequencing Artifact,#D10161
-SBS59,Potential Sequencing Artifact,#D10161
+SBS46,Possible Sequencing Artifact,#D10161
+SBS47,Possible Sequencing Artifact,#D10161
+SBS48,Possible Sequencing Artifact,#D10161
+SBS50,Possible Sequencing Artifact,#D10161
+SBS53,Possible Sequencing Artifact,#D10161
+SBS54,Possible Sequencing Artifact,#D10161
+SBS55,Possible Sequencing Artifact,#D10161
+SBS56,Possible Sequencing Artifact,#D10161
+SBS57,Possible Sequencing Artifact,#D10161
+SBS58,Possible Sequencing Artifact,#D10161
+SBS59,Possible Sequencing Artifact,#D10161

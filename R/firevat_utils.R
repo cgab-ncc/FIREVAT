@@ -12,12 +12,22 @@
 #' @title GetPCAWGMutSigs
 #' @description Returns the PCAWG mutational signatures data
 #'
+#' @param sequencing.type A string value.
+#' It can be either 'wes' for whole-exome sequencing or 'wgs' for whole-genome sequencing
+#'
 #' @return a data.frame of the PCAWG mutatioanl signatures
 #'
 #' @export
 #' @importFrom utils read.csv
-GetPCAWGMutSigs <- function() {
-    f <- system.file("extdata", "PCAWG_sigProfiler_SBS_Signatures_2018_03_28.csv", package = "FIREVAT")
+GetPCAWGMutSigs <- function(sequencing.type = "wes") {
+    if (sequencing.type == "wes") {
+        f <- system.file("extdata", "PCAWG_sigProfiler_exome_SBS_signatures_20180321.csv", package = "FIREVAT")
+    } else if (sequencing.type == "wgs") {
+        f <- system.file("extdata", "PCAWG_sigProfiler_genome_SBS_Signatures_20180328.csv", package = "FIREVAT")
+    } else {
+        print("Invalid sequencing.type parameter. It must be either 'wes' or 'wgs'")
+        return(NULL)
+    }
     df.pcawg.mut.sigs <- read.csv(f,
                                   header = T,
                                   check.names = F,

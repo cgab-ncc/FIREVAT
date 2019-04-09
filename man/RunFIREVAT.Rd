@@ -11,6 +11,7 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   ga.type = "real-valued", ga.pop.size = 200, ga.max.iter = 200,
   ga.run = 50, ga.pmutation = 0.25, ga.preemptive.killing = FALSE,
   mutalisk = TRUE, mutalisk.method = "all",
+  mutalisk.must.include.sigs = NULL,
   mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
   perform.strand.bias.analysis = TRUE,
@@ -80,6 +81,9 @@ compared to the original mutatational signatures analysis}
 The value can be either 'all' or 'random.sampling'.
 'all' uses all target.mut.sigs to identify mutational signatures.
 'random.sampling' randomly samples from target.mut.sigs to identify mutational signatures.}
+
+\item{mutalisk.must.include.sigs}{Signatures that must be included in the Mutalisk signature identification
+A character vector corresponding to the signature names.}
 
 \item{mutalisk.random.sampling.count}{Mutalisk random sampling count. Default: 20.
 The number of signatures to sample from target.mut.sigs}

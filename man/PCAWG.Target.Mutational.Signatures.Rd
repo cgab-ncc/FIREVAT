@@ -4,7 +4,7 @@
 \name{PCAWG.Target.Mutational.Signatures}
 \alias{PCAWG.Target.Mutational.Signatures}
 \title{Constant}
-\format{An object of class \code{character} of length 49.}
+\format{An object of class \code{character} of length 47.}
 \usage{
 PCAWG.Target.Mutational.Signatures
 }

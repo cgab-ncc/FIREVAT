@@ -9,7 +9,7 @@
 Chromosome.Names
 }
 \description{
-Chromosome names for FIREVAT. 
+Chromosome names for FIREVAT.
 Chromosome names should be given in the format of "chr" + chromosome number.
 }
 \keyword{datasets}

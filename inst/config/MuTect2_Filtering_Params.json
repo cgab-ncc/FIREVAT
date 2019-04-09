@@ -171,7 +171,7 @@
         },
         "type": "integer",
         "default": 6,
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "NLOD",
@@ -183,7 +183,7 @@
         },
         "type": "integer",
         "default": 2,
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "RawFOXOG",
@@ -207,7 +207,8 @@
             ]
         },
         "type": "float",
-        "default": 0.25,
+        "default": 25,
+        "range": [0, 50],
         "use_in_filter": true
     },
     {

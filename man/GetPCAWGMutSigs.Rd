@@ -4,7 +4,11 @@
 \alias{GetPCAWGMutSigs}
 \title{GetPCAWGMutSigs}
 \usage{
-GetPCAWGMutSigs()
+GetPCAWGMutSigs(sequencing.type = "wes")
+}
+\arguments{
+\item{sequencing.type}{A string value.
+It can be either 'wes' for whole-exome sequencing or 'wgs' for whole-genome sequencing}
 }
 \value{
 a data.frame of the PCAWG mutatioanl signatures
