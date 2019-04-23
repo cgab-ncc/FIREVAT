@@ -28,27 +28,37 @@ Bioinformatics Analysis Team, National Cancer Center Korea
 - [FIREVAT](#firevat)
   - [**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts](#finding-reliable-variants-without-artifacts)
 - [Table of contents](#table-of-contents)
-- [Installation](#installation)
+- [01. Installation](#01. Installation)
+- [02. Examples](#02. Examples)
+- [05. Suggested Workflow](#05. Suggested Workflow)
 - [Attributions](#attributions)
 - [License](#license)
 
----
-
-## Installation
+## 01. Installation
 
 You can install the released version of FIREVAT from [FIREVAT github repository](https://github.com/cgab-ncc/FIREVAT) with:
 
-``` r
+```{r}
 install.packages("devtools")
 library(devtools)
 install_github("cgab-ncc/FIREVAT")
 ```
 
+## 02. Examples
+
+```{r}
+Examples
+```
+
+## 05. Suggested Workflow
+
+<p float="left">
+  <img src="FIREVAT_Suggested_Workflow.png" width="100%"/>
+</p>
+
 ## Attributions
 
 FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@ncc.re.kr) -- Dongwan Hong's lab -- National Cancer Center, Korea.
-
-
 
 ## License
 [GPL-2](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE)
