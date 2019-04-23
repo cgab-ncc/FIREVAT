@@ -7,13 +7,19 @@ FIREVAT is a variant filtering tool for cancer sequencing data. FIREVAT uses mut
 
 ---
 
-### February 19, 2019
+### April 23, 2019
 
 ### Authors
 - Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 - Hyunbin Kim (khb7840@ncc.re.kr)
 
 Bioinformatics Analysis Team, National Cancer Center Korea
+
+---
+
+<p float="left">
+  <img src="FIREVAT_Workflow_Figure.png" width="100%"/>
+</p>
 
 ---
 
@@ -44,11 +50,9 @@ FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) 
 
 
 
-## License 
+## License
 [GPL-2](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE)
 
 
 [mutalisk]: http://mutalisk.org/
 [paper]: https://academic.oup.com/nar/article/46/W1/W102/5001159
-
-
