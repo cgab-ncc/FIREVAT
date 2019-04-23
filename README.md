@@ -28,9 +28,9 @@ Bioinformatics Analysis Team, National Cancer Center Korea
 - [FIREVAT](#firevat)
   - [**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts](#finding-reliable-variants-without-artifacts)
 - [Table of contents](#table-of-contents)
-- [01. Installation](#01.-installation)
-- [02. Examples](#02.-examples)
-- [05. Suggested Workflow](#05. Suggested Workflow)
+- [01. Installation](#installation)
+- [02. Examples](#examples)
+- [05. Suggested Workflow](#suggested Workflow)
 - [Attributions](#attributions)
 - [License](#license)
 
