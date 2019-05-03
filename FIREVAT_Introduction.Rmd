@@ -1,7 +1,9 @@
 ---
 title: "FIREVAT Introduction"
-output: html_document
-author: Andy Jinseok Lee, Hyunbin Kim
+author: "Andy Jinseok Lee, Hyunbin Kim"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -9,13 +11,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## 00. Using FIREVAT
+
+### 00-1. Variant refinement
 Using ```RunFIREVAT```, you can perform variant refinement using mutational signatures.<br/>
-With 2 cores (each with 3.5GHz clock speed) this sample script akes about 10 minutes to run.
-```{r, echo=FALSE}
+With 2 cores (each with 3.5GHz clock speed) this sample script takes about 10 minutes to run.
+```{r, eval=FALSE}
 library(FIREVAT)
 
 # Assign output directory
-output.dir <- "/home/jinseoklee/Documents/Projects/Temp/FIREVAT_TEMP/"
+output.dir <- ""
 
 sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
 config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", package = "FIREVAT")
@@ -41,12 +45,38 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
                       annotate = FALSE)
 ```
 
-### 00-1. Variant refinement
-
 ### 00-2. Manual filtering
+You can also perform manual variant filtering.
+```{r, eval=FALSE}
+## TODO NEEDS WORKS
+
+library(FIREVAT)
+
+# Assign output directory
+output.dir <- "/home/jinseoklee/Documents/Projects/Temp/FIREVAT_TEMP/"
+
+sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
+config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", package = "FIREVAT")
+
+results <- RunFIREVAT(vcf.file = sample.vcf.file,
+                      vcf.file.genome = 'hg19',
+                      config.file = config.file,
+                      mode = "manual",
+                      df.ref.mut.sigs = GetPCAWGMutSigs(),
+                      target.mut.sigs = GetPCAWGMutSigsNames(),
+                      sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+                      output.dir = output.dir,
+                      num.cores = 2,
+                      perform.strand.bias.analysis = TRUE,
+                      ref.forward.strand.var = "TumorDPRefForward",
+                      ref.reverse.strand.var = "TumorDPRefReverse",
+                      alt.forward.strand.var = "TumorDPAltForward",
+                      alt.reverse.strand.var = "TumorDPAltReverse",
+                      annotate = FALSE)
+```
 
 ### 00-3. Mutational signature analysis
-
+Using FIREVAT, you can run Mutalisk?
 ```{r}
 
 ```
@@ -60,10 +90,6 @@ The R package FIREVAT provides
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
 
 ## 02. Installing FIREVAT
 
@@ -93,17 +119,11 @@ Refer to 05-X. Mutalisk parameters
 
 #### 03-X-Y. Preparing annotation data.frame
 
-
 ## 04. Variant refinement
 
 ### 04-X. Modes
 
 ### 04-Y. Optimization parameters
-
-
-
-
-
 
 ## 05. Mutational signature analysis
 
@@ -118,12 +138,6 @@ Refer to 05-X. Mutalisk parameters
 #### 05-X-Y. MutationalPatterns parameters
 
 #### 05-X-Y. MutationalPatterns results
-
-
-
-
-
-
 
 ## 06. Strand bias analysis
 
@@ -151,12 +165,3 @@ Bubble chart plot
 
 ## 11. Session info
 
-Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
