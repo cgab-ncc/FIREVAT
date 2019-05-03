@@ -66,7 +66,7 @@
         "type": "integer",
         "default": 5,
         "range": [0, 10],
-        "use_in_filter": false
+        "use_in_filter": true
     },
     {
         "name": "PrimaryRefAD",
@@ -106,7 +106,7 @@
         "type": "float",
         "default": 5,
         "range": [0, 10],
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "TumorVAF",

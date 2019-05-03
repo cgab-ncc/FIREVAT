@@ -119,7 +119,7 @@
         "type": "integer",
         "default": 10,
         "range": [0, 20],
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "PrimaryDP",
@@ -133,7 +133,7 @@
         "type": "integer",
         "default": 10,
         "range": [0, 20],
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "PrimaryDPAlt",
@@ -141,6 +141,42 @@
         "op": {
             "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
             "args": ["PrimaryDPAltForward", "PrimaryDPAltReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalDPAlt",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["NormalDPAltForward", "NormalDPAltReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalDPRef",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["NormalDPRefForward", "NormalDPRefReverse"]
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryDPRef",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["PrimaryDPRefForward", "PrimaryDPRefReverse"]
         },
         "type": "integer",
         "default": 5,

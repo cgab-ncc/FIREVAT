@@ -23,8 +23,8 @@
             "index": 2
         },
         "type": "integer",
-        "default": 5,
-        "range": [0, 10],
+        "default": 1,
+        "range": [0, 5],
         "use_in_filter": true
     },
     {
@@ -103,8 +103,8 @@
             "index": 2
         },
         "type": "integer",
-        "default": 5,
-        "range": [0, 10],
+        "default": 3,
+        "range": [3, 10],
         "use_in_filter": true
     },
     {
@@ -143,7 +143,7 @@
             "index": 1
         },
         "type": "float",
-        "default": 5,
+        "default": 1,
         "range": [0, 10],
         "use_in_filter": true
     },
@@ -209,7 +209,7 @@
         "type": "float",
         "default": 25,
         "range": [0, 50],
-        "use_in_filter": true
+        "use_in_filter": false
     },
     {
         "name": "TumorRefF1R2",

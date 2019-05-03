@@ -915,7 +915,7 @@ PrepareRefinedStrandBiasTable <- function(data) {
     }
 
     if (data$strand.bias.perform.fdr.correction == TRUE) {
-        include.array <- data$refined.vcf.obj$data$StrandBiasQValue < 0.05
+        include.array <- data$refined.vcf.obj$data$StrandBiasQValue < data$filter.by.strand.bias.analysis.cutoff
         vcf.objs <- FilterVCF(vcf.obj = data$refined.vcf.obj,
                               include.array = include.array,
                               force.include = TRUE,
@@ -923,7 +923,7 @@ PrepareRefinedStrandBiasTable <- function(data) {
         vcf.obj <- vcf.objs$vcf.obj.filtered
         stat.sig.value.col <- "StrandBiasQValue"
     } else {
-        include.array <- data$refined.vcf.obj$data$StrandBiasPValue < 0.05
+        include.array <- data$refined.vcf.obj$data$StrandBiasPValue < data$filter.by.strand.bias.analysis.cutoff
         vcf.objs <- FilterVCF(vcf.obj = data$refined.vcf.obj,
                               include.array = include.array,
                               force.include = TRUE,
