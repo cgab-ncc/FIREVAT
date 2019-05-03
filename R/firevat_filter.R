@@ -101,7 +101,7 @@ FilterVCF <- function(vcf.obj,
         condition.list <- list("include"=include)
 
         if (verbose == TRUE) {
-            print(paste0("Before applying filter: ", nrow(vcf.obj$data), " rows"))
+            PrintLog(paste0("* Before applying filter: ", nrow(vcf.obj$data), " rows in VCF object"))
         }
 
         for (param in names(vcf.filter)) {
@@ -124,10 +124,9 @@ FilterVCF <- function(vcf.obj,
         vcf.data.artifact <- vcf.obj$data[!include, ]
 
         if (verbose == TRUE) {
-            print(paste0("After applying filter: ", nrow(vcf.data.refined),
-                         " rows in vcf.data.filtered"))
-            print(paste0("After applying filter: ", nrow(vcf.data.artifact),
-                         " rows in vcf.data.artifact"))
+            PrintLog("* After applying filter: ")
+            PrintLog(paste0("** ", nrow(vcf.data.refined), " rows in vcf.data.filtered VCF object"))
+            PrintLog(paste0("** ", nrow(vcf.data.artifact), " rows in vcf.data.artifact VCF object"))
         }
 
         # Return two vcf.obj
@@ -143,8 +142,7 @@ FilterVCF <- function(vcf.obj,
             stop("The parameter 'include.array' must not be NULL as force.include is TRUE.")
         }
         if (nrow(vcf.obj$data) != length(include.array)) {
-            stop("The parameter 'include.array' length must be the same
-                 as the number of rows in vcf.obj$data")
+            stop("The parameter 'include.array' length must be the same as the number of rows in vcf.obj$data")
         }
         vcf.data.include <- vcf.obj$data[include.array, ]
         vcf.data.exclude <- vcf.obj$data[!include.array, ]

@@ -28,7 +28,8 @@ ReadVCF <- function(vcf.file,
                     split.info = FALSE,
                     check.chromosome.name = TRUE) {
     vcf.temp <- read.vcf(x = vcf.file,
-                         split.info = split.info)
+                         split.info = split.info,
+                         verbose = FALSE)
 
     vcf.obj <- list(data = vcf.temp$vcf,
                     header = vcf.temp$header,
@@ -70,7 +71,7 @@ WriteVCF <- function(vcf.obj, save.file) {
     vcf.obj.temp <- list(header = vcf.obj$header,
                          vcf = vcf.obj$data)
     attr(vcf.obj.temp, "vcf") <- TRUE
-    write.vcf(vcf.obj.temp, filename = save.file)
+    write.vcf(vcf.obj.temp, filename = save.file, verbose = FALSE)
 }
 
 
@@ -93,10 +94,6 @@ WriteVCF <- function(vcf.obj, save.file) {
 #' @export
 #' @import data.table
 InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
-    if (verbose == TRUE) {
-        print(Sys.time())
-    }
-
     # Boolean vector that decides whether to keep each each row
     # If point mutation then insert the row into vcf.obj.filtered
     # else insert the row into vcf.obj.artifact
@@ -104,16 +101,15 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     nrows <- nrow(vcf.obj$data)
 
     if (verbose == TRUE) {
-        print(paste0("Before initialization, there are ",
-                     nrow(vcf.obj$data), " rows in the original vcf"))
-        print(paste("Reading FORMAT column"))
+        PrintLog(paste0("* Before initialization: ", nrow(vcf.obj$data), " rows in the original VCF file."))
+        PrintLog("* Reading VCF file FORMAT column.")
     }
 
     # Parse FORMAT keys
     FORMAT.keys <- strsplit(vcf.obj$data$FORMAT, ":")
 
     if (verbose == TRUE) {
-        print(paste("Reading INFO column"))
+        PrintLog("* Reading VCF file INFO column.")
     }
     # Parse INFO column
     INFO.vals <- sapply(strsplit(vcf.obj$data$INFO,";"), function(x){
@@ -121,8 +117,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     INFO.vals <- sapply(INFO.vals, MatchINFOKeyValue)
 
     if (verbose == TRUE) {
-        print(paste("Parsing column",
-        colnames(vcf.obj$data)[10:ncol(vcf.obj$data)]))
+        PrintLog(paste0("** Parsing VCF column: ", colnames(vcf.obj$data)[10:ncol(vcf.obj$data)]))
     }
 
     # Parse FORMAT values
@@ -142,7 +137,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
             name <- as.character(config.obj[[j]]$name)
 
             if (verbose == TRUE) {
-                print(paste("Getting", name))
+                PrintLog(paste0("*** Getting VCF attribute: ", name))
             }
 
             column_header <- as.character(config.obj[[j]]$field$column_header)
@@ -169,7 +164,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
             name <- as.character(config.obj[[j]]$name)
 
             if (verbose == TRUE) {
-                print(paste("Getting", name))
+                PrintLog(paste0("*** Getting VCF attribute: ", name))
             }
 
             key <- as.character(config.obj[[j]]$field$key)
@@ -189,7 +184,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
         name <- as.character(op.entry$name)
 
         if (verbose) {
-            print(paste("Calculating", name))
+            PrintLog(paste0("*** Calculating VCF attribute: ", name))
         }
 
         function_string <- as.character(op.entry$op$function_string)
@@ -209,7 +204,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     # Filter data
     # Only consider point mutations for downstream analysis
     if (verbose == TRUE) {
-        print(paste("Checking if given mutations are point mutations"))
+        PrintLog("* Checking if given mutations are point mutations.")
     }
 
     condition.list <- list(
@@ -218,7 +213,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     )
 
     if (verbose == TRUE) {
-        print(paste("Removing lines with NA parameters"))
+        PrintLog("* Removing VCF rows with NA parameters.")
     }
 
     for (name in names(config.obj)) {
@@ -232,10 +227,9 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     vcf.data.artifact <- vcf.obj$data[!include, ]
 
     if (verbose == TRUE) {
-        print("After initialization,")
-        print(paste0("There are ", nrow(vcf.data.filtered), " rows in vcf.data.filtered vcf"))
-        print(paste0("There has ", nrow(vcf.data.artifact), " rows in vcf.data.artifact vcf"))
-        print(Sys.time())
+        PrintLog("* After initialization:")
+        PrintLog(paste0("** ", nrow(vcf.data.filtered), " rows in vcf.data.filtered VCF object."))
+        PrintLog(paste0("** ", nrow(vcf.data.artifact), " rows in vcf.data.artifact VCF object."))
     }
 
     return(list(vcf.obj.filtered = list(data = vcf.data.filtered,

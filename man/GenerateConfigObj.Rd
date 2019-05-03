@@ -18,8 +18,8 @@ GenerateConfigObj(vcf.obj, save.config = TRUE,
 config.obj
 }
 \description{
-This function generate config.obj by checking vcf header. 
+This function generate config.obj by checking vcf header.
 Users should fill in the information needed in console.
-In current version, only Integers & Float values can be used in 
+In current version, only Integers & Float values can be used in
 config.obj for running FIREVAT.
 }

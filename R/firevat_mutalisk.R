@@ -451,14 +451,19 @@ RunMutalisk <- function(vcf.obj,
     vcf.trinucleotide.data <- MutaliskParseVCFObj(vcf.obj = vcf.obj)
 
     # Identify mutational signatures among the target signatures
-    if (verbose) print(paste0("Started running Mutalisk with ", length(target.mut.sigs),
-                              " target signatures using ", method, " method"))
+    if (verbose == TRUE) {
+        PrintLog("* Started running Mutalisk with:")
+        PrintLog(paste0("** ", length(target.mut.sigs), " target signatures"))
+        PrintLog(paste0("** '", method, "' method"))
+    }
 
     # Run Mutalisk based on 'method'
     if (method == "random.sampling")  {
         target.mut.sigs.sampled <- c()
         for (i in 1:n.iter)  {
-            if (verbose) print(paste0("Random sampling iteration ", i))
+            if (verbose == TRUE) {
+                PrintLog(paste0("* Random sampling iteration: ", i))
+            }
             candidate.mut.sigs <- sample(target.mut.sigs, n.sample)
             candidateresults <- RunMutaliskHelper(vcf.trinucleotide.data = vcf.trinucleotide.data,
                                                   df.ref.mut.sigs = df.ref.mut.sigs,
@@ -467,7 +472,9 @@ RunMutalisk <- function(vcf.obj,
                                          candidateresults$identified.mut.sigs)
         }
         target.mut.sigs.sampled <- unique(c(target.mut.sigs.sampled, random.sampling.candidate.mut.sigs))
-        if (verbose) print(paste0("Running Mutalisk with ", length(target.mut.sigs.sampled), " candidate signatures"))
+        if (verbose == TRUE) {
+            PrintLog(paste0("* Running Mutalisk with ", length(target.mut.sigs.sampled), " candidate signatures"))
+        }
         results <- RunMutaliskHelper(vcf.trinucleotide.data = vcf.trinucleotide.data,
                                      df.ref.mut.sigs = df.ref.mut.sigs,
                                      target.mut.sigs = target.mut.sigs.sampled)
@@ -478,8 +485,8 @@ RunMutalisk <- function(vcf.obj,
                                      target.mut.sigs = target.mut.sigs)
     }
 
-    if (verbose) print(paste0("Finished running Mutalisk with ", length(target.mut.sigs),
-                              " target signatures using ", method, " method"))
-
+    if (verbose == TRUE) {
+        PrintLog("* Finished running Mutalisk")
+    }
     return(results)
 }

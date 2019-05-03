@@ -56,7 +56,7 @@ PlotVCFStatsHistograms <- function(plot.values,
                                    font.size.med = 10,
                                    font.size.large = 12,
                                    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
-    print("Started plotting vcf stats histograms")
+    PrintLog("** Started plotting vcf stats histograms")
     graphs <- list()
     i <- 1
     for (curr.plot.values in plot.values) {
@@ -116,7 +116,7 @@ PlotVCFStatsHistograms <- function(plot.values,
                                        size = font.size.large))
     ggsave(save.file, width = 16, height = 9)
 
-    print("Finished plotting vcf stats histograms")
+    PrintLog("** Finished plotting vcf stats histograms")
     return(list(f = f, graphs = graphs))
 }
 
@@ -143,7 +143,7 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
                                  axis.font.size = 10,
                                  label.font.size = 10,
                                  title.font.size = 12) {
-    print("Started plotting vcf stats boxplots")
+    PrintLog("** Started plotting vcf stats boxplots")
 
     # Prepare plot data
     df1 <- data.frame(type = rep('Original', length(original.vcf.stat.values)),
@@ -218,7 +218,7 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
                            label = "p.format") +
         rremove("legend") + rremove("ylab")
 
-    print("Finished plotting vcf stats boxplots")
+    PrintLog("** Finished plotting vcf stats boxplots")
     return(g)
 }
 
@@ -265,7 +265,7 @@ PlotOptimizationIterations <- function(df,
                                        font.size.med = 14,
                                        font.size.large = 16,
                                        plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
-    print("Started plotting optimization iterations")
+    PrintLog("** Started plotting optimization iterations")
 
     df.temp <- df[,c(x.axis.var, columns.to.plot)]
     df.temp[,x.axis.var] <- as.numeric(as.character(df.temp[, x.axis.var]))
@@ -309,7 +309,7 @@ PlotOptimizationIterations <- function(df,
     # Save file
     ggsave(save.file, width = 16, height = 9)
 
-    print("Finished plotting optimization iterations")
+    PrintLog("** Finished plotting optimization iterations")
     return(g)
 }
 
@@ -359,7 +359,7 @@ PlotTriNucSpectrum <- function(sub.types,
                                plot.margin.left = 0.5,
                                plot.margin.right = 0.5,
                                title) {
-    print("Started plotting trinucleotide spectrum")
+    PrintLog("** Started plotting trinucleotide spectrum")
 
     # Prepare plot data
     plot.colors <- TriNuc.Mutation.Type.Hex.Colors
@@ -462,7 +462,7 @@ PlotTriNucSpectrum <- function(sub.types,
                                                    color = "black", rot = 90))
     }
 
-    print("Finished plotting trinucleotide spectrum")
+    PrintLog("** Finished plotting trinucleotide spectrum")
     return(figure)
 }
 
@@ -497,7 +497,7 @@ PlotSignaturesContProbs <- function(df.identified.mut.sigs,
                                     font.size.small = 8,
                                     font.size.med = 14,
                                     plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
-    print("Started plotting signatures probabilities")
+    PrintLog("** Started plotting signatures probabilities")
 
     # Prepare plot data
     x <- as.character(df.identified.mut.sigs$signature)
@@ -569,7 +569,7 @@ PlotSignaturesContProbs <- function(df.identified.mut.sigs,
                                    title.position = "top",
                                    title.hjust = 0))
 
-    print("Finished plotting signatures probabilities")
+    PrintLog("** Finished plotting signatures probabilities")
     return(g)
 }
 
@@ -616,7 +616,7 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
                               font.size.small = 8,
                               font.size.med = 14,
                               plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")) {
-    print("Started plotting mutation types")
+    PrintLog("** Started plotting mutation types")
 
     # Prepare plot data
     x <- mutation.types
@@ -665,7 +665,7 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
         g <- g + guides(fill = FALSE)
     }
 
-    print("Finished plotting signatures probabilities")
+    PrintLog("** Finished plotting signatures probabilities")
     return(g)
 }
 
@@ -702,7 +702,7 @@ PlotMutaliskResults <- function(mutalisk.results,
                                 trinuc.min.y,
                                 mut.type.max.y,
                                 title) {
-    print("Started plotting Mutalisk results")
+    PrintLog("** Started plotting Mutalisk results")
 
     # 1. Plot contribution probabilities of identified signatures
     df.identified.mut.sigs <- data.frame(
@@ -771,7 +771,7 @@ PlotMutaliskResults <- function(mutalisk.results,
                             show.legend = F,
                             title = title)
 
-    print("Finished plotting Mutalisk results")
+    PrintLog("** Finished plotting Mutalisk results")
     return(list(f1 = f1,
                 f2.1 = g1,
                 f2.2 = g2,
@@ -797,7 +797,7 @@ PlotMutaliskResults <- function(mutalisk.results,
 PlotTable <- function(df,
                       padding = 20,
                       font.size = 14) {
-    print("Started plotting table")
+    PrintLog("** Started plotting table")
 
     # Add padding
     padding.char <- rep(" ", padding)
@@ -841,6 +841,6 @@ PlotTable <- function(df,
     }
     grid.newpage()
 
-    print("Finished plotting table")
+    PrintLog("** Finished plotting table")
     return(g)
 }

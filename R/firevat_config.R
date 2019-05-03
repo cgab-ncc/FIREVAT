@@ -30,7 +30,8 @@
 #' @importFrom yaml read_yaml
 ParseConfigFile <- function(config.path, verbose = TRUE) {
     if (verbose == TRUE) {
-        print(paste("Parsing",config.path))
+        PrintLog("* Started parsing config file: ")
+        PrintLog(paste0("** ", config.path))
     }
 
     suppressWarnings(
@@ -45,9 +46,7 @@ ParseConfigFile <- function(config.path, verbose = TRUE) {
             config.obj <- read_yaml(config.path)
         }, error = function(e) {
             # Error message if config file is in neither json nor yaml
-            read.error.message <- paste("ERROR: Cannot read config file:",
-                                        config.path)
-            stop(read.error.message)
+            stop(paste0("Cannot read config file: ", config.path))
         })
     }
 
@@ -84,7 +83,8 @@ ParseConfigFile <- function(config.path, verbose = TRUE) {
     }
 
     if (verbose == TRUE) {
-        print(paste("Completed parsing",config.path))
+        PrintLog("* Finished parsing config file:")
+        PrintLog(paste0("** ", config.path))
     }
 
     return(config.obj)
@@ -158,9 +158,9 @@ MatchINFOKeyValue <- function(INFO.list) {
 
 #' @title Generate config.obj by checking vcf header
 #' @description
-#' This function generate config.obj by checking vcf header. 
+#' This function generate config.obj by checking vcf header.
 #' Users should fill in the information needed in console.
-#' In current version, only Integers & Float values can be used in 
+#' In current version, only Integers & Float values can be used in
 #' config.obj for running FIREVAT.
 #'
 #' @param vcf.obj A list from \code{\link{ReadVCF}}
@@ -181,32 +181,32 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
     # INFO
     ## mandatory fields: name/direction/field_type/key/index/type
     ## optional fields: default/range
-    
+
     # Define config.obj
     print(paste("VCF Spec:", vcf.obj$header$fileformat))
     print("Checklist protocol, initiated.")
-    
+
     config.obj <- list()
-    
+
     column.names <- c("FORMAT", "INFO")
-    
+
     # Check FORMAT & INFO columns.
     for (col.name in column.names) {
         col.name.info <- vcf.obj$header[[col.name]]
-        
+
         # Show fields
         print(paste(length(col.name.info[,"ID"]),col.name,"fields identified."))
         print(paste0(col.name.info[,"ID"], ": ",
                      col.name.info[,"Description"],
                      ", Type: ", col.name.info[,"Type"]))
-        
+
         i <- 1
-        
+
         repeat{
             if (i >  length(col.name.info[,"ID"])){
                 break
             }
-            
+
             # Get values
             key <- col.name.info[i,"ID"]
             print(paste("Checking", key))
@@ -219,9 +219,9 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                 i <- i + 1
                 next
             }
-            
+
             # Skip if type == String or Flag
-            if (type %in% c("String", "Flag")) { 
+            if (type %in% c("String", "Flag")) {
                 i <- i + 1
                 next
             }
@@ -247,7 +247,7 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                     next
                 }
             }
-            
+
             if (use.in.filter==TRUE) {
                 param.name <- readline(prompt="Parameter name: ")
                 field.type <- col.name
@@ -260,7 +260,7 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                 }
                 # if col.name == "FORMAT", get column names to extract value.
                 if (col.name == "FORMAT") {
-                    
+
                     field.column.header <- readline(prompt=
                         paste0("Get values from column (",
                                paste(col.samples, collapse=", "),
@@ -273,7 +273,7 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                 } else if (col.name == "INFO") {
                     field.column.header <- ""
                 }
-                
+
                 direction <- readline(prompt=
                     paste0("Filtering direction (",
                            "POS: Parameter of Refined variants > CUTOFF, ",
@@ -290,7 +290,7 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                 filtering.range <- readline(prompt=
                     "Filtering range (min,max; Optional: Press ENTER to ignore): "
                 )
-                
+
                 # Check whether given information is right.
                 print(paste0("Check this information.",
                              "name: ", param.name, ";",
@@ -305,8 +305,8 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                              "use_in_filter: ", use.in.filter))
                 check.before.save <- as.logical(readline(prompt=
                                      "Save this information to config.obj (T/F): "))
-                
-                suppressWarnings({                
+
+                suppressWarnings({
                     if (check.before.save) {
                         config.obj[[param.name]] <- list(
                             "name" = param.name,
@@ -338,7 +338,7 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
                     }
                 })
             }
-            
+
             # Check whether to repeat generatation parameters from this key.
             print(paste("Current field:",col.name))
             print(paste("Current key:", key))
@@ -362,14 +362,14 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
             }
             # Jump to next parameter
             key.next <- as.logical(readline(prompt="Jump to next param (T/F): "))
-            
+
             if (key.next) {
                 i <- i + 1
                 next
             }
         }
     }
-    
+
     # Save config.obj if save.config == TRUE
     if (save.config) {
         config.extension <- file_ext(config.path)
@@ -382,7 +382,7 @@ GenerateConfigObj <- function(vcf.obj, save.config = TRUE,
             stop("FIREVAT config file should be in json or yaml format.")
         }
     }
-    
+
     # Jobs Done!
     print("Completed.")
     return(config.obj)

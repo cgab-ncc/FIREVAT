@@ -132,85 +132,91 @@ RunFIREVAT <- function(vcf.file,
                        save.tsv = TRUE,
                        report.format = "html",
                        verbose = TRUE) {
-    # 0.1. Check input parameters
+    # 00. Check input parameters
     if (is.character(vcf.file) == FALSE) {
-        stop("The parameter 'vcf.file' must be a string")
+        stop("The parameter 'vcf.file' must be a string.")
     }
     if (vcf.file.genome != 'hg19' && vcf.file.genome != 'hg38') {
-        stop("The parameter 'vcf.file.genome' must be either 'hg19' or 'hg38'")
+        stop("The parameter 'vcf.file.genome' must be either 'hg19' or 'hg38'.")
     }
     if (is.character(config.file) == FALSE) {
-        stop("The parameter 'config.file' must be a string")
+        stop("The parameter 'config.file' must be a string.")
     }
     if (is.data.frame(df.ref.mut.sigs) == FALSE) {
-        stop("The parameter 'df.ref.mut.sigs' must be a data.frame")
+        stop("The parameter 'df.ref.mut.sigs' must be a data.frame.")
     }
     if (all(target.mut.sigs %in% colnames(df.ref.mut.sigs)) == FALSE)  {
-        stop("All elements of the parameter 'target.mut.sigs' must be present in 'df.ref.mut.sigs' columns")
+        stop("All elements of the parameter 'target.mut.sigs' must be present in 'df.ref.mut.sigs' columns.")
     }
     if (all(sequencing.artifact.mut.sigs %in% colnames(df.ref.mut.sigs)) == FALSE)  {
-        stop("All elements of the parameter 'sequencing.artifact.mut.sigs' must be present in 'df.ref.mut.sigs' columns")
+        stop("All elements of the parameter 'sequencing.artifact.mut.sigs' must be present in 'df.ref.mut.sigs' columns.")
     }
     if (is.numeric(num.cores) == FALSE || num.cores <= 0)  {
-        stop("The parameter 'num.cores' must be an integer and be greater than 0")
+        stop("The parameter 'num.cores' must be an integer and be greater than 0.")
     }
     if (is.character(output.dir) == FALSE)  {
-        stop("The parameter 'output.dir' must be a string")
+        stop("The parameter 'output.dir' must be a string.")
     }
     if (mode != "ga" && mode != "manual")  {
-        stop("The parameter 'mode' must be either 'ga' or 'manual'")
+        stop("The parameter 'mode' must be either 'ga' or 'manual'.")
     }
     if (is.numeric(init.artifact.stop) == FALSE || init.artifact.stop >= 1) {
         stop("The parameter 'init.artifact.stop' must be a numeric value less than 1.")
     }
     if (is.numeric(ga.pop.size) == FALSE || ga.pop.size <= 0)  {
-        stop("The parameter 'ga.pop.size' must be an integer and be greater than 0")
+        stop("The parameter 'ga.pop.size' must be an integer and be greater than 0.")
     }
     if (is.numeric(ga.max.iter) == FALSE || ga.max.iter <= 0)  {
-        stop("The parameter 'ga.max.iter' must be an integer and be greater than 0")
+        stop("The parameter 'ga.max.iter' must be an integer and be greater than 0.")
     }
     if (is.numeric(ga.run) == FALSE || ga.run <= 0)  {
-        stop("The parameter 'ga.run' must be an integer and be greater than 0")
+        stop("The parameter 'ga.run' must be an integer and be greater than 0.")
     }
     if (is.numeric(ga.pmutation) == FALSE || ga.pmutation < 0 || ga.pmutation > 1)  {
-        stop("The parameter 'ga.pmutation' must be a value between 0 and 1")
+        stop("The parameter 'ga.pmutation' must be a value between 0 and 1.")
     }
     if (verbose != TRUE && verbose != FALSE)  {
-        stop("The parameter 'verbose' must be a boolean")
+        stop("The parameter 'verbose' must be a boolean.")
     }
 
     start.datetime <- Sys.time()
     if (verbose == TRUE) {
-        print(start.datetime)
-        print("Initializing FIREVAT variant filtering pipeline")
+        PrintLog("Started running FIREVAT.")
+        PrintLog("Step 01. Initialize FIREVAT input parameters.")
     }
 
-    # 0.2. Create the output directory
+    # 01. Create the output directory
     if (dir.exists(output.dir) == FALSE) {
         dir.create(output.dir, recursive = T)
+        PrintLog(paste0("Step 01-1. Created output directory at ", output.dir))
     } else {
         if (verbose == TRUE) {
-            print(paste0(output.dir, " already exists"))
+            PrintLog(paste0("Step 01-1. Output directory ", output.dir, " already exists."))
         }
     }
 
-    # 1. Read the vcf file
+    # 02. Read the vcf file
+    PrintLog("Step 01-2. Read VCF file [firevat_vcf::ReadVCF].")
     vcf.obj <- ReadVCF(vcf.file = vcf.file, genome = vcf.file.genome)
 
-    # 2. Read the config file
+    # 03. Read the config file
+    PrintLog("Step 01-3. Read config file [firevat_config::ParseConfigFile]")
     config.obj <- ParseConfigFile(config.file, verbose = verbose)
 
-    # 3.Initially select point mutations that satisfy the config file and
-    #   consider these the initial set of mutations
+    # 04.Initially select point mutations that satisfy the config file and
+    # consider these the initial set of mutations
+    PrintLog("Step 01-4. Initialize VCF file [firevat_vcf::InitializeVCF]")
     vcf.objs <- InitializeVCF(vcf.obj = vcf.obj,
                               config.obj = config.obj,
                               verbose = verbose)
     vcf.obj <- vcf.objs$vcf.obj.filtered
 
-    # 4. Make filter from config file
+    # 05. Make filter from config file
+    PrintLog("Step 01-5. Make VCF filter [firevat_filter::MakeFilter]")
     vcf.filter <- MakeFilter(config.obj)
 
-    # 5.1. Prepare data for optimization
+    # 06. Prepare data for optimization
+    PrintLog("Step 01-6. Prepare data for optimization")
     data = list(start.datetime = start.datetime,
                 vcf.file = vcf.file,
                 vcf.file.basename = gsub("\\.vcf", "", basename(vcf.file)),
@@ -243,10 +249,10 @@ RunFIREVAT <- function(vcf.file,
                 firevat.version = packageVersion("FIREVAT"),
                 verbose = verbose)
 
-    # 5.2. FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
-    # TODO: NEED TEST 50 or 100
+    # 07. FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
+    PrintLog("Step 01-7. Check mutations count")
     if (nrow(vcf.obj$data) <= 50) {
-        print("FIREVAT must have at least 50 mutations to run. Returning without running FIREVAT.")
+        PrintLog("FIREVAT must have at least 50 mutations to run. Returning without running FIREVAT.", type = "WARNING")
         data$end.datetime <- Sys.time()
         data$variant.refinement.performed <- FALSE
         data$variant.refinement.terminiation.log <- "Not enough point mutations (less than or equal 50)"
@@ -259,14 +265,14 @@ RunFIREVAT <- function(vcf.file,
         return(data)
     } else {
         if (verbose == TRUE) {
-            print(paste0("Starting with ", nrow(vcf.obj$data), " point mutations"))
+            PrintLog(paste0("* ", nrow(vcf.obj$data), " point mutations identified for potential FIREVAT variant refinement."))
         }
     }
 
     # 6. Optimize filter parameters
     if (mode == "ga") {
         if (verbose == TRUE) {
-            print("Started running FIREVAT Genetic Algorithm optimization")
+            PrintLog("Step 02. Run FIREVAT variant refinement optimization.")
         }
 
         # Prepare data for Mutational Patterns (memoization)
@@ -280,6 +286,10 @@ RunFIREVAT <- function(vcf.file,
         }
 
         # Check if refinement is necessary based on the sum of sequencing artifact weights in the original VCF file
+        if (verbose == TRUE) {
+            PrintLog("Step 02-1. Check if FIREVAT variant refinement is necessary [firevat_optimization::CheckIfVariantRefinementIsNecessary]")
+        }
+
         is.variant.refinement.necessary <- CheckIfVariantRefinementIsNecessary(vcf.obj = data$vcf.obj,
                                                                                bsg = data$bsg,
                                                                                df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
@@ -290,19 +300,16 @@ RunFIREVAT <- function(vcf.file,
         data$original.muts.seq.art.weights.sum <- is.variant.refinement.necessary$seq.art.sigs.weights.sum
 
         if (is.variant.refinement.necessary$judgment == TRUE) {
+            PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
+            PrintLog(paste0("** This value is greater than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
+            PrintLog("** FIREVAT will now begin performing varaint refinement.")
             data$variant.refinement.performed <- TRUE
-            print(paste0("The sum of sequencing artifact weights is ",
-                         is.variant.refinement.necessary$seq.art.sigs.weights.sum,
-                         ", which is greater than the ",
-                         "'init.artifact.stop' parameter that you set (", data$init.artifact.stop,
-                         "). FIREVAT will therefore now begin performing variant refinement."))
         } else {
-            print(paste0("The sum of sequencing artifact weights is ",
-                         is.variant.refinement.necessary$seq.art.sigs.weights.sum,
-                         " in the original vcf file that you supplied.",
-                         " FIREVAT therefore returns without performing variant refinement."))
-            data$end.datetime <- Sys.time()
+            PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
+            PrintLog(paste0("** This value is equal to or smaller than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
+            PrintLog("** FIREVAT will return without performing varaint refinement.", type = "WARNING")
             data$variant.refinement.performed <- FALSE
+            data$end.datetime <- Sys.time()
             data$variant.refinement.terminiation.log <- "Initial sequencing artifact weights sum is less than or equal to init.artifact.stop"
             if (save.rdata == TRUE) {
                 save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
@@ -335,6 +342,7 @@ RunFIREVAT <- function(vcf.file,
 
         # Suggestions
         if (use.suggested.soln == TRUE) { # use default parameters as suggestions
+            PrintLog("Step 02-2. Compute suggested solutions [firevat_brute_force::GetGASuggestedSolutions]")
             suggested.solutions <- GetGASuggestedSolutions(vcf.obj = data$vcf.obj,
                                                            bsg = data$bsg,
                                                            config.obj = data$config.obj,
@@ -352,6 +360,8 @@ RunFIREVAT <- function(vcf.file,
         } else {
             suggestions <- NULL
         }
+
+        PrintLog("Step 02-3. Run variant optimization guided by mutational signatures [firevat_optimization::GAOptimizationObjFn]")
 
         if (ga.type == "binary") {
             # Convert filter parameters to bits
@@ -405,10 +415,6 @@ RunFIREVAT <- function(vcf.file,
             }
         }
 
-        if (verbose == TRUE) {
-            print("Finished running FIREVAT Genetic Algorithm optimization")
-        }
-
         # Parse optimized results
         if (data$ga.type == "binary") {
             data$x.solution.binary <- as.numeric(ga.results@solution[1,])
@@ -423,34 +429,34 @@ RunFIREVAT <- function(vcf.file,
             print("FIREVAT results")
             print(summary(ga.results))
             if (data$ga.type == "binary") {
-                print("FIREVAT optimized binary values of filter parameters")
+                PrintLog("* FIREVAT optimized binary values of filter parameters:")
                 print(data$x.solution.binary)
             }
-            print("FIREVAT Optimized integer values of filter parameters")
+            PrintLog("* FIREVAT optimized integer values of filter parameters:")
             print(data$x.solution.decimal)
         }
     } else if (mode == "manual") {
         if (verbose == TRUE) {
-            print("Running FIREVAT manual optimization")
+            PrintLog("Step 02. Run FIREVAT manual variant refinement.")
         }
         data$x.solution.decimal <- unlist(data$vcf.filter) # default values
     }
 
     # 7. Filter vcf.data based on the updated vcf.filter
+    PrintLog("Step 02-4. Filter VCF based on optmized filter parameters.")
     data$vcf.filter <- UpdateFilter(vcf.filter = data$vcf.filter,
                                     param.values = data$x.solution.decimal)
     optimized.vcf.objs <- FilterVCF(vcf.obj = data$vcf.obj,
                                     config.obj = data$config.obj,
                                     vcf.filter = data$vcf.filter,
                                     verbose = data$verbose)
-
     data$refined.vcf.obj <- optimized.vcf.objs$vcf.obj.filtered
     data$artifactual.vcf.obj <- optimized.vcf.objs$vcf.obj.artifact
 
     # Check if point mutations remaining in either refined.vcf.obj or artifactual.vcf.obj.
     # Either refinement is too liberal or too stringent. Return with a message.
     if (nrow(data$refined.vcf.obj$data) == 0) {
-        print("After performing variant refinement there are no mutations remaining in the refined set.")
+        PrintLog("After performing variant refinement there are no mutations remaining in the refined set.", type = "WARNING")
         data$end.datetime <- Sys.time()
         data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the refined set"
         if (save.rdata == TRUE) {
@@ -462,7 +468,7 @@ RunFIREVAT <- function(vcf.file,
         return(data)
     }
     if (nrow(data$artifactual.vcf.obj$data) == 0) {
-        print("After performing variant refinement there are no mutations remaining in the artifactual set.")
+        PrintLog("After performing variant refinement there are no mutations remaining in the artifactual set.", type = "WARNING")
         data$end.datetime <- Sys.time()
         data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the artifactual set"
         if (save.rdata == TRUE) {
@@ -485,7 +491,11 @@ RunFIREVAT <- function(vcf.file,
     data$strand.bias.fdr.correction.method <- strand.bias.fdr.correction.method
     data$strand.bias.perform.fdr.correction <- strand.bias.perform.fdr.correction
 
+    PrintLog("Step 03. Additional analysis.")
+
     if (data$perform.strand.bias.analysis == TRUE) {
+        PrintLog("Step 03-1. Perform strand bias analysis [firevat_strand_bias::PerformStrandBiasAnalysis]")
+
         data$refined.vcf.obj <- PerformStrandBiasAnalysis(
             vcf.obj = data$refined.vcf.obj,
             ref.forward.strand.var = data$ref.forward.strand.var,
@@ -496,6 +506,7 @@ RunFIREVAT <- function(vcf.file,
             fdr.correction.method = data$strand.bias.fdr.correction.method)
 
         if (data$filter.by.strand.bias.analysis == TRUE) {
+            PrintLog("* Filter by strand bias analysis results [firevat_strand_bias::FilterByStrandBiasAnalysis]")
             filtered.vcf.objs <- FilterByStrandBiasAnalysis(
                 refined.vcf.obj = data$refined.vcf.obj,
                 artifactual.vcf.obj = data$artifactual.vcf.obj,
@@ -523,6 +534,8 @@ RunFIREVAT <- function(vcf.file,
     data$annotation.filter.condition = annotation.filter.condition
 
     if (data$annotate == TRUE) {
+        PrintLog("Step 03-2. Annotate variants [firevat_annotation::AnnotateVCFObj]")
+
         # Annotate VCFs
         data$vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$vcf.obj,
                                                  df.annotation.db = data$df.annotation.db,
@@ -547,6 +560,9 @@ RunFIREVAT <- function(vcf.file,
     # Identify target mutational signatures
     # Here we fetch all signatures ever identified by Mutational Patterns
     if (mutalisk == TRUE) {
+        PrintLog("Step 03-3. Perform Mutalisk mutational signature analysis [firevat_mutalisk::RunMutalisk]")
+        PrintLog("* Preparing data")
+
         df.optimization.logs <- ReadOptimizationIterationReport(data = data)
         Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
             include <- rep(TRUE, length(sigs))
@@ -613,7 +629,9 @@ RunFIREVAT <- function(vcf.file,
     }
 
     # 12. Write VCF Files
-    if (write.vcf == TRUE){
+    if (write.vcf == TRUE) {
+        PrintLog("Step 04. Write refined and artifactual VCF files [firevat_vcf::WriteVCF]")
+
         WriteVCF(vcf.obj = data$vcf.obj,
                  save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
         WriteVCF(vcf.obj = data$refined.vcf.obj,
@@ -635,14 +653,17 @@ RunFIREVAT <- function(vcf.file,
 
     # 13. Report results
     if (report == TRUE) {
+        PrintLog("Step 05. Generate FIREVAT report")
         data <- ReportFIREVATResults(data = data)
     }
 
     # 14. Save data
     if (save.rdata == TRUE) {
+        PrintLog("Step 06. Write .RData")
         save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
     }
     if (save.tsv == TRUE) {
+        PrintLog("Step 07. Write FIREVAT results to .tsv file")
         WriteFIREVATResultsToTSV(firevat.results = data)
     }
 

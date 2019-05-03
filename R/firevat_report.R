@@ -57,9 +57,9 @@ GetOptimizedSignatures <- function(data,
         artifact.signatures.str <- "artifactual.muts.sequencing.artifact.signatures"
         artifact.signatures.weights.str <- "artifactual.muts.sequencing.artifact.signatures.weights"
     } else {
-        print(paste0("ERROR - unknown parameter passed.",
-                     "'mutations.type' must be one of the following: ",
-                     "'refined' or 'artifact'"))
+        PrintLog(paste0("ERROR - unknown parameter passed.",
+                        "'mutations.type' must be one of the following: ",
+                        "'refined' or 'artifact'"), type = "ERROR")
         return(NULL)
     }
 
@@ -102,9 +102,9 @@ GetOptimizedSignatures <- function(data,
                          stringsAsFactors = F,
                          check.names = F)
     } else {
-        print(paste0("ERROR - unknown parameter passed.",
-                     "'signatures' must be one of the following: ",
-                     "'all', 'target' or 'artifact'"))
+        PrintLog(paste0("ERROR - unknown parameter passed.",
+                        "'signatures' must be one of the following: ",
+                        "'all', 'target' or 'artifact'"), type = "ERROR")
         return(NULL)
     }
     return(df)
@@ -1001,7 +1001,7 @@ PrepareArtifactStrandBiasTable <- function(data) {
 #' @export
 ReportFIREVATResults <- function(data) {
     if (data$verbose == TRUE) {
-        print("Started generating FIREVAT report")
+        PrintLog("* Started generating FIREVAT report")
     }
 
     # Generate html report
@@ -1050,7 +1050,7 @@ ReportFIREVATResults <- function(data) {
     }
 
     if (data$verbose == TRUE) {
-        print("Finished generating FIREVAT report")
+        PrintLog("* Finished generating FIREVAT report")
     }
 
     data$report.items <- report.items

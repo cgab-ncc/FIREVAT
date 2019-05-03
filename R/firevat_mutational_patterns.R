@@ -105,7 +105,7 @@ RunMutPat <- function(mut.pat.input,
                       target.mut.sigs,
                       verbose = TRUE) {
     if (verbose == TRUE) {
-        print("Started running Mutational Patterns")
+        PrintLog("* Started running Mutational Patterns")
     }
 
     # Take only unique mutational signatures
@@ -134,7 +134,7 @@ RunMutPat <- function(mut.pat.input,
               cosine.similarity.score = cosine.similarity.score)
 
     if (verbose == TRUE) {
-        print("Finished running Mutational Patterns")
+        PrintLog("* Finished running Mutational Patterns")
     }
 
     return(r)
