@@ -342,6 +342,7 @@ PlotOptimizationIterations <- function(df,
 #'
 #' @import ggplot2
 #' @import ggpubr
+#' @import extrafont
 #' @export
 PlotTriNucSpectrum <- function(sub.types,
                                spectrum,
@@ -359,6 +360,9 @@ PlotTriNucSpectrum <- function(sub.types,
                                plot.margin.left = 0.5,
                                plot.margin.right = 0.5,
                                title) {
+    # extrafont
+    loadfonts()
+
     PrintLog("** Started plotting trinucleotide spectrum")
 
     # Prepare plot data

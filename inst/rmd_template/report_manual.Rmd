@@ -20,7 +20,10 @@ knitr::opts_chunk$set(fig.width = 12,
 <!-- Load libraries and data-->
 ```{r, echo=FALSE}
 library(knitr)
+library(extrafont)
 
+
+extrafont::loadfonts()
 data <- params$data
 report.items <- params$report.items
 ```

@@ -563,69 +563,96 @@ RunFIREVAT <- function(vcf.file,
         PrintLog("Step 03-3. Perform Mutalisk mutational signature analysis [firevat_mutalisk::RunMutalisk]")
         PrintLog("* Preparing data")
 
-        df.optimization.logs <- ReadOptimizationIterationReport(data = data)
-        Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
-            include <- rep(TRUE, length(sigs))
-            include[which(sigs == "")] <- FALSE
-            include[is.na(sigs)] <- FALSE
+        if (mode == "ga") {
+            df.optimization.logs <- ReadOptimizationIterationReport(data = data)
+            Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
+                include <- rep(TRUE, length(sigs))
+                include[which(sigs == "")] <- FALSE
+                include[is.na(sigs)] <- FALSE
 
-            sigs <- as.character(sigs[include])
-            weights <- as.character(weights[include])
-            sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
-            weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
+                sigs <- as.character(sigs[include])
+                weights <- as.character(weights[include])
+                sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
+                weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
 
-            if (length(sigs) == 0) {
-                return(c())
+                if (length(sigs) == 0) {
+                    return(c())
+                }
+
+                candidate.sigs <- c()
+                for (i in 1:length(sigs)) {
+                    df <- data.frame(sig = sigs[[i]],
+                                     weight = weights[[i]],
+                                     stringsAsFactors = F)
+                    df <- df[df$weight >= cutoff, ]
+                    candidate.sigs <- c(candidate.sigs, df$sig)
+                }
+                return(candidate.sigs)
+            }
+            sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
+                                weights = df.optimization.logs$refined.muts.target.signatures.weights)
+            sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
+                                weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
+            sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
+                                weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
+            sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
+                                weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
+            if (is.null(mutalisk.must.include.sigs) == FALSE) {
+                data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs, mutalisk.must.include.sigs))
+            } else {
+                data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
             }
 
-            candidate.sigs <- c()
-            for (i in 1:length(sigs)) {
-                df <- data.frame(sig = sigs[[i]],
-                                 weight = weights[[i]],
-                                 stringsAsFactors = F)
-                df <- df[df$weight >= cutoff, ]
-                candidate.sigs <- c(candidate.sigs, df$sig)
-            }
-            return(candidate.sigs)
-        }
-        sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
-                            weights = df.optimization.logs$refined.muts.target.signatures.weights)
-        sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
-                            weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
-        sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
-                            weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
-        sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
-                            weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
-        if (is.null(mutalisk.must.include.sigs) == FALSE) {
-            data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs, mutalisk.must.include.sigs))
-        } else {
-            data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
-        }
-
-        # Original vcf
-        data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
-                                                      df.ref.mut.sigs = data$df.ref.mut.sigs,
-                                                      target.mut.sigs = data$mut.pat.target.sigs,
-                                                      method = data$mutalisk.method,
-                                                      n.sample = data$mutalisk.random.sampling.count,
-                                                      n.iter = data$mutalisk.random.sampling.max.iter,
-                                                      verbose = data$verbose)
-        # Refined vcf
-        data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
-                                                          df.ref.mut.sigs = df.ref.mut.sigs,
+            # Original vcf
+            data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
+                                                          df.ref.mut.sigs = data$df.ref.mut.sigs,
                                                           target.mut.sigs = data$mut.pat.target.sigs,
                                                           method = data$mutalisk.method,
                                                           n.sample = data$mutalisk.random.sampling.count,
                                                           n.iter = data$mutalisk.random.sampling.max.iter,
                                                           verbose = data$verbose)
-        # Artifact vcf
-        data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+            # Refined vcf
+            data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
                                                               df.ref.mut.sigs = df.ref.mut.sigs,
                                                               target.mut.sigs = data$mut.pat.target.sigs,
                                                               method = data$mutalisk.method,
                                                               n.sample = data$mutalisk.random.sampling.count,
                                                               n.iter = data$mutalisk.random.sampling.max.iter,
                                                               verbose = data$verbose)
+            # Artifact vcf
+            data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+                                                                  df.ref.mut.sigs = df.ref.mut.sigs,
+                                                                  target.mut.sigs = data$mut.pat.target.sigs,
+                                                                  method = data$mutalisk.method,
+                                                                  n.sample = data$mutalisk.random.sampling.count,
+                                                                  n.iter = data$mutalisk.random.sampling.max.iter,
+                                                                  verbose = data$verbose)
+        } else if (mode == "manual") {
+            # Original vcf
+            data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
+                                                          df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                          target.mut.sigs = data$target.mut.sigs,
+                                                          method = data$mutalisk.method,
+                                                          n.sample = data$mutalisk.random.sampling.count,
+                                                          n.iter = data$mutalisk.random.sampling.max.iter,
+                                                          verbose = data$verbose)
+            # Refined vcf
+            data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
+                                                              df.ref.mut.sigs = df.ref.mut.sigs,
+                                                              target.mut.sigs = data$target.mut.sigs,
+                                                              method = data$mutalisk.method,
+                                                              n.sample = data$mutalisk.random.sampling.count,
+                                                              n.iter = data$mutalisk.random.sampling.max.iter,
+                                                              verbose = data$verbose)
+            # Artifact vcf
+            data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+                                                                  df.ref.mut.sigs = df.ref.mut.sigs,
+                                                                  target.mut.sigs = data$target.mut.sigs,
+                                                                  method = data$mutalisk.method,
+                                                                  n.sample = data$mutalisk.random.sampling.count,
+                                                                  n.iter = data$mutalisk.random.sampling.max.iter,
+                                                                  verbose = data$verbose)
+        }
     }
 
     # 12. Write VCF Files
