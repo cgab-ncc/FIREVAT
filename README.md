@@ -6,7 +6,7 @@
 [![](http://cranlogs.r-pkg.org/badges/grand-total/badger?color=green)](https://cran.r-project.org/package=FIREVAT)
 [![GPLv2 license](https://img.shields.io/badge/License-GPLv2-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
-```FIREVAT``` (**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts) is an R package that performs variant refinement for cancer sequencing data. ```FIREVAT``` uses mutational signatures to identify sequencing artifacts and low-quality variants.
+```FIREVAT``` (**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts) is an R package that performs variant refinement on cancer sequencing data. ```FIREVAT``` uses mutational signatures to identify sequencing artifacts and low-quality variants.
 
 <p float="left">
   <img src="FIREVAT_Workflow_Figure.png" width="100%"/>
@@ -18,13 +18,13 @@
 
 You can install the released version of ```FIREVAT``` from CRAN:
 
-```{r}
+```r
 install.packages("FIREVAT")
 ```
 
 You can also install the developmental version of ```FIREVAT``` from github:
 
-```{r}
+```r
 install.packages("devtools")
 library(devtools)
 install_github("cgab-ncc/FIREVAT")
@@ -34,7 +34,7 @@ install_github("cgab-ncc/FIREVAT")
 
 ```FIREVAT``` accepts a Variant Call Format (VCF) file as the primary input. It also requires a configuration file that corresponds to the attributes found in the VCF file. The variant refinement is then performed by running the following code example:
 
-```{r}
+```r
 library(FIREVAT)
 
 # Output directory
@@ -71,7 +71,7 @@ Running the code above will generate FIREVAT outputs, including ```HTML``` repor
 
 
 For your convenience, we have prepared configuration files for popularly used variant callers:
-```{r}
+```r
 # MuTect2
 mutect2.config.file <- system.file("config", "MuTect2_Filtering_Params.json", package = "FIREVAT")
 
