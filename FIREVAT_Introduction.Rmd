@@ -76,9 +76,16 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
 ```
 
 ### 00-3. Mutational signature analysis
-Using FIREVAT, you can run Mutalisk?
+Using FIREVAT, you can run Mutalisk
 ```{r}
+library(FIREVAT)
 
+sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
+vcf.obj <- ReadVCF(sample.vcf.file)
+
+mutalisk.results <- RunMutalisk(vcf.obj = vcf.obj,
+                                df.ref.mut.sigs = GetPCAWGMutSigs(),
+                                target.mut.sigs = GetPCAWGMutSigsNames())
 ```
 
 ## 01. Introduction
