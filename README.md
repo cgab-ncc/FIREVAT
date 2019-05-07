@@ -32,7 +32,7 @@ install_github("cgab-ncc/FIREVAT")
 
 ### Usage
 
-```FIREVAT``` accepts a Variant Call Format (VCF) file as the primary input. It also requires a configuration file that corresponds to the attributes found in the VCF file. The variant refinement is then performed by running the following code example:
+```FIREVAT``` accepts a Variant Call Format (VCF) file as the primary input. It also requires a configuration (JSON) file that corresponds to the attributes found in the VCF file. The variant refinement is then performed by running the following code example:
 
 ```r
 library(FIREVAT)
@@ -69,8 +69,9 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
 
 Running the code above will generate FIREVAT outputs, including ```HTML``` report, ```refined.vcf```, and ```artifact.vcf``` files:
 
+Feel free to take a look at the sample [**HTML report**](). The sample ```FIREVAT``` output files are available [**here**]().
 
-For your convenience, we have prepared configuration files for popularly used variant callers:
+For your convenience, we have prepared configuration (JSON) files for popularly used variant callers:
 ```r
 # MuTect2
 mutect2.config.file <- system.file("config", "MuTect2_Filtering_Params.json", package = "FIREVAT")
@@ -85,7 +86,9 @@ somaticsniper.config.file <- system.file("config", "SomaticSniper_Filtering_Para
 varscan2.config.file <- system.file("config", "Varscan2_Filtering_Params.json", package = "FIREVAT")
 ```
 
-In [**Introduction to FIREVAT**](https://github.com/cgab-ncc/FIREVAT/tree/master/vignettes/firevat.html), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
+### Vignette
+
+In [**Introduction to FIREVAT**](https://github.com/cgab-ncc/FIREVAT/tree/master/vignettes/intro_to_firevat.html), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
 
 ## Suggested workflow
 
