@@ -1,12 +1,601 @@
 # FIREVAT Main Functions
 #
 # Last revised date:
-#   March 22, 2019
+#   May 08, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
 #   Hyunbin Kim (khb7840@ncc.re.kr)
 #   Bioinformatics Analysis Team, National Cancer Center Korea
+
+
+#' @title RunGAMode
+#' @description Runs FIREVAT ga mode
+#'
+#' @param data A list from RunFIREVAT
+#'
+#' @return A list
+#'
+#' @export
+RunGAMode <- function(data) {
+    if (data$verbose == TRUE) {
+        PrintLog("Step 02. Run FIREVAT variant refinement optimization.")
+    }
+
+    # Prepare data for Mutational Patterns (memoization)
+    data$df.mut.pat.ref.sigs <- MutPatParseRefMutSigs(df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                      target.mut.sigs = data$target.mut.sigs)
+    if (data$vcf.obj$genome == "hg19") {
+        data$bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
+    }
+    if (data$vcf.obj$genome == "hg38") {
+        data$bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+    }
+
+    # 02-1. Check if refinement is necessary based on the sum of sequencing artifact weights in the original VCF file
+    if (data$verbose == TRUE) {
+        PrintLog("Step 02-1. Check if FIREVAT variant refinement is necessary [firevat_optimization::CheckIfVariantRefinementIsNecessary]")
+    }
+
+    is.variant.refinement.necessary <- CheckIfVariantRefinementIsNecessary(vcf.obj = data$vcf.obj,
+                                                                           bsg = data$bsg,
+                                                                           df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
+                                                                           target.mut.sigs = data$target.mut.sigs,
+                                                                           sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
+                                                                           init.artifact.stop = data$init.artifact.stop,
+                                                                           verbose = data$verbose)
+    data$original.muts.seq.art.weights.sum <- is.variant.refinement.necessary$seq.art.sigs.weights.sum
+
+    if (is.variant.refinement.necessary$judgment == TRUE) {
+        PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
+        PrintLog(paste0("** This value is greater than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
+        PrintLog("** FIREVAT will now begin performing varaint refinement.")
+        data$variant.refinement.performed <- TRUE
+    } else {
+        PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
+        PrintLog(paste0("** This value is equal to or smaller than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
+        PrintLog("** FIREVAT will return without performing varaint refinement.", type = "WARNING")
+        data$variant.refinement.performed <- FALSE
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Initial sequencing artifact weights sum is less than or equal to init.artifact.stop"
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+
+    # Get lower / upper vectors from config file
+    lower.upper.list <- GetParameterLowerUpperVector(data$vcf.obj, data$config.obj, data$vcf.filter)
+    if (lower.upper.list$valid == FALSE) {
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.performed <- FALSE
+        data$variant.refinement.terminiation.log <- "Config file parameter filter range is invalid."
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+    data$vcf.obj <- lower.upper.list$vcf.obj
+    lower.vector <- lower.upper.list$lower.vector
+    upper.vector <- lower.upper.list$upper.vector
+    data$lower.vector <- lower.vector
+    data$upper.vector <- upper.vector
+
+    # 02-2. Generate candidate suggestions
+    if (data$use.suggested.soln == TRUE) { # use default parameters as suggestions
+        PrintLog("Step 02-2. Compute suggested solutions [firevat_brute_force::GetGASuggestedSolutions]")
+        suggested.solutions <- GetGASuggestedSolutions(vcf.obj = data$vcf.obj,
+                                                       bsg = data$bsg,
+                                                       config.obj = data$config.obj,
+                                                       lower.upper.list = lower.upper.list,
+                                                       df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
+                                                       target.mut.sigs = data$target.mut.sigs,
+                                                       sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
+                                                       objective.fn = data$objective.fn,
+                                                       original.muts.seq.art.weights.sum = data$original.muts.seq.art.weights.sum,
+                                                       ga.preemptive.killing = data$ga.preemptive.killing,
+                                                       verbose = data$verbose)
+        data$df.suggested.solutions <- suggested.solutions$df.suggested.solutions
+        data$suggested.solutions.matrix <- suggested.solutions$suggested.solutions.matrix
+        suggestions <- data$suggested.solutions.matrix
+    } else {
+        suggestions <- NULL
+    }
+
+    # 02-3. Run variant refinement optimization
+    PrintLog("Step 02-3. Run variant optimization guided by mutational signatures [firevat_optimization::GAOptimizationObjFn]")
+    if (data$ga.type == "binary") {
+        # Convert filter parameters to bits
+        bits.list <- ParameterToBits(data$vcf.obj, data$config.obj, data$vcf.filter)
+        params.bit.len <- bits.list$params.bit.len
+        data$vcf.obj <- bits.list$vcf.obj
+        n.bits <- sum(params.bit.len)
+        data$n.bits <- n.bits
+        data$params.bit.len <- params.bit.len
+        # Run GA with binary type
+        ga.results <- ga(type = "binary",
+                         fitness =  function(string) GAOptimizationObjFn(string, data),
+                         nBits = n.bits,
+                         popSize = data$ga.pop.size,
+                         maxiter = data$ga.max.iter,
+                         parallel = data$num.cores,
+                         run = data$ga.run,
+                         pmutation = data$ga.pmutation,
+                         suggestions = NULL,
+                         monitor = function(obj) GAMonitorFn(obj, data),
+                         keepBest = TRUE)
+
+    } else if (data$ga.type == "real-valued") {
+        # Run GA with real-valued type
+        if (packageVersion("GA") >= '3.1') {
+            ga.results <- ga(type = "real-valued",
+                             fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
+                             lower = lower.vector, # <-- vector from config
+                             upper = upper.vector, # <-- vector from config
+                             popSize = data$ga.pop.size,
+                             maxiter = data$ga.max.iter,
+                             parallel = data$num.cores,
+                             run = data$ga.run,
+                             pmutation = data$ga.pmutation,
+                             suggestions = suggestions,
+                             monitor = function(obj) GAMonitorFn(obj, data),
+                             keepBest = TRUE)
+        } else {
+            ga.results <- ga(type = "real-valued",
+                             fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
+                             min = lower.vector, # <-- vector from config
+                             max = upper.vector, # <-- vector from config
+                             popSize = data$ga.pop.size,
+                             maxiter = data$ga.max.iter,
+                             parallel = data$num.cores,
+                             run = data$ga.run,
+                             pmutation = data$ga.pmutation,
+                             suggestions = suggestions,
+                             monitor = function(obj) GAMonitorFn(obj, data),
+                             keepBest = TRUE)
+        }
+    }
+
+    # Parse optimized results
+    if (data$ga.type == "binary") {
+        data$x.solution.binary <- as.numeric(ga.results@solution[1,])
+        data$x.solution.decimal <- GADecodeBinaryString(string = data$x.solution.binary,
+                                                        data = data)
+    } else if (data$ga.type == "real-valued"){
+        data$x.solution.decimal <- floor(as.numeric(ga.results@solution[1,]))
+        names(data$x.solution.decimal) <- names(data$vcf.filter)
+    }
+
+    if (data$verbose == TRUE) {
+        print("FIREVAT results")
+        print(summary(ga.results))
+        if (data$ga.type == "binary") {
+            PrintLog("* FIREVAT optimized binary values of filter parameters:")
+            print(data$x.solution.binary)
+        }
+        PrintLog("* FIREVAT optimized integer values of filter parameters:")
+        print(data$x.solution.decimal)
+    }
+
+    # 02-4. Filter vcf.data based on the updated vcf.filter
+    PrintLog("Step 02-4. Filter VCF based on optmized filter parameters.")
+    data$vcf.filter <- UpdateFilter(vcf.filter = data$vcf.filter,
+                                    param.values = data$x.solution.decimal)
+    optimized.vcf.objs <- FilterVCF(vcf.obj = data$vcf.obj,
+                                    config.obj = data$config.obj,
+                                    vcf.filter = data$vcf.filter,
+                                    verbose = data$verbose)
+    data$refined.vcf.obj <- optimized.vcf.objs$vcf.obj.filtered
+    data$artifactual.vcf.obj <- optimized.vcf.objs$vcf.obj.artifact
+
+    # Check if point mutations remaining in either refined.vcf.obj or artifactual.vcf.obj.
+    # Either refinement is too liberal or too stringent. Return with a message.
+    if (nrow(data$refined.vcf.obj$data) == 0) {
+        PrintLog("After performing variant refinement there are no mutations remaining in the refined set.", type = "WARNING")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the refined set"
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+    if (nrow(data$artifactual.vcf.obj$data) == 0) {
+        PrintLog("After performing variant refinement there are no mutations remaining in the artifactual set.", type = "WARNING")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the artifactual set"
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+
+    # Check if variant refinement failed for all iterations
+    df.optimization.logs <- ReadOptimizationIterationReport(data = data)
+    if (tail(df.optimization.logs$iteration.ran.successfully, 1) == FALSE) {
+        PrintLog("Variant refinement is unsuccessful because there are not enough mutations.", type = "WARNING")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Unsuccessful because there are not enough mutations for variant refinement"
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+
+    # 03. Additional analysis
+    # 03-1. Strand bias analysis
+    PrintLog("Step 03. Additional analysis.")
+    if (data$perform.strand.bias.analysis == TRUE) {
+        PrintLog("Step 03-1. Perform strand bias analysis [firevat_strand_bias::PerformStrandBiasAnalysis]")
+
+        data$refined.vcf.obj <- PerformStrandBiasAnalysis(
+            vcf.obj = data$refined.vcf.obj,
+            ref.forward.strand.var = data$ref.forward.strand.var,
+            ref.reverse.strand.var = data$ref.reverse.strand.var,
+            alt.forward.strand.var = data$alt.forward.strand.var,
+            alt.reverse.strand.var = data$alt.reverse.strand.var,
+            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+            fdr.correction.method = data$strand.bias.fdr.correction.method)
+
+        if (data$filter.by.strand.bias.analysis == TRUE) {
+            PrintLog("* Filter by strand bias analysis results [firevat_strand_bias::FilterByStrandBiasAnalysis]")
+            filtered.vcf.objs <- FilterByStrandBiasAnalysis(
+                refined.vcf.obj = data$refined.vcf.obj,
+                artifactual.vcf.obj = data$artifactual.vcf.obj,
+                perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+                filter.by.strand.bias.analysis.cutoff = data$filter.by.strand.bias.analysis.cutoff)
+            data$refined.vcf.obj <- filtered.vcf.objs$refined.vcf.obj
+            data$artifactual.vcf.obj <- filtered.vcf.objs$artifactual.vcf.obj
+        }
+
+        data$artifactual.vcf.obj <- PerformStrandBiasAnalysis(
+            vcf.obj = data$artifactual.vcf.obj,
+            ref.forward.strand.var = data$ref.forward.strand.var,
+            ref.reverse.strand.var = data$ref.reverse.strand.var,
+            alt.forward.strand.var = data$alt.forward.strand.var,
+            alt.reverse.strand.var = data$alt.reverse.strand.var,
+            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+            fdr.correction.method = data$strand.bias.fdr.correction.method)
+    }
+
+    # 03-2. Annotate
+    if (data$annotate == TRUE) {
+        PrintLog("Step 03-2. Annotate variants [firevat_annotation::AnnotateVCFObj]")
+
+        # Annotate VCFs
+        data$vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$vcf.obj,
+                                                 df.annotation.db = data$df.annotation.db,
+                                                 include.all.columns = TRUE)
+        data$refined.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$refined.vcf.obj,
+                                                         df.annotation.db = data$df.annotation.db,
+                                                         include.all.columns = TRUE)
+        data$artifactual.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$artifactual.vcf.obj,
+                                                             df.annotation.db = data$df.annotation.db,
+                                                             include.all.columns = TRUE)
+
+        # Query annotated VCFs
+        data$refined.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$refined.vcf.obj.annotated,
+                                                                    filter.key.value.pairs = data$annotation.filter.key.value.pairs,
+                                                                    filter.condition = data$annotation.filter.condition)
+        data$artifactual.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$artifactual.vcf.obj.annotated,
+                                                                        filter.key.value.pairs = data$annotation.filter.key.value.pairs,
+                                                                        filter.condition = data$annotation.filter.condition)
+    }
+
+    # 03-3. Run Mutalisk
+    # Identify target mutational signatures
+    # Here we fetch all signatures ever identified by Mutational Patterns
+    if (data$mutalisk == TRUE) {
+        PrintLog("Step 03-3. Perform Mutalisk mutational signature analysis [firevat_mutalisk::RunMutalisk]")
+        PrintLog("* Preparing data")
+
+        df.optimization.logs <- ReadOptimizationIterationReport(data = data)
+        Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
+            include <- rep(TRUE, length(sigs))
+            include[which(sigs == "")] <- FALSE
+            include[is.na(sigs)] <- FALSE
+
+            sigs <- as.character(sigs[include])
+            weights <- as.character(weights[include])
+            sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
+            weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
+
+            if (length(sigs) == 0) {
+                return(c())
+            }
+
+            candidate.sigs <- c()
+            for (i in 1:length(sigs)) {
+                df <- data.frame(sig = sigs[[i]],
+                                 weight = weights[[i]],
+                                 stringsAsFactors = F)
+                df <- df[df$weight >= cutoff, ]
+                candidate.sigs <- c(candidate.sigs, df$sig)
+            }
+            return(candidate.sigs)
+        }
+        sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
+                            weights = df.optimization.logs$refined.muts.target.signatures.weights)
+        sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
+                            weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
+        sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
+                            weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
+        sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
+                            weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
+        if (is.null(data$mutalisk.must.include.sigs) == FALSE) {
+            data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs, data$mutalisk.must.include.sigs))
+        } else {
+            data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
+        }
+
+        # Original vcf
+        data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
+                                                      df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                      target.mut.sigs = data$mut.pat.target.sigs,
+                                                      method = data$mutalisk.method,
+                                                      n.sample = data$mutalisk.random.sampling.count,
+                                                      n.iter = data$mutalisk.random.sampling.max.iter,
+                                                      verbose = data$verbose)
+        # Refined vcf
+        data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
+                                                          df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                          target.mut.sigs = data$mut.pat.target.sigs,
+                                                          method = data$mutalisk.method,
+                                                          n.sample = data$mutalisk.random.sampling.count,
+                                                          n.iter = data$mutalisk.random.sampling.max.iter,
+                                                          verbose = data$verbose)
+        # Artifact vcf
+        data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+                                                              df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                              target.mut.sigs = data$mut.pat.target.sigs,
+                                                              method = data$mutalisk.method,
+                                                              n.sample = data$mutalisk.random.sampling.count,
+                                                              n.iter = data$mutalisk.random.sampling.max.iter,
+                                                              verbose = data$verbose)
+    }
+
+    # 04. Write VCF Files
+    if (data$write.vcf == TRUE) {
+        PrintLog("Step 04. Write refined and artifactual VCF files [firevat_vcf::WriteVCF]")
+
+        WriteVCF(vcf.obj = data$vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
+        WriteVCF(vcf.obj = data$refined.vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
+        WriteVCF(vcf.obj = data$artifactual.vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
+        if (data$annotate == TRUE) {
+            WriteVCF(vcf.obj = data$data$vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original_Annotated.vcf"))
+            WriteVCF(vcf.obj = data$refined.vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined_Annotated.vcf"))
+            WriteVCF(vcf.obj = data$artifactual.vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact_Annotated.vcf"))
+        }
+    }
+
+    data$end.datetime <- Sys.time()
+    data$variant.refinement.terminiation.log <- "Successful"
+
+    # 05. Report results
+    if (data$report == TRUE) {
+        PrintLog("Step 05. Generate FIREVAT report")
+        data <- ReportFIREVATResults(data = data)
+    }
+
+    # 06. Save data
+    if (data$save.rdata == TRUE) {
+        PrintLog("Step 06. Write .RData")
+        save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+    }
+
+    # 07. Save tsv
+    if (data$save.tsv == TRUE) {
+        PrintLog("Step 07. Write FIREVAT results to .tsv file")
+        WriteFIREVATResultsToTSV(firevat.results = data)
+    }
+
+    return(data)
+}
+
+#' @title RunManualMode
+#' @description Runs FIREVAT manual mode
+#'
+#' @param data A list from RunFIREVAT
+#'
+#' @return A list
+#'
+#' @export
+RunManualMode <- function(data) {
+    if (data$verbose == TRUE) {
+        PrintLog("Step 02. Run FIREVAT manual variant refinement.")
+    }
+    data$x.solution.decimal <- unlist(data$vcf.filter) # default values
+
+    # 02-1. Filter vcf.data based on the updated vcf.filter
+    PrintLog("Step 02-1. Filter VCF based on optmized filter parameters.")
+    data$vcf.filter <- UpdateFilter(vcf.filter = data$vcf.filter,
+                                    param.values = data$x.solution.decimal)
+    optimized.vcf.objs <- FilterVCF(vcf.obj = data$vcf.obj,
+                                    config.obj = data$config.obj,
+                                    vcf.filter = data$vcf.filter,
+                                    verbose = data$verbose)
+    data$refined.vcf.obj <- optimized.vcf.objs$vcf.obj.filtered
+    data$artifactual.vcf.obj <- optimized.vcf.objs$vcf.obj.artifact
+
+    # Check if point mutations remaining in either refined.vcf.obj or artifactual.vcf.obj.
+    # Either refinement is too liberal or too stringent. Return with a message.
+    if (nrow(data$refined.vcf.obj$data) == 0) {
+        PrintLog("After performing variant refinement there are no mutations remaining in the refined set.", type = "WARNING")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the refined set"
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+    if (nrow(data$artifactual.vcf.obj$data) == 0) {
+        PrintLog("After performing variant refinement there are no mutations remaining in the artifactual set.", type = "WARNING")
+        data$end.datetime <- Sys.time()
+        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the artifactual set"
+        if (data$save.rdata == TRUE) {
+            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+        }
+        if (data$save.tsv == TRUE) {
+            WriteFIREVATResultsToTSV(firevat.results = data)
+        }
+        return(data)
+    }
+
+    # 03. Additional analysis
+    # 03-1. Strand bias analysis
+    PrintLog("Step 03. Additional analysis.")
+    if (data$perform.strand.bias.analysis == TRUE) {
+        PrintLog("Step 03-1. Perform strand bias analysis [firevat_strand_bias::PerformStrandBiasAnalysis]")
+
+        data$refined.vcf.obj <- PerformStrandBiasAnalysis(
+            vcf.obj = data$refined.vcf.obj,
+            ref.forward.strand.var = data$ref.forward.strand.var,
+            ref.reverse.strand.var = data$ref.reverse.strand.var,
+            alt.forward.strand.var = data$alt.forward.strand.var,
+            alt.reverse.strand.var = data$alt.reverse.strand.var,
+            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+            fdr.correction.method = data$strand.bias.fdr.correction.method)
+
+        if (data$filter.by.strand.bias.analysis == TRUE) {
+            PrintLog("* Filter by strand bias analysis results [firevat_strand_bias::FilterByStrandBiasAnalysis]")
+            filtered.vcf.objs <- FilterByStrandBiasAnalysis(
+                refined.vcf.obj = data$refined.vcf.obj,
+                artifactual.vcf.obj = data$artifactual.vcf.obj,
+                perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+                filter.by.strand.bias.analysis.cutoff = data$filter.by.strand.bias.analysis.cutoff)
+            data$refined.vcf.obj <- filtered.vcf.objs$refined.vcf.obj
+            data$artifactual.vcf.obj <- filtered.vcf.objs$artifactual.vcf.obj
+        }
+
+        data$artifactual.vcf.obj <- PerformStrandBiasAnalysis(
+            vcf.obj = data$artifactual.vcf.obj,
+            ref.forward.strand.var = data$ref.forward.strand.var,
+            ref.reverse.strand.var = data$ref.reverse.strand.var,
+            alt.forward.strand.var = data$alt.forward.strand.var,
+            alt.reverse.strand.var = data$alt.reverse.strand.var,
+            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
+            fdr.correction.method = data$strand.bias.fdr.correction.method)
+    }
+
+    # 03-2. Annotate
+    if (data$annotate == TRUE) {
+        PrintLog("Step 03-2. Annotate variants [firevat_annotation::AnnotateVCFObj]")
+
+        # Annotate VCFs
+        data$vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$vcf.obj,
+                                                 df.annotation.db = data$df.annotation.db,
+                                                 include.all.columns = TRUE)
+        data$refined.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$refined.vcf.obj,
+                                                         df.annotation.db = data$df.annotation.db,
+                                                         include.all.columns = TRUE)
+        data$artifactual.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$artifactual.vcf.obj,
+                                                             df.annotation.db = data$df.annotation.db,
+                                                             include.all.columns = TRUE)
+
+        # Query annotated VCFs
+        data$refined.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$refined.vcf.obj.annotated,
+                                                                    filter.key.value.pairs = data$annotation.filter.key.value.pairs,
+                                                                    filter.condition = data$annotation.filter.condition)
+        data$artifactual.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$artifactual.vcf.obj.annotated,
+                                                                        filter.key.value.pairs = data$annotation.filter.key.value.pairs,
+                                                                        filter.condition = data$annotation.filter.condition)
+    }
+
+    # 03-3. Run Mutalisk
+    if (data$mutalisk == TRUE) {
+        PrintLog("Step 03-3. Perform Mutalisk mutational signature analysis [firevat_mutalisk::RunMutalisk]")
+
+        # Original vcf
+        data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
+                                                      df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                      target.mut.sigs = data$target.mut.sigs,
+                                                      method = data$mutalisk.method,
+                                                      n.sample = data$mutalisk.random.sampling.count,
+                                                      n.iter = data$mutalisk.random.sampling.max.iter,
+                                                      verbose = data$verbose)
+        # Refined vcf
+        data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
+                                                          df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                          target.mut.sigs = data$target.mut.sigs,
+                                                          method = data$mutalisk.method,
+                                                          n.sample = data$mutalisk.random.sampling.count,
+                                                          n.iter = data$mutalisk.random.sampling.max.iter,
+                                                          verbose = data$verbose)
+        # Artifact vcf
+        data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
+                                                              df.ref.mut.sigs = data$df.ref.mut.sigs,
+                                                              target.mut.sigs = data$target.mut.sigs,
+                                                              method = data$mutalisk.method,
+                                                              n.sample = data$mutalisk.random.sampling.count,
+                                                              n.iter = data$mutalisk.random.sampling.max.iter,
+                                                              verbose = data$verbose)
+    }
+
+    # 04. Write VCF Files
+    if (data$write.vcf == TRUE) {
+        PrintLog("Step 04. Write refined and artifactual VCF files [firevat_vcf::WriteVCF]")
+
+        WriteVCF(vcf.obj = data$vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
+        WriteVCF(vcf.obj = data$refined.vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
+        WriteVCF(vcf.obj = data$artifactual.vcf.obj,
+                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
+        if (data$annotate == TRUE) {
+            WriteVCF(vcf.obj = data$data$vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original_Annotated.vcf"))
+            WriteVCF(vcf.obj = data$refined.vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined_Annotated.vcf"))
+            WriteVCF(vcf.obj = data$artifactual.vcf.obj.annotated,
+                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact_Annotated.vcf"))
+        }
+    }
+
+    data$end.datetime <- Sys.time()
+
+    # 05. Report results
+    if (data$report == TRUE) {
+        PrintLog("Step 05. Generate FIREVAT report")
+        data <- ReportFIREVATResults(data = data)
+    }
+
+    # 06. Save data
+    if (data$save.rdata == TRUE) {
+        PrintLog("Step 06. Write .RData")
+        save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
+    }
+
+    # 07. Save tsv
+    if (data$save.tsv == TRUE) {
+        PrintLog("Step 07. Write FIREVAT results to .tsv file")
+        WriteFIREVATResultsToTSV(firevat.results = data)
+    }
+
+    return(data)
+}
 
 
 #' @title RunFIREVAT
@@ -217,17 +806,18 @@ RunFIREVAT <- function(vcf.file,
 
     # 06. Prepare data for optimization
     PrintLog("Step 01-6. Prepare data for optimization")
-    data = list(start.datetime = start.datetime,
-                vcf.file = vcf.file,
+    data = list(vcf.file = vcf.file,
                 vcf.file.basename = gsub("\\.vcf", "", basename(vcf.file)),
                 vcf.obj = vcf.obj,
+                vcf.filter = vcf.filter,
                 config.file = config.file,
                 config.obj = config.obj,
-                vcf.filter = vcf.filter,
                 df.ref.mut.sigs = df.ref.mut.sigs,
                 target.mut.sigs = target.mut.sigs,
                 sequencing.artifact.mut.sigs = sequencing.artifact.mut.sigs,
                 output.dir = output.dir,
+                mode = mode,
+                num.cores = num.cores,
                 init.artifact.stop = init.artifact.stop,
                 # GA parameters
                 objective.fn = objective.fn,
@@ -237,16 +827,38 @@ RunFIREVAT <- function(vcf.file,
                 ga.max.iter = ga.max.iter,
                 ga.run = ga.run,
                 ga.preemptive.killing = ga.preemptive.killing,
+                use.suggested.soln = use.suggested.soln,
                 # Mutalisk parameters
+                mutalisk = mutalisk,
                 mutalisk.method = mutalisk.method,
                 mutalisk.must.include.sigs = mutalisk.must.include.sigs,
                 mutalisk.random.sampling.count = mutalisk.random.sampling.count,
                 mutalisk.random.sampling.max.iter = mutalisk.random.sampling.max.iter,
                 report.format = report.format,
-                mode = mode,
-                use.suggested.soln = use.suggested.soln,
-                num.cores = num.cores,
+                # Strand bias analysis parameters
+                perform.strand.bias.analysis = perform.strand.bias.analysis,
+                filter.by.strand.bias.analysis = filter.by.strand.bias.analysis,
+                filter.by.strand.bias.analysis.cutoff = filter.by.strand.bias.analysis.cutoff,
+                ref.forward.strand.var = ref.forward.strand.var,
+                ref.reverse.strand.var = ref.reverse.strand.var,
+                alt.forward.strand.var = alt.forward.strand.var,
+                alt.reverse.strand.var = alt.reverse.strand.var,
+                strand.bias.fdr.correction.method = strand.bias.fdr.correction.method,
+                strand.bias.perform.fdr.correction = strand.bias.perform.fdr.correction,
+                # Annotation parameters
+                annotate = annotate,
+                df.annotation.db = df.annotation.db,
+                annotated.columns.to.display = annotated.columns.to.display,
+                annotation.filter.key.value.pairs = annotation.filter.key.value.pairs,
+                annotation.filter.condition = annotation.filter.condition,
+                # Miscellaneous
+                start.datetime = start.datetime,
                 firevat.version = packageVersion("FIREVAT"),
+                write.vcf = write.vcf,
+                report = report,
+                save.rdata = save.rdata,
+                save.tsv = save.tsv,
+                report.format = report.format,
                 verbose = verbose)
 
     # 07. FIREVAT can only be run if there are more than 50 point mutations in the initial vcf file
@@ -269,429 +881,11 @@ RunFIREVAT <- function(vcf.file,
         }
     }
 
-    # 6. Optimize filter parameters
+    # 08. Optimize filter parameters
     if (mode == "ga") {
-        if (verbose == TRUE) {
-            PrintLog("Step 02. Run FIREVAT variant refinement optimization.")
-        }
-
-        # Prepare data for Mutational Patterns (memoization)
-        data$df.mut.pat.ref.sigs <- MutPatParseRefMutSigs(df.ref.mut.sigs = df.ref.mut.sigs,
-                                                          target.mut.sigs = target.mut.sigs)
-        if (data$vcf.obj$genome == "hg19") {
-            data$bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
-        }
-        if (data$vcf.obj$genome == "hg38") {
-            data$bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
-        }
-
-        # Check if refinement is necessary based on the sum of sequencing artifact weights in the original VCF file
-        if (verbose == TRUE) {
-            PrintLog("Step 02-1. Check if FIREVAT variant refinement is necessary [firevat_optimization::CheckIfVariantRefinementIsNecessary]")
-        }
-
-        is.variant.refinement.necessary <- CheckIfVariantRefinementIsNecessary(vcf.obj = data$vcf.obj,
-                                                                               bsg = data$bsg,
-                                                                               df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
-                                                                               target.mut.sigs = data$target.mut.sigs,
-                                                                               sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
-                                                                               init.artifact.stop = data$init.artifact.stop,
-                                                                               verbose = data$verbose)
-        data$original.muts.seq.art.weights.sum <- is.variant.refinement.necessary$seq.art.sigs.weights.sum
-
-        if (is.variant.refinement.necessary$judgment == TRUE) {
-            PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
-            PrintLog(paste0("** This value is greater than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
-            PrintLog("** FIREVAT will now begin performing varaint refinement.")
-            data$variant.refinement.performed <- TRUE
-        } else {
-            PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
-            PrintLog(paste0("** This value is equal to or smaller than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
-            PrintLog("** FIREVAT will return without performing varaint refinement.", type = "WARNING")
-            data$variant.refinement.performed <- FALSE
-            data$end.datetime <- Sys.time()
-            data$variant.refinement.terminiation.log <- "Initial sequencing artifact weights sum is less than or equal to init.artifact.stop"
-            if (save.rdata == TRUE) {
-                save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
-            }
-            if (save.tsv == TRUE) {
-                WriteFIREVATResultsToTSV(firevat.results = data)
-            }
-            return(data)
-        }
-
-        # Get lower / upper vectors from config file
-        lower.upper.list <- GetParameterLowerUpperVector(vcf.obj, config.obj, vcf.filter)
-        if (lower.upper.list$valid == FALSE) {
-            data$end.datetime <- Sys.time()
-            data$variant.refinement.performed <- FALSE
-            data$variant.refinement.terminiation.log <- "Config file parameter filter range is invalid."
-            if (save.rdata == TRUE) {
-                save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
-            }
-            if (save.tsv == TRUE) {
-                WriteFIREVATResultsToTSV(firevat.results = data)
-            }
-            return(data)
-        }
-        data$vcf.obj <- lower.upper.list$vcf.obj
-        lower.vector <- lower.upper.list$lower.vector
-        upper.vector <- lower.upper.list$upper.vector
-        data$lower.vector <- lower.vector
-        data$upper.vector <- upper.vector
-
-        # Suggestions
-        if (use.suggested.soln == TRUE) { # use default parameters as suggestions
-            PrintLog("Step 02-2. Compute suggested solutions [firevat_brute_force::GetGASuggestedSolutions]")
-            suggested.solutions <- GetGASuggestedSolutions(vcf.obj = data$vcf.obj,
-                                                           bsg = data$bsg,
-                                                           config.obj = data$config.obj,
-                                                           lower.upper.list = lower.upper.list,
-                                                           df.mut.pat.ref.sigs = data$df.mut.pat.ref.sigs,
-                                                           target.mut.sigs = data$target.mut.sigs,
-                                                           sequencing.artifact.mut.sigs = data$sequencing.artifact.mut.sigs,
-                                                           objective.fn = data$objective.fn,
-                                                           original.muts.seq.art.weights.sum = data$original.muts.seq.art.weights.sum,
-                                                           ga.preemptive.killing = data$ga.preemptive.killing,
-                                                           verbose = data$verbose)
-            data$df.suggested.solutions <- suggested.solutions$df.suggested.solutions
-            data$suggested.solutions.matrix <- suggested.solutions$suggested.solutions.matrix
-            suggestions <- data$suggested.solutions.matrix
-        } else {
-            suggestions <- NULL
-        }
-
-        PrintLog("Step 02-3. Run variant optimization guided by mutational signatures [firevat_optimization::GAOptimizationObjFn]")
-
-        if (ga.type == "binary") {
-            # Convert filter parameters to bits
-            bits.list <- ParameterToBits(vcf.obj, config.obj, vcf.filter)
-            params.bit.len <- bits.list$params.bit.len
-            data$vcf.obj <- bits.list$vcf.obj
-            n.bits <- sum(params.bit.len)
-            data$n.bits <- n.bits
-            data$params.bit.len <- params.bit.len
-            # Run GA with binary type
-            ga.results <- ga(type = "binary",
-                             fitness =  function(string) GAOptimizationObjFn(string, data),
-                             nBits = n.bits,
-                             popSize = ga.pop.size,
-                             maxiter = ga.max.iter,
-                             parallel = num.cores,
-                             run = ga.run,
-                             pmutation = ga.pmutation,
-                             suggestions = NULL,
-                             monitor = function(obj) GAMonitorFn(obj, data),
-                             keepBest = TRUE)
-
-        } else if (ga.type == "real-valued") {
-            # Run GA with real-valued type
-            if (packageVersion("GA") >= '3.1') {
-                ga.results <- ga(type = "real-valued",
-                                 fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
-                                 lower = lower.vector, # <-- vector from config
-                                 upper = upper.vector, # <-- vector from config
-                                 popSize = ga.pop.size,
-                                 maxiter = ga.max.iter,
-                                 parallel = num.cores,
-                                 run = ga.run,
-                                 pmutation = ga.pmutation,
-                                 suggestions = suggestions,
-                                 monitor = function(obj) GAMonitorFn(obj, data),
-                                 keepBest = TRUE)
-            } else {
-                ga.results <- ga(type = "real-valued",
-                                 fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
-                                 min = lower.vector, # <-- vector from config
-                                 max = upper.vector, # <-- vector from config
-                                 popSize = ga.pop.size,
-                                 maxiter = ga.max.iter,
-                                 parallel = num.cores,
-                                 run = ga.run,
-                                 pmutation = ga.pmutation,
-                                 suggestions = suggestions,
-                                 monitor = function(obj) GAMonitorFn(obj, data),
-                                 keepBest = TRUE)
-            }
-        }
-
-        # Parse optimized results
-        if (data$ga.type == "binary") {
-            data$x.solution.binary <- as.numeric(ga.results@solution[1,])
-            data$x.solution.decimal <- GADecodeBinaryString(string = data$x.solution.binary,
-                                                            data = data)
-        } else if (data$ga.type == "real-valued"){
-            data$x.solution.decimal <- floor(as.numeric(ga.results@solution[1,]))
-            names(data$x.solution.decimal) <- names(data$vcf.filter)
-        }
-
-        if (verbose == TRUE) {
-            print("FIREVAT results")
-            print(summary(ga.results))
-            if (data$ga.type == "binary") {
-                PrintLog("* FIREVAT optimized binary values of filter parameters:")
-                print(data$x.solution.binary)
-            }
-            PrintLog("* FIREVAT optimized integer values of filter parameters:")
-            print(data$x.solution.decimal)
-        }
+        data <- RunGAMode(data = data)
     } else if (mode == "manual") {
-        if (verbose == TRUE) {
-            PrintLog("Step 02. Run FIREVAT manual variant refinement.")
-        }
-        data$x.solution.decimal <- unlist(data$vcf.filter) # default values
-    }
-
-    # 7. Filter vcf.data based on the updated vcf.filter
-    PrintLog("Step 02-4. Filter VCF based on optmized filter parameters.")
-    data$vcf.filter <- UpdateFilter(vcf.filter = data$vcf.filter,
-                                    param.values = data$x.solution.decimal)
-    optimized.vcf.objs <- FilterVCF(vcf.obj = data$vcf.obj,
-                                    config.obj = data$config.obj,
-                                    vcf.filter = data$vcf.filter,
-                                    verbose = data$verbose)
-    data$refined.vcf.obj <- optimized.vcf.objs$vcf.obj.filtered
-    data$artifactual.vcf.obj <- optimized.vcf.objs$vcf.obj.artifact
-
-    # Check if point mutations remaining in either refined.vcf.obj or artifactual.vcf.obj.
-    # Either refinement is too liberal or too stringent. Return with a message.
-    if (nrow(data$refined.vcf.obj$data) == 0) {
-        PrintLog("After performing variant refinement there are no mutations remaining in the refined set.", type = "WARNING")
-        data$end.datetime <- Sys.time()
-        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the refined set"
-        if (save.rdata == TRUE) {
-            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
-        }
-        if (save.tsv == TRUE) {
-            WriteFIREVATResultsToTSV(firevat.results = data)
-        }
-        return(data)
-    }
-    if (nrow(data$artifactual.vcf.obj$data) == 0) {
-        PrintLog("After performing variant refinement there are no mutations remaining in the artifactual set.", type = "WARNING")
-        data$end.datetime <- Sys.time()
-        data$variant.refinement.terminiation.log <- "Successful but after performing variant refinement there are no mutations remaining in the artifactual set"
-        if (save.rdata == TRUE) {
-            save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
-        }
-        if (save.tsv == TRUE) {
-            WriteFIREVATResultsToTSV(firevat.results = data)
-        }
-        return(data)
-    }
-
-    # 8. Strand bias analysis
-    data$perform.strand.bias.analysis <- perform.strand.bias.analysis
-    data$filter.by.strand.bias.analysis <- filter.by.strand.bias.analysis
-    data$filter.by.strand.bias.analysis.cutoff <- filter.by.strand.bias.analysis.cutoff
-    data$ref.forward.strand.var <- ref.forward.strand.var
-    data$ref.reverse.strand.var <- ref.reverse.strand.var
-    data$alt.forward.strand.var <- alt.forward.strand.var
-    data$alt.reverse.strand.var <- alt.reverse.strand.var
-    data$strand.bias.fdr.correction.method <- strand.bias.fdr.correction.method
-    data$strand.bias.perform.fdr.correction <- strand.bias.perform.fdr.correction
-
-    PrintLog("Step 03. Additional analysis.")
-
-    if (data$perform.strand.bias.analysis == TRUE) {
-        PrintLog("Step 03-1. Perform strand bias analysis [firevat_strand_bias::PerformStrandBiasAnalysis]")
-
-        data$refined.vcf.obj <- PerformStrandBiasAnalysis(
-            vcf.obj = data$refined.vcf.obj,
-            ref.forward.strand.var = data$ref.forward.strand.var,
-            ref.reverse.strand.var = data$ref.reverse.strand.var,
-            alt.forward.strand.var = data$alt.forward.strand.var,
-            alt.reverse.strand.var = data$alt.reverse.strand.var,
-            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
-            fdr.correction.method = data$strand.bias.fdr.correction.method)
-
-        if (data$filter.by.strand.bias.analysis == TRUE) {
-            PrintLog("* Filter by strand bias analysis results [firevat_strand_bias::FilterByStrandBiasAnalysis]")
-            filtered.vcf.objs <- FilterByStrandBiasAnalysis(
-                refined.vcf.obj = data$refined.vcf.obj,
-                artifactual.vcf.obj = data$artifactual.vcf.obj,
-                perform.fdr.correction = data$strand.bias.perform.fdr.correction,
-                filter.by.strand.bias.analysis.cutoff = data$filter.by.strand.bias.analysis.cutoff)
-            data$refined.vcf.obj <- filtered.vcf.objs$refined.vcf.obj
-            data$artifactual.vcf.obj <- filtered.vcf.objs$artifactual.vcf.obj
-        }
-
-        data$artifactual.vcf.obj <- PerformStrandBiasAnalysis(
-            vcf.obj = data$artifactual.vcf.obj,
-            ref.forward.strand.var = data$ref.forward.strand.var,
-            ref.reverse.strand.var = data$ref.reverse.strand.var,
-            alt.forward.strand.var = data$alt.forward.strand.var,
-            alt.reverse.strand.var = data$alt.reverse.strand.var,
-            perform.fdr.correction = data$strand.bias.perform.fdr.correction,
-            fdr.correction.method = data$strand.bias.fdr.correction.method)
-    }
-
-    # 9. Annotate
-    data$annotate = annotate
-    data$df.annotation.db = df.annotation.db
-    data$annotated.columns.to.display = annotated.columns.to.display
-    data$annotation.filter.key.value.pairs = annotation.filter.key.value.pairs
-    data$annotation.filter.condition = annotation.filter.condition
-
-    if (data$annotate == TRUE) {
-        PrintLog("Step 03-2. Annotate variants [firevat_annotation::AnnotateVCFObj]")
-
-        # Annotate VCFs
-        data$vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$vcf.obj,
-                                                 df.annotation.db = data$df.annotation.db,
-                                                 include.all.columns = TRUE)
-        data$refined.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$refined.vcf.obj,
-                                                         df.annotation.db = data$df.annotation.db,
-                                                         include.all.columns = TRUE)
-        data$artifactual.vcf.obj.annotated <- AnnotateVCFObj(vcf.obj = data$artifactual.vcf.obj,
-                                                             df.annotation.db = data$df.annotation.db,
-                                                             include.all.columns = TRUE)
-
-        # Query annotated VCFs
-        data$refined.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$refined.vcf.obj.annotated,
-                                                                    filter.key.value.pairs = data$annotation.filter.key.value.pairs,
-                                                                    filter.condition = data$annotation.filter.condition)
-        data$artifactual.vcf.obj.annotated.queried <- QueryAnnotatedVCF(vcf.obj.annotated = data$artifactual.vcf.obj.annotated,
-                                                                        filter.key.value.pairs = data$annotation.filter.key.value.pairs,
-                                                                        filter.condition = data$annotation.filter.condition)
-    }
-
-    # 10. Run Mutalisk
-    # Identify target mutational signatures
-    # Here we fetch all signatures ever identified by Mutational Patterns
-    if (mutalisk == TRUE) {
-        PrintLog("Step 03-3. Perform Mutalisk mutational signature analysis [firevat_mutalisk::RunMutalisk]")
-        PrintLog("* Preparing data")
-
-        if (mode == "ga") {
-            df.optimization.logs <- ReadOptimizationIterationReport(data = data)
-            Split.Sigs <- function(sigs, weights, cutoff = 0.05) {
-                include <- rep(TRUE, length(sigs))
-                include[which(sigs == "")] <- FALSE
-                include[is.na(sigs)] <- FALSE
-
-                sigs <- as.character(sigs[include])
-                weights <- as.character(weights[include])
-                sigs <- lapply(sigs, function(x) strsplit(x, ',')[[1]])
-                weights <- lapply(weights, function(x) strsplit(x, ',')[[1]])
-
-                if (length(sigs) == 0) {
-                    return(c())
-                }
-
-                candidate.sigs <- c()
-                for (i in 1:length(sigs)) {
-                    df <- data.frame(sig = sigs[[i]],
-                                     weight = weights[[i]],
-                                     stringsAsFactors = F)
-                    df <- df[df$weight >= cutoff, ]
-                    candidate.sigs <- c(candidate.sigs, df$sig)
-                }
-                return(candidate.sigs)
-            }
-            sigs1 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.target.signatures,
-                                weights = df.optimization.logs$refined.muts.target.signatures.weights)
-            sigs2 <- Split.Sigs(sigs = df.optimization.logs$refined.muts.sequencing.artifact.signatures,
-                                weights = df.optimization.logs$refined.muts.sequencing.artifact.signatures.weights)
-            sigs3 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.target.signatures,
-                                weights = df.optimization.logs$artifactual.muts.target.signatures.weights)
-            sigs4 <- Split.Sigs(sigs = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures,
-                                weights = df.optimization.logs$artifactual.muts.sequencing.artifact.signatures.weights)
-            if (is.null(mutalisk.must.include.sigs) == FALSE) {
-                data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs, mutalisk.must.include.sigs))
-            } else {
-                data$mut.pat.target.sigs <- unique(c(sigs1, sigs2, sigs3, sigs4, data$sequencing.artifact.mut.sigs))
-            }
-
-            # Original vcf
-            data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
-                                                          df.ref.mut.sigs = data$df.ref.mut.sigs,
-                                                          target.mut.sigs = data$mut.pat.target.sigs,
-                                                          method = data$mutalisk.method,
-                                                          n.sample = data$mutalisk.random.sampling.count,
-                                                          n.iter = data$mutalisk.random.sampling.max.iter,
-                                                          verbose = data$verbose)
-            # Refined vcf
-            data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
-                                                              df.ref.mut.sigs = df.ref.mut.sigs,
-                                                              target.mut.sigs = data$mut.pat.target.sigs,
-                                                              method = data$mutalisk.method,
-                                                              n.sample = data$mutalisk.random.sampling.count,
-                                                              n.iter = data$mutalisk.random.sampling.max.iter,
-                                                              verbose = data$verbose)
-            # Artifact vcf
-            data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
-                                                                  df.ref.mut.sigs = df.ref.mut.sigs,
-                                                                  target.mut.sigs = data$mut.pat.target.sigs,
-                                                                  method = data$mutalisk.method,
-                                                                  n.sample = data$mutalisk.random.sampling.count,
-                                                                  n.iter = data$mutalisk.random.sampling.max.iter,
-                                                                  verbose = data$verbose)
-        } else if (mode == "manual") {
-            # Original vcf
-            data$raw.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$vcf.obj,
-                                                          df.ref.mut.sigs = data$df.ref.mut.sigs,
-                                                          target.mut.sigs = data$target.mut.sigs,
-                                                          method = data$mutalisk.method,
-                                                          n.sample = data$mutalisk.random.sampling.count,
-                                                          n.iter = data$mutalisk.random.sampling.max.iter,
-                                                          verbose = data$verbose)
-            # Refined vcf
-            data$refined.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$refined.vcf.obj,
-                                                              df.ref.mut.sigs = df.ref.mut.sigs,
-                                                              target.mut.sigs = data$target.mut.sigs,
-                                                              method = data$mutalisk.method,
-                                                              n.sample = data$mutalisk.random.sampling.count,
-                                                              n.iter = data$mutalisk.random.sampling.max.iter,
-                                                              verbose = data$verbose)
-            # Artifact vcf
-            data$artifactual.muts.mutalisk.results <- RunMutalisk(vcf.obj = data$artifactual.vcf.obj,
-                                                                  df.ref.mut.sigs = df.ref.mut.sigs,
-                                                                  target.mut.sigs = data$target.mut.sigs,
-                                                                  method = data$mutalisk.method,
-                                                                  n.sample = data$mutalisk.random.sampling.count,
-                                                                  n.iter = data$mutalisk.random.sampling.max.iter,
-                                                                  verbose = data$verbose)
-        }
-    }
-
-    # 12. Write VCF Files
-    if (write.vcf == TRUE) {
-        PrintLog("Step 04. Write refined and artifactual VCF files [firevat_vcf::WriteVCF]")
-
-        WriteVCF(vcf.obj = data$vcf.obj,
-                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original.vcf"))
-        WriteVCF(vcf.obj = data$refined.vcf.obj,
-                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined.vcf"))
-        WriteVCF(vcf.obj = data$artifactual.vcf.obj,
-                 save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact.vcf"))
-        if (data$annotate == TRUE) {
-            WriteVCF(vcf.obj = data$data$vcf.obj.annotated,
-                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Original_Annotated.vcf"))
-            WriteVCF(vcf.obj = data$refined.vcf.obj.annotated,
-                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Refined_Annotated.vcf"))
-            WriteVCF(vcf.obj = data$artifactual.vcf.obj.annotated,
-                     save.file = paste0(data$output.dir, data$vcf.file.basename, "_Artifact_Annotated.vcf"))
-        }
-    }
-
-    data$end.datetime <- Sys.time()
-    data$variant.refinement.terminiation.log <- "Successful"
-
-    # 13. Report results
-    if (report == TRUE) {
-        PrintLog("Step 05. Generate FIREVAT report")
-        data <- ReportFIREVATResults(data = data)
-    }
-
-    # 14. Save data
-    if (save.rdata == TRUE) {
-        PrintLog("Step 06. Write .RData")
-        save(data, file = paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_data.RData"))
-    }
-    if (save.tsv == TRUE) {
-        PrintLog("Step 07. Write FIREVAT results to .tsv file")
-        WriteFIREVATResultsToTSV(firevat.results = data)
+        data <- RunManualMode(data = data)
     }
 
     return(data)
