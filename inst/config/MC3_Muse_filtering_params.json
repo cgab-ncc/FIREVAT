@@ -64,8 +64,8 @@
             "index": 2
         },
         "type": "integer",
-        "default": 5,
-        "range": [0, 10],
+        "default": 1,
+        "range": [0, 5],
         "use_in_filter": true
     },
     {
@@ -92,8 +92,8 @@
             "index": 2
         },
         "type": "integer",
-        "default": 5,
-        "range": [0, 10],
+        "default": 3,
+        "range": [3, 10],
         "use_in_filter": true
     },
     {
@@ -104,7 +104,7 @@
             "args": ["NormalRefAD", "NormalAltAD"]
         },
         "type": "float",
-        "default": 5,
+        "default": 1,
         "range": [0, 10],
         "use_in_filter": false
     },
