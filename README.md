@@ -69,6 +69,10 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
 
 Running the code above will generate FIREVAT outputs, including ```HTML``` report, ```refined.vcf```, and ```artifact.vcf``` files:
 
+<p float="left">
+  <img src="inst/img/FIREVAT_Sample_HTML_Report_Screenshots.png" width="100%"/>
+</p>
+
 Feel free to take a look at the sample [**HTML report**](). The sample ```FIREVAT``` output files are available [**here**]().
 
 For your convenience, we have prepared configuration (JSON) files for popularly used variant callers:
