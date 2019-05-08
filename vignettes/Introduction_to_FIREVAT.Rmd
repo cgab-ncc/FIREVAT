@@ -1,9 +1,11 @@
 ---
-title: "FIREVAT Introduction"
+title: "Introduction to FIREVAT"
 author: "Andy Jinseok Lee, Hyunbin Kim"
-output:
-  pdf_document: default
-  html_document: default
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to FIREVAT}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
@@ -51,7 +53,7 @@ You can also perform manual variant filtering.
 library(FIREVAT)
 
 # Assign output directory
-output.dir <- "/home/jinseoklee/Documents/Projects/Temp/FIREVAT_TEMP/"
+output.dir <- ""
 
 sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
 config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", package = "FIREVAT")
@@ -76,7 +78,7 @@ results <- RunFIREVAT(vcf.file = sample.vcf.file,
 
 ### 00-3. Mutational signature analysis
 Using FIREVAT, you can run Mutalisk
-```{r}
+```{r, eval=FALSE}
 library(FIREVAT)
 
 sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
@@ -95,7 +97,7 @@ The R package FIREVAT provides
 
 
 ## 02. Installing FIREVAT
-```{r}
+```{r, eval=FALSE}
 install.packages("FIREVAT")
 ```
 
@@ -103,7 +105,7 @@ install.packages("FIREVAT")
 To perform variant refinement using FIREVAT, you need to supply a VCF file and a FIREVAT configuration file.
 
 ### 03-1. Loading example data
-```{r}
+```{r, eval=FALSE}
 
 ```
 

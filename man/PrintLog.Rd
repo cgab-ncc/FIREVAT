@@ -8,6 +8,8 @@ PrintLog(msg, type = "INFO")
 }
 \arguments{
 \item{msg}{String value message to print along with log type and date}
+
+\item{type}{String value that represents type of this message. 'INFO' by default.}
 }
 \description{
 Prints log message

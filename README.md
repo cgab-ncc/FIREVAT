@@ -9,7 +9,7 @@
 ```FIREVAT``` (**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts) is an R package that performs variant refinement on cancer sequencing data. ```FIREVAT``` uses mutational signatures to identify sequencing artifacts and low-quality variants.
 
 <p float="left">
-  <img src="FIREVAT_Workflow_Figure.png" width="100%"/>
+  <img src="inst/img/FIREVAT_Workflow_Figure.png" width="100%"/>
 </p>
 
 ## Getting started
@@ -22,7 +22,7 @@ You can install the released version of ```FIREVAT``` from CRAN:
 install.packages("FIREVAT")
 ```
 
-You can also install the developmental version of ```FIREVAT``` from github:
+You can also install the developmental version of ```FIREVAT``` from GitHub:
 
 ```r
 install.packages("devtools")
@@ -92,10 +92,10 @@ In [**Introduction to FIREVAT**](https://github.com/cgab-ncc/FIREVAT/tree/master
 
 ## Suggested workflow
 
-Based on our validation studies, We suggest using ```FIREVAT``` in the following workflow:
+Based on our validation studies, we suggest using ```FIREVAT``` in the following workflow:
 
 <p float="left">
-  <img src="FIREVAT_Suggested_Workflow.png" width="100%"/>
+  <img src="inst/img/FIREVAT_Suggested_Workflow.png" width="100%"/>
 </p>
 
 ## Paper
