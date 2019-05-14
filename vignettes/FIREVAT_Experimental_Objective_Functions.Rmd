@@ -1,0 +1,98 @@
+---
+title: "FIREVAT Experimental Objective Functions"
+date: "May 14 2019"
+width: 
+author: 
+- name: "Andy Jinseok Lee"
+  affiliation: 
+    - Bioinformatics Analysis Team, National Cancer Center Korea
+  email: jinseok.lee@ncc.re.kr
+- name: "Hyunbin Kim"
+  affiliation: 
+    - Bioinformatics Analysis Team, National Cancer Center Korea
+  email: khb7840@ncc.re.kr
+package: FIREVAT
+output: 
+    BiocStyle::html_document:
+vignette: >
+  %\VignetteIndexEntry{FIREVAT Experimental Objective Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    cache = FALSE
+)
+```
+
+# Experimental objective functions
+
+## Euc.Obj.Fn
+$$ \sqrt{ cos\Theta_{r}^{2} + (1- \Sigma w_{A,r}^i)^{2} + cos\Theta_{a}^{2} + (\Sigma w_{A,a}^i)^{2} } $$
+<br/>
+
+## Exp.Weighted.Obj.Fn.1
+$$ [log_{10}(0.9 \cdot cos\Theta_{r} + 0.1) + 1] \cdot [\frac{(10^{(\Sigma w_{A,r}^i)} - 0.1)}{0.9}] \cdot [log_{10}(0.9 \cdot cos\Theta_{a} + 0.1) + 1] \cdot [\frac{(10^{(\Sigma w_{A,a}^i - 1)} - 0.1)}{0.9}] $$
+<br/>
+
+## Exp.Weighted.Obj.Fn.2
+$$ [0.5 \cdot log_{10}(0.99 \cdot cos\Theta_{r} + 0.01) + 1] \cdot [\frac{(10^{2 \cdot (\Sigma w_{A,r}^i)} - 0.01)}{0.99}] \cdot [0.5 \cdot log_{10}(0.99 \cdot cos\Theta_{a} + 0.01) + 1] \cdot [\frac{(10^{2 \cdot (\Sigma w_{A,a}^i - 1)} - 0.01)}{0.99}] $$ 
+<br/>
+
+## Euc.Exp.Weighted.Obj.Fn
+$$ \sqrt{[log_{10}(0.9 \cdot cos\Theta_{r} + 0.1) + 1]^{2} + [\frac{(10^{(\Sigma w_{A,r}^i)} - 0.1)}{0.9}]^{2} + [log_{10}(0.9 \cdot cos\Theta_{a} + 0.1) + 1]^{2} + [\frac{(10^{(\Sigma w_{A,a}^i - 1)} - 0.1)}{0.9}]^{2}} $$
+<br/>
+
+## Euc.Exp.Weighted.Seq.Art.Only.Obj.Fn.1
+$$ \sqrt{[\frac{(10^{(\Sigma w_{A,r}^i)} - 0.1)}{0.9}]^{2} + [\frac{(10^{(\Sigma w_{A,a}^i - 1)} - 0.1)}{0.9}]^{2}} $$
+<br/>
+
+## Euc.Exp.Weighted.Seq.Art.Only.Obj.Fn.2
+$$ \sqrt{[log_{10}(0.9 \cdot cos\Theta_{a} + 0.1) + 1]^{2} + [\frac{(10^{(\Sigma w_{A,a}^i - 1)} - 0.1)}{0.9}]^{2}} $$
+<br/>
+
+## Exp.Weighted.Refined.Seq.Art.Only.Obj.Fn
+$$ \frac{10^{(\Sigma w_{A,r}^i)} - 0.1}{0.9} $$
+<br/>
+
+## Sigmoid.Obj.Fn
+$$ [\frac{1}{1+e^{-3 \cdot (-6 + 10 \cdot (cos\Theta_{r})^{5})}}] \cdot [\frac{1}{1+e^{-3 \cdot (-6 + 10 \cdot (1 - \Sigma w_{A,r}^i)^{5})}}] \cdot [\frac{1}{1+e^{-3 \cdot (-6 + 10 \cdot (cos\Theta_{a})^{5})}}] \cdot [\frac{1}{1+e^{-3 \cdot (-6 + 10 \cdot (\Sigma w_{A,a}^i)^{5})}}] $$
+<br/>
+
+## Leaky.ReLU.Obj.Fn
+\begin{align}
+cos\Theta_{r}^{'}=\begin{cases}
+0.111 \cdot cos\Theta_{r}, & \text{if $cos\Theta_{r} < 0.9$}\\
+9 \cdot (cos\Theta_{r} - 0.888), & \text{otherwise}.
+\end{cases}
+
+\newline\newline
+
+cos\Theta_{a}^{'}=\begin{cases}
+0.111 \cdot cos\Theta_{a}, & \text{if $cos\Theta_{a} < 0.9$}\\
+9 \cdot (cos\Theta_{a} - 0.888), & \text{otherwise}.
+\end{cases}
+
+\newline\newline
+
+(\Sigma w_{A,r}^i)^{'}=\begin{cases}
+0.111 \cdot (1 - \Sigma w_{A,r}^i), & \text{if $(1 - \Sigma w_{A,r}^i) < 0.9$}\\
+9 \cdot ((1 - \Sigma w_{A,r}^i) - 0.888), & \text{otherwise}.
+\end{cases}
+
+\newline\newline
+
+(\Sigma w_{A,a}^i)^{'}=\begin{cases}
+0.111 \cdot \Sigma w_{A,a}^i, & \text{if $\Sigma w_{A,a}^i < 0.9$}\\
+9 \cdot (\Sigma w_{A,a}^i - 0.888), & \text{otherwise}.
+\end{cases}
+
+\newline\newline
+
+cos\Theta_{r}^{'} \cdot (\Sigma w_{A,r}^i)^{'} \cdot cos\Theta_{a}^{'} \cdot (\Sigma w_{A,a}^i)^{'}
+\end{align}
+
+<br/>

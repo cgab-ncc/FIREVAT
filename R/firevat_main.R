@@ -623,13 +623,13 @@ RunManualMode <- function(data) {
 #' the Genetic Algorithm package. If FALSE, then FIREVAT supplies NULL to the GA package 'suggestions' parameter.
 #' FIREVAT also computes baseline performance of each filter variable and uses fittest population from each variable
 #' as a suggested solution.
-#' @param ga.pop.size Integer value of the Genetic Algorithm 'population size' parameter. Default: 200.
+#' @param ga.pop.size Integer value of the Genetic Algorithm 'population size' parameter. Default: 100.
 #' This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.
-#' @param ga.max.iter Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 200.
+#' @param ga.max.iter Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 100.
 #' This value should be set based on the number of filter parameters. Recommendation: same as 'ga.pop.size'.
 #' @param ga.run Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
 #' This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.
-#' @param ga.pmutation Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.
+#' @param ga.pmutation Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.1.
 #' @param ga.preemptive.killing If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
 #' compared to the original mutatational signatures analysis
 #' @param mutalisk If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.
@@ -688,10 +688,10 @@ RunFIREVAT <- function(vcf.file,
                        objective.fn = Default.Obj.Fn,
                        use.suggested.soln = TRUE,
                        ga.type = "real-valued",
-                       ga.pop.size = 200,
-                       ga.max.iter = 200,
+                       ga.pop.size = 100,
+                       ga.max.iter = 100,
                        ga.run = 50,
-                       ga.pmutation = 0.25,
+                       ga.pmutation = 0.1,
                        ga.preemptive.killing = FALSE,
                        # Mutalisk parameters
                        mutalisk = TRUE,

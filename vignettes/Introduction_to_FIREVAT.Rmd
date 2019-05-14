@@ -1,7 +1,19 @@
 ---
 title: "Introduction to FIREVAT"
-author: "Andy Jinseok Lee, Hyunbin Kim"
-output: rmarkdown::html_vignette
+date: "May 14 2019"
+width: 
+author: 
+- name: "Andy Jinseok Lee"
+  affiliation: 
+    - Bioinformatics Analysis Team, National Cancer Center Korea
+  email: jinseok.lee@ncc.re.kr
+- name: "Hyunbin Kim"
+  affiliation: 
+    - Bioinformatics Analysis Team, National Cancer Center Korea
+  email: khb7840@ncc.re.kr
+package: FIREVAT
+output:
+    BiocStyle::html_document:
 vignette: >
   %\VignetteIndexEntry{Introduction to FIREVAT}
   %\VignetteEngine{knitr::rmarkdown}
@@ -9,172 +21,437 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    cache = FALSE
+)
 ```
 
-## 00. Using FIREVAT
+# Basic examples
 
-### 00-1. Variant refinement
-Using ```RunFIREVAT```, you can perform variant refinement using mutational signatures.<br/>
-With 2 cores (each with 3.5GHz clock speed) this sample script takes about 10 minutes to run.
+## Variant refinement
+```RunFIREVAT``` function performs variant refinement using mutational signatures. 
+This function optimizes the filtering cutoff values by minimizing artifactual signature weights.
+With 2 cores (each with 3.5GHz clock speed) this sample code below takes about 10 minutes to run.
 ```{r, eval=FALSE}
 library(FIREVAT)
 
-# Assign output directory
-output.dir <- ""
+output.dir <- "" # assign output directory
 
-sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
-config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", package = "FIREVAT")
+sample.vcf.file <- system.file("extdata", 
+                               "DCC_PCAWG_Cell_Lines_HCC1954.vcf", 
+                               package = "FIREVAT")
+config.file <- system.file("config", 
+                           "PCAWG_DKFZ_Cell_Line_Filtering_Params.json",
+                           package = "FIREVAT")
 
-results <- RunFIREVAT(vcf.file = sample.vcf.file,
-                      vcf.file.genome = 'hg19',
-                      config.file = config.file,
-                      df.ref.mut.sigs = GetPCAWGMutSigs(),
-                      target.mut.sigs = GetPCAWGMutSigsNames(),
-                      sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
-                      output.dir = output.dir,
-                      objective.fn = Default.Obj.Fn,
-                      num.cores = 2,
-                      ga.pop.size = 100,
-                      ga.max.iter = 5,
-                      ga.run = 5,
-                      ga.pmutation = 0.1,
-                      perform.strand.bias.analysis = TRUE,
-                      ref.forward.strand.var = "TumorDPRefForward",
-                      ref.reverse.strand.var = "TumorDPRefReverse",
-                      alt.forward.strand.var = "TumorDPAltForward",
-                      alt.reverse.strand.var = "TumorDPAltReverse",
-                      annotate = FALSE)
+results <- RunFIREVAT(
+    vcf.file = sample.vcf.file,
+    vcf.file.genome = 'hg19',
+    config.file = config.file,
+    df.ref.mut.sigs = GetPCAWGMutSigs(),
+    target.mut.sigs = GetPCAWGMutSigsNames(),
+    sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+    output.dir = output.dir,
+    objective.fn = Default.Obj.Fn,
+    num.cores = 2,
+    ga.pop.size = 100,
+    ga.max.iter = 5,
+    ga.run = 5,
+    ga.pmutation = 0.1,
+    perform.strand.bias.analysis = TRUE,
+    ref.forward.strand.var = "TumorDPRefForward",
+    ref.reverse.strand.var = "TumorDPRefReverse",
+    alt.forward.strand.var = "TumorDPAltForward",
+    alt.reverse.strand.var = "TumorDPAltReverse",
+    annotate = FALSE)
 ```
 
-### 00-2. Manual filtering
+## Manual filtering
+
 You can also perform manual variant filtering.
 ```{r, eval=FALSE}
 library(FIREVAT)
 
-# Assign output directory
-output.dir <- ""
+output.dir <- "" # assign output directory
 
-sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
-config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", package = "FIREVAT")
+sample.vcf.file <- system.file("extdata", 
+                               "DCC_PCAWG_Cell_Lines_HCC1954.vcf", 
+                               package = "FIREVAT")
+config.file <- system.file("config",
+                           "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", 
+                           package = "FIREVAT")
 
-results <- RunFIREVAT(vcf.file = sample.vcf.file,
-                      vcf.file.genome = 'hg19',
-                      config.file = config.file,
-                      mode = "manual",
-                      df.ref.mut.sigs = GetPCAWGMutSigs(),
-                      target.mut.sigs = GetPCAWGMutSigsNames(),
-                      sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
-                      output.dir = output.dir,
-                      num.cores = 2,
-                      mutalisk.method = "random.sampling",
-                      perform.strand.bias.analysis = TRUE,
-                      ref.forward.strand.var = "TumorDPRefForward",
-                      ref.reverse.strand.var = "TumorDPRefReverse",
-                      alt.forward.strand.var = "TumorDPAltForward",
-                      alt.reverse.strand.var = "TumorDPAltReverse",
-                      annotate = FALSE)
+results <- RunFIREVAT(
+    vcf.file = sample.vcf.file,
+    vcf.file.genome = 'hg19',
+    config.file = config.file,
+    mode = "manual",
+    df.ref.mut.sigs = GetPCAWGMutSigs(),
+    target.mut.sigs = GetPCAWGMutSigsNames(),
+    sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+    output.dir = output.dir,
+    num.cores = 2,
+    mutalisk.method = "random.sampling",
+    perform.strand.bias.analysis = TRUE,
+    ref.forward.strand.var = "TumorDPRefForward",
+    ref.reverse.strand.var = "TumorDPRefReverse",
+    alt.forward.strand.var = "TumorDPAltForward",
+    alt.reverse.strand.var = "TumorDPAltReverse",
+    annotate = FALSE)
 ```
 
-### 00-3. Mutational signature analysis
-Using FIREVAT, you can run Mutalisk
-```{r, eval=FALSE}
+## Mutational signature analysis
+
+Using ```FIREVAT```, you can run ```Mutalisk```
+```{r, warning=FALSE, results='hide', message=FALSE}
 library(FIREVAT)
 
-sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
+sample.vcf.file <- system.file("extdata", 
+                               "DCC_PCAWG_Cell_Lines_HCC1954.vcf", 
+                               package = "FIREVAT")
 vcf.obj <- ReadVCF(sample.vcf.file)
 
 mutalisk.results <- RunMutalisk(vcf.obj = vcf.obj,
                                 df.ref.mut.sigs = GetPCAWGMutSigs(),
-                                target.mut.sigs = GetPCAWGMutSigsNames())
+                                target.mut.sigs = GetPCAWGMutSigsNames(),
+                                n.sample = 10,
+                                n.iter = 5)
 ```
 
-## 01. Introduction
+Subsequently, ```Mutalisk``` results can be plotted.
+```{r, warning=FALSE, results='hide', message=FALSE}
+g <- PlotMutaliskResults(
+    mutalisk.results = mutalisk.results,
+    signatures = unique(mutalisk.results$identified.mut.sigs),
+    trinuc.max.y = 1,
+    trinuc.min.y = 0,
+    mut.type.max.y = 1,
+    title = "")
+```
 
-FIREVAT (FInding REliable Variants without ArTifacts) uses mutational signatures to perform variant refinement and generates accurate signature analysis. 
+### Signature contribution probabilities
 
-The R package FIREVAT provides 
+```{r}
+print(g$f1)
+```
 
+### Observed spectrum
 
-## 02. Installing FIREVAT
+```{r}
+print(g$f2.1)
+```
+
+### Reconstructed spectrum
+
+```{r}
+print(g$f2.2)
+```
+
+### Residual spectrum
+
+```{r}
+print(g$f2.3)
+```
+
+### Trinucleotide spectrum
+
+```{r}
+print(g$f3)
+```
+
+# Introduction
+
+```FIREVAT``` (FInding REliable Variants without ArTifacts) uses mutational signatures to perform variant refinement and generates accurate signature analysis. 
+
+The R package ```FIREVAT``` provides convenient methods to identify artifactual variants and generate visualizations that explain the refinement outcomes. These functions can be used to aid quality control efforts in cancer genomics studies.
+
+## Installing package
+
+The released version of ```FIREVAT``` is available on ```CRAN```.
 ```{r, eval=FALSE}
 install.packages("FIREVAT")
 ```
 
-## 03. Inputs
-To perform variant refinement using FIREVAT, you need to supply a VCF file and a FIREVAT configuration file.
-
-### 03-1. Loading example data
+Alternatively, you can install ```FIREVAT``` directly from our GitHub repository.
 ```{r, eval=FALSE}
-
+install.packages("devtools")
+library(devtools)
+install_github("cgab-ncc/FIREVAT")
 ```
 
+## Inputs
 
-### 03-X. Genetic Algorithm (GA) parameters
+To perform variant refinement using ```RunFIREVAT```, you need to supply a VCF file and a ```FIREVAT``` configuration file.
 
-### 03-X. Objective function
-Refer to 04-X. 
+### VCF file
 
-### 03-X. Preparing your own VCF file
+```FIREVAT``` accepts a standard Variant Call Format (VCF) file as the primary input. Here are some example VCF files included in our package.
+```{r, warning=FALSE, results='hide', message=FALSE}
+# Sample VCFs
+sample.vcf.file.1 <- system.file("extdata",
+                                 "DCC_PCAWG_Cell_Lines_HCC1954.vcf",
+                                 package = "FIREVAT")
+sample.vcf.file.2 <- system.file("extdata",
+                                 "DCC_PCAWG_Cell_Lines_HCC1143.vcf",
+                                 package = "FIREVAT")
 
-### 03-X. Preparing your own configuration file
+sample.vcf.obj.1 <- ReadVCF(sample.vcf.file.1)
+sample.vcf.obj.2 <- ReadVCF(sample.vcf.file.2)
+```
 
-### 03-X. Preparing your own mutational signature reference matrix
+HCC1954
+```{r}
+print(head(sample.vcf.obj.1$header))
+print(head(sample.vcf.obj.1$data))
+print(head(sample.vcf.obj.1$genome))
+```
 
-### 03-X. Selecting target mutational signatures by cancer type
+HCC1143
+```{r}
+head(sample.vcf.obj.2$header)
+head(sample.vcf.obj.2$data)
+head(sample.vcf.obj.2$genome)
+```
 
-### 03-X. Mutalisk parameters
-Refer to 05-X. Mutalisk parameters
+### Configuration file
 
-### 03-X. Variant annotation parameters
+```RunFIREVAT``` needs a ```FIREVAT``` configuration (JSON) file that specifies the instructions
+for extracting and treating desired filter parameters. We have prepared configuration files for
+widely used variant callers.
+```{r}
+mutect2.config.file <- system.file("config",
+                                   "MuTect2_Filtering_Params.json",
+                                   package = "FIREVAT")
+muse.config.file <- system.file("config",
+                                "Muse_Filtering_Params.json",
+                                package = "FIREVAT")
+somaticsniper.config.file <- system.file("config",
+                                         "SomaticSniper_Filtering_Params.json",
+                                         package = "FIREVAT")
+varscan2.config.file <- system.file("config",
+                                    "Varscan_Filtering_Params.json",
+                                    package = "FIREVAT")
+```
 
-#### 03-X-Y. Downloading ClinVar, COSMIC etc
+### Preparing your own configuration file
 
-#### 03-X-Y. Preparing annotation data.frame
+The JSON file must have the following information for each filter parameter:
 
-## 04. Variant refinement
+* name
+* direction         [POS or NEG]
+* field 
+    * field_type        [string; e.g. 'FORMAT']
+    * column_header     [string; e.g. 'TUMOR']
+    * key               [string; e.g. 'AD']
+    * index             [integer; e.g. 2]
+* type                  [integer or float]
+* default               [integer or float]
+* range                 [min,max; integer or float; e.g. 10,20]
+* use_in_filter         [false or true]
+* op
+    * function_string   [R code that gets evaluated] 
+    * args              [string vector]
 
-### 04-X. Modes
+### Reference mutational signature matrix
 
-### 04-Y. Optimization parameters
+```FIREVAT``` relies on mutational signatures to identify artifactual variants.
+The PCAWG signatures include artifactual signatures that accommodate this approach.
+```{r}
+GetPCAWGMutSigs()[1:5,1:10]
+```
 
-## 05. Mutational signature analysis
+Here are the signatures related to sequencing artifact:
+```{r}
+PCAWG.All.Sequencing.Artifact.Signatures
+```
 
-### 05-X. Mutalisk
+### Preparing your own mutational signature reference matrix
 
-#### 05-X-Y. Mutalisk parameters
+You may supply your own custom mutational signatures. Please make sure that the columns contain the following headers in the order they appear:
+```{r}
+GetPCAWGMutSigs()[1:5,1:3]
+```
+Your first custom signature should begin at column 4 (in 1-based index in R).
+Once you have the right data.frame, you can supply it into ```df.ref.mut.sigs``` input parameter of ```RunFIREVAT```.
 
-#### 05-X-Y. Mutalisk results
+### Genetic Algorithm (GA) parameters
 
-### 05-X. MutationalPatterns
+<img src="res/FIREVAT_GA_Parameters_Table.png" width="800" align="middle" />
 
-#### 05-X-Y. MutationalPatterns parameters
+### Objective functions
 
-#### 05-X-Y. MutationalPatterns results
+```FIREVAT``` optimization employs an evaluation approach that incorporates cosine similarity scores and sequencing artifact signature weights (see below) to determine if a given set of filter parameters leads to a more refined set of mutations. Here we first define the terms used for the evaluation approach, namely the objective function.<br/>
 
-## 06. Strand bias analysis
+Cosine similarity score computed from signature analysis using refined mutations:
+$$ cos\Theta_{r} $$
 
-### 06-1. Filtering variants by strand bias analysis results
+Sum of sequencing artifact signature weights computed from signature analysis using refined mutations:
+$$ \Sigma w_{A,r}^i $$
 
-## 07. Variant annotation
+Cosine similarity score computed from signature analysis using artifactual mutations:
+$$ cos\Theta_{a} $$
 
-### 07-1. Annotating variants
+Sum of sequencing artifact signature weights computed from signature analysis using artifactual mutations:
+$$ \Sigma w_{A,a}^i $$
 
-### 07-2. White/black list
+```Default.Obj.Fn``` (default objective function) is then the product of the four terms above:
+$$ cos\Theta_{r} \cdot (1-\Sigma w_{A,r}^i) \cdot cos\Theta_{a} \cdot \Sigma w_{A,a}^i $$
 
-## 08. FIREVAT report
+<br/>(Experimental) there are different ways of working with the terms to formulate an evaluation method. Such possibilities include logarithmically or exponentially weighting each term. There are other experimental objective functions included in ```FIREVAT```. Please refer to [FIREVAT Experimenta Objective Functions](https://github.com/cgab-ncc/FIREVAT/tree/master/vignettes/FIREVAT_Experimental_Objective_Functions.html) for these. Please note that based on our validation studies, the ```Default.Obj.Fn``` function performed the most reliably and accurately.
 
-## 09. Generating individual FIREVAT report plots
+### Selecting target mutational signatures by cancer type
 
-## 10. Advanced FIREVAT examples
+You may choose to supply a different subset of target signatures depending on the cancer type by using the input parameter ```target.mut.sigs``` in ```RunFIREVAT```. For example, we may choose to only identify SBS1, SBS2, SBS5, and SBS13 for the sample VCF file:
+```{r, eval=FALSE}
+output.dir <- "" # assign output directory
 
-### 10-1. Additional plot generation
+target.mut.sigs <- c("SBS1", "SBS2", "SBS5", "SBS13")
+
+sample.vcf.file <- system.file("extdata", 
+                               "DCC_PCAWG_Cell_Lines_HCC1954.vcf", 
+                               package = "FIREVAT")
+config.file <- system.file("config", 
+                           "PCAWG_DKFZ_Cell_Line_Filtering_Params.json",
+                           package = "FIREVAT")
+results <- RunFIREVAT(
+    vcf.file = sample.vcf.file,
+    vcf.file.genome = 'hg19',
+    config.file = config.file,
+    df.ref.mut.sigs = GetPCAWGMutSigs(),
+    target.mut.sigs = target.mut.sigs,
+    sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+    output.dir = output.dir,
+    objective.fn = Default.Obj.Fn,
+    num.cores = 2,
+    ga.pop.size = 100,
+    ga.max.iter = 5,
+    ga.run = 5,
+    ga.pmutation = 0.1,
+    perform.strand.bias.analysis = TRUE,
+    ref.forward.strand.var = "TumorDPRefForward",
+    ref.reverse.strand.var = "TumorDPRefReverse",
+    alt.forward.strand.var = "TumorDPAltForward",
+    alt.reverse.strand.var = "TumorDPAltReverse",
+    annotate = FALSE)
+```
+
+### Mutalisk parameters
+
+<img src="res/FIREVAT_Mutalisk_Parameters_Table.png" width="800" align="middle" />
+
+### Variant annotation parameters
+
+To annotate variants, supply a ```data.frame``` with the the following parameters:<br/>
+
+* CHROM
+* POS
+* REF
+* ALT
+
+as well as any information that you wish to annotate.<br/>
+
+Here is an example of including annotation in ```RunFIREVAT```.<br/>
+First, download a clinical variant database such as [ClinVar GRCh37](ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/) or [ClinVar GRCh38](ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/) (depending on the genome assemlby of your VCF file). In the case of ClinVar, download the ```clinvar_<date>.vcf.gz``` file and unzip this. The ClinVar VCF can be preapred by ```FIREVAT``` for ```RunFIREVAT``` by using the function ```PrepareAnnotationDB```.
+```{r, eval=FALSE}
+output.dir <- "" # assign output directory
+
+sample.vcf.file <- system.file("extdata", 
+                               "DCC_PCAWG_Cell_Lines_HCC1954.vcf", 
+                               package = "FIREVAT")
+config.file <- system.file("config", 
+                           "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", 
+                           package = "FIREVAT")
+
+# Unzipped ClinVar VCF file (e.g. "clinvar_hg19_20190212.vcf")
+clinvar.vcf.file <- "" 
+clinvar.vcf.obj <- ReadVCF(vcf.file = clinvar.vcf.file, 
+                           genome = "hg19", split.info = TRUE)
+df.annotation.db <- PrepareAnnotationDB(annotation.vcf.obj = clinvar.vcf.obj)
+
+# Annotation parameters
+cols.to.display = c("GENEINFO", "CLNSIG")
+filter.key.value.pairs <- list("CLNSIG" = c("Pathogenic", 
+                                            "Pathogenic/Likely_pathogenic", 
+                                            "Likely_pathogenic"))
+
+# Run FIREVAT
+results <- RunFIREVAT(
+    vcf.file = sample.vcf.file,
+    vcf.file.genome = 'hg19',
+    config.file = config.file,
+    df.ref.mut.sigs = GetPCAWGMutSigs(),
+    target.mut.sigs = GetPCAWGMutSigsNames(),
+    sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+    output.dir = output.dir,
+    objective.fn = Default.Obj.Fn,
+    num.cores = 6,
+    ga.pop.size = 100,
+    ga.max.iter = 5,
+    ga.run = 5,
+    ga.pmutation = 0.1,
+    perform.strand.bias.analysis = TRUE,
+    ref.forward.strand.var = "TumorDPRefForward",
+    ref.reverse.strand.var = "TumorDPRefReverse",
+    alt.forward.strand.var = "TumorDPAltForward",
+    alt.reverse.strand.var = "TumorDPAltReverse",
+    annotate = TRUE,
+    df.annotation.db = df.annotation.db,
+    annotated.columns.to.display = cols.to.display,
+    annotation.filter.key.value.pairs = filter.key.value.pairs,
+    annotation.filter.condition = "AND")
+```
+
+# Variant refinement
+
+## Modes
+
+## Optimization parameters
+
+# Mutational signature analysis
+
+## Mutalisk
+
+### Mutalisk parameters
+
+### Mutalisk results
+
+## MutationalPatterns
+
+### MutationalPatterns parameters
+
+### MutationalPatterns results
+
+# Outputs
+
+## Report
+
+```FIREVAT``` refinement generates a ```HTML``` report file. Here we explain each element of the report by using the report produced on the HCC1954 cell line.<br/>
+
+At the top of the report, you'll find the basic information about the VCF file that you input as well as the execution time and the GA parameters.
+<img src="res/FIREVAT_Report_1.png" align="middle" /><br/>
+
+Below are the optimized filtering parameters. The resulting refined.vcf has been filtered based on these values.
+<img src="res/FIREVAT_Report_2.png" align="middle" /><br/>
+
+Here is a summary of the variant optimization outcome and process.
+<img src="res/FIREVAT_Report_3.png" align="middle" /><br/>
+
+## Files
+
+# Advanced examples
+
+## Additional plot generation
 Cohort-level signature probability distribution plot
 Correlation plot
 Sequence logo plot
 Bubble chart plot
 
-### 10-2. Custom pipeline
+## Custom pipeline
 
-## 11. Session info
+# Session information
+```{r}
+sessionInfo()
+```
 
