@@ -220,7 +220,7 @@ head(sample.vcf.obj.2$genome)
 ```RunFIREVAT``` needs a ```FIREVAT``` configuration (JSON) file that specifies the instructions
 for extracting and treating desired filter parameters. We have prepared configuration files for
 widely used variant callers.
-```{r}
+```{r, eval=FALSE}
 mutect2.config.file <- system.file("config",
                                    "MuTect2_Filtering_Params.json",
                                    package = "FIREVAT")

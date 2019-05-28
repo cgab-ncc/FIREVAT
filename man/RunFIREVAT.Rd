@@ -8,8 +8,8 @@ RunFIREVAT(vcf.file, vcf.file.genome, config.file, df.ref.mut.sigs,
   target.mut.sigs, sequencing.artifact.mut.sigs, num.cores, output.dir,
   mode = "ga", init.artifact.stop = 0.05,
   objective.fn = Default.Obj.Fn, use.suggested.soln = TRUE,
-  ga.type = "real-valued", ga.pop.size = 200, ga.max.iter = 200,
-  ga.run = 50, ga.pmutation = 0.25, ga.preemptive.killing = FALSE,
+  ga.type = "real-valued", ga.pop.size = 100, ga.max.iter = 100,
+  ga.run = 50, ga.pmutation = 0.1, ga.preemptive.killing = FALSE,
   mutalisk = TRUE, mutalisk.method = "all",
   mutalisk.must.include.sigs = NULL,
   mutalisk.random.sampling.count = 20,
@@ -61,16 +61,16 @@ as a suggested solution.}
 
 \item{ga.type}{String value. The value should be either 'binray' or 'real-valued'.}
 
-\item{ga.pop.size}{Integer value of the Genetic Algorithm 'population size' parameter. Default: 200.
+\item{ga.pop.size}{Integer value of the Genetic Algorithm 'population size' parameter. Default: 100.
 This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.}
 
-\item{ga.max.iter}{Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 200.
+\item{ga.max.iter}{Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 100.
 This value should be set based on the number of filter parameters. Recommendation: same as 'ga.pop.size'.}
 
 \item{ga.run}{Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
 This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.}
 
-\item{ga.pmutation}{Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.25.}
+\item{ga.pmutation}{Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.1.}
 
 \item{ga.preemptive.killing}{If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
 compared to the original mutatational signatures analysis}
