@@ -1,18 +1,18 @@
 ---
 title: "FIREVAT Experimental Objective Functions"
 date: "May 14 2019"
-width: 
-author: 
+width:
+author:
 - name: "Andy Jinseok Lee"
-  affiliation: 
+  affiliation:
     - Bioinformatics Analysis Team, National Cancer Center Korea
   email: jinseok.lee@ncc.re.kr
 - name: "Hyunbin Kim"
-  affiliation: 
+  affiliation:
     - Bioinformatics Analysis Team, National Cancer Center Korea
   email: khb7840@ncc.re.kr
 package: FIREVAT
-output: 
+output:
     BiocStyle::html_document:
 vignette: >
   %\VignetteIndexEntry{FIREVAT Experimental Objective Functions}

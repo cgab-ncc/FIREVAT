@@ -2,9 +2,9 @@
 title: "Introduction to FIREVAT"
 date: "May 14 2019"
 width: 
-author: 
+author:
 - name: "Andy Jinseok Lee"
-  affiliation: 
+  affiliation:
     - Bioinformatics Analysis Team, National Cancer Center Korea
   email: jinseok.lee@ncc.re.kr
 - name: "Hyunbin Kim"
@@ -116,8 +116,8 @@ vcf.obj <- ReadVCF(sample.vcf.file)
 mutalisk.results <- RunMutalisk(vcf.obj = vcf.obj,
                                 df.ref.mut.sigs = GetPCAWGMutSigs(),
                                 target.mut.sigs = GetPCAWGMutSigsNames(),
-                                n.sample = 10,
-                                n.iter = 5)
+                                n.sample = 20,
+                                n.iter = 10)
 ```
 
 Subsequently, ```Mutalisk``` results can be plotted.
@@ -403,26 +403,6 @@ results <- RunFIREVAT(
     annotation.filter.condition = "AND")
 ```
 
-# Variant refinement
-
-## Modes
-
-## Optimization parameters
-
-# Mutational signature analysis
-
-## Mutalisk
-
-### Mutalisk parameters
-
-### Mutalisk results
-
-## MutationalPatterns
-
-### MutationalPatterns parameters
-
-### MutationalPatterns results
-
 # Outputs
 
 ## Report
@@ -432,23 +412,48 @@ results <- RunFIREVAT(
 At the top of the report, you'll find the basic information about the VCF file that you input as well as the execution time and the GA parameters.
 <img src="res/FIREVAT_Report_1.png" align="middle" /><br/>
 
-Below are the optimized filtering parameters. The resulting refined.vcf has been filtered based on these values.
+Refinement Optimization section presents the refinement processes and results. Below are the optimized filtering parameters. The resulting refined VCF has been filtered based on these values.
 <img src="res/FIREVAT_Report_2.png" align="middle" /><br/>
 
-Here is a summary of the variant optimization outcome and process.
+Here is a summary of the variant optimization outcome and process. The values of the four terms constituting the objective function are plotted in each of the 100 iterations. In the subsequent plot the weight of each artifactual signature identified as a result of each filter applied in each iteration is shown. 
 <img src="res/FIREVAT_Report_3.png" align="middle" /><br/>
+
+Optimized Mutational Signature Identificadtion section presents the Mutalisk results by applying the optimized filters. The mutational signature analysis results of the original VCF, refined VCF, and artifactual VCF are shown here. The sequencing artifact signatures apparent in the original VCF are now predominanly present in the artifactual VCF, while refined VCF shows relatively smaller proportion of these signatures.
+<img src="res/FIREVAT_Report_4.png" align="middle" /><br/>
+
+Mutational signature was performed using Mutalisk by applying the refined filter parameters. The refinement led to filtering out 43,042 (69.23%) of variants in the original VCF, leaving 19,134 (30.77%) as refined point mutations. The cosine similarity score and the residual sum of square from each of the three analyses are also indicated.
+<img src="res/FIREVAT_Report_5.png" align="middle" /><br/>
+
+Graphical representation of the observed spectrum in each of the original, refined, and artifactual VCFs.
+<img src="res/FIREVAT_Report_6.png" align="middle" /><br/>
+
+Graphical representation of the reconstructed spectrum in each of the original, refined, and artifactual VCFs.
+<img src="res/FIREVAT_Report_7.png" align="middle" /><br/>
+
+Graphical representation of the residual spectrum in each of the original, refined, and artifactual VCFs.
+<img src="res/FIREVAT_Report_8.png" align="middle" /><br/>
+
+Graphical representation of nucleotide substitution types in each of the original, refined, and artifactual VCFs.
+<img src="res/FIREVAT_Report_9.png" align="middle" /><br/>
+
+Optimized VCF Statistics section presents distribution of each filter parameter in the original, refined, and artifactual VCFs. In each row, the barplot on the right shows the statistical significance (Mann Whitney; two-tailed) between each pair of VCFs.
+<img src="res/FIREVAT_Report_10.png" align="middle" /><br/>
+
+Variants with Strand Bias section presents strand bias found in each refined and artifactual VCFs. Here we asked ```FIREVAT``` to filter out variants with strand bias in the refined VCF so we do not see any of those variants under the Refined VCF sub-heading. We also performed corrected for false discovery rate and variants were filtered out based on q-values (< 0.05).
+<img src="res/FIREVAT_Report_11.png" align="middle" /><br/>
+
+VCF Annotation section presents variants with clinical significance. Here we see that while mutations in PIK3CA and TP53 were included in the refined VCF NPHS1 variant was filtered out and included in the artifactual VCF. This result shows that further investigation (e.g. manual inspection with the BAM file) is necessary to assess the veracity of this variant.
+<img src="res/FIREVAT_Report_12.png" align="middle" /><br/>
 
 ## Files
 
-# Advanced examples
+Additionally, ```FIREVAT``` generates a set of relevant files useful for downstream analysis of the refinement results:
 
-## Additional plot generation
-Cohort-level signature probability distribution plot
-Correlation plot
-Sequence logo plot
-Bubble chart plot
-
-## Custom pipeline
+* Optimization log (TSV file). This includes all of the optimization logs plotted in section 1 (Refined Optimization)
+* FIREVAT results (RData file). This contains all of the relevant data specified and processed by ```FIREVAT```
+* Refined mutations (VCF file)
+* Artifactual mutations (VCF file)
+* Summary data on ```FIREVAT``` execution that can be readily loaded (TSV file)
 
 # Session information
 ```{r}
