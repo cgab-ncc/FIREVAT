@@ -25,10 +25,24 @@ install.packages("FIREVAT")
 You can also install the developmental version of ```FIREVAT``` from GitHub:
 
 ```r
+install.packages("BiocManager")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+
 install.packages("devtools")
-library(devtools)
-install_github("cgab-ncc/FIREVAT")
+devtools::install_github("cgab-ncc/FIREVAT", dependencies = TRUE)
 ```
+
+If you wish to download the tar.gz and install it, then:
+```r
+install.packages("BiocManager")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+
+install.packages("devtools")
+devtools::install_local("/path/to/FIREVAT_<version>.tar.gz", dependencies = TRUE)
+```
+
 
 ### Usage
 

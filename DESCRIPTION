@@ -9,7 +9,7 @@ Maintainer: Andy Jinseok Lee <jinseok.lee@ncc.re.kr>, Hyunbin Kim <khb7840@ncc.r
 Depends:
     R (>= 3.4.0)
 biocViews:
-Imports: 
+Imports:
     data.table,
     stringi,
     bedr,
@@ -27,6 +27,9 @@ Imports:
     dplyr,
     extrafont,
     IRanges,
+    BSgenome,
+    GenomeInfoDb,
+    GenomeInfoDbData,
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38,
     MutationalPatterns,
