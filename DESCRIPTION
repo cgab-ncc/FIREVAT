@@ -11,6 +11,7 @@ Depends:
     R (>= 3.5.0)
 Imports:
     data.table,
+    rngtools,
     stringi,
     bedr,
     GA,
@@ -27,9 +28,6 @@ Imports:
     dplyr,
     extrafont,
     IRanges,
-    BSgenome,
-    GenomeInfoDb,
-    GenomeInfoDbData,
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38,
     MutationalPatterns,
