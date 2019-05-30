@@ -11,7 +11,7 @@ Depends:
     R (>= 3.5.0)
 Imports:
     data.table,
-    rngtools,
+    rngtools (== 1.3.1),
     stringi,
     bedr,
     GA,
