@@ -1,3 +1,4 @@
+Package: FIREVAT
 Type: Package
 Title: FIREVAT, FInding REliable Variants without ArTifacts
 Description: FIREVAT is a variant filtering tool for cancer sequencing data, 
@@ -7,8 +8,7 @@ Version: 0.4.3
 Authors: Andy Jinseok Lee, Hyunbin Kim
 Maintainer: Andy Jinseok Lee <jinseok.lee@ncc.re.kr>, Hyunbin Kim <khb7840@ncc.re.kr>
 Depends:
-    R (>= 3.4.0)
-biocViews:
+    R (>= 3.5.0)
 Imports:
     data.table,
     stringi,
@@ -34,7 +34,12 @@ Imports:
     BSgenome.Hsapiens.UCSC.hg38,
     MutationalPatterns,
     deconstructSigs
-Package: FIREVAT
+biocViews: 
+    CancerGenomics, 
+    VariantRefinement, 
+    VariantFiltering, 
+    MutationalSignatures,
+    SomaticMutation,
 Authors@R: c(
     person("Andy Jinseok", "Lee", email="jinseok.lee@ncc.re.kr",
     role=c("aut","cre")),
@@ -42,9 +47,9 @@ Authors@R: c(
     role="aut")
     )
 URL: https://github.com/cgab-ncc/FIREVAT
-License: GPL-2
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Suggests: knitr
 VignetteBuilder: knitr
+License: GPL-2
