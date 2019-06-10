@@ -134,4 +134,4 @@ Based on our validation studies, we suggest using ```FIREVAT``` in the following
 FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@ncc.re.kr).
 
 ## License
-[MIT License](https://github.com/cgab-ncc/FIREVAT/LICENSE)
+[MIT License](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE)
