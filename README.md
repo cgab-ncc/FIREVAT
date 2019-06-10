@@ -16,37 +16,19 @@
 
 ### Installation
 
-If you are a Windows user, please install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) first.
-
-You can install the released version of ```FIREVAT``` from CRAN:
-
-```r
-install.packages("FIREVAT")
-```
-
-
-You can also install the developmental version of ```FIREVAT``` from GitHub:
-
+To install the developmental version of ```FIREVAT``` from GitHub:
 ```r
 install.packages("devtools")
-install.packages("BiocManager")
-BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
-BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
-
-# If you are using R < 3.6.0
-package.url <- "http://cran.r-project.org/src/contrib/Archive/rngtools/rngtools_1.3.1.tar.gz"
-devtools::install_url(url = package.url, dependencies = TRUE)
-
-# If you are using R >= 3.6.0
-install.packages("rngtools")
-
-# Install FIREVAT
 devtools::install_github("cgab-ncc/FIREVAT", dependencies = TRUE)
 ```
 
-If you wish to download the tar.gz and install it, then:
+```FIREVAT``` depends on the following packages<br/>
+- [BSgenome.Hsapiens.UCSC.hg19](http://bioconductor.org/packages/release/data/annotation/html/BSgenome.Hsapiens.UCSC.hg19.html)
+- [BSgenome.Hsapiens.UCSC.hg38](http://bioconductor.org/packages/release/data/annotation/html/BSgenome.Hsapiens.UCSC.hg38.html)
+- [rngtools](https://cran.r-project.org/web/packages/rngtools/index.html)
+
+To install the above packages:
 ```r
-install.packages("devtools")
 install.packages("BiocManager")
 BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
 BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
@@ -57,11 +39,15 @@ devtools::install_url(url = package.url, dependencies = TRUE)
 
 # If you are using R >= 3.6.0
 install.packages("rngtools")
-
-# Install FIREVAT
-devtools::install_local("/path/to/FIREVAT_<version>.tar.gz", dependencies = TRUE)
 ```
 
+If you are a Windows user, please install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) first.
+
+To install the released ```FIREVAT``` version:
+```r
+install.packages("devtools")
+devtools::install_local("/path/to/FIREVAT_<version>.tar.gz", dependencies = TRUE)
+```
 
 ### Usage
 
@@ -148,7 +134,4 @@ Based on our validation studies, we suggest using ```FIREVAT``` in the following
 FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@ncc.re.kr).
 
 ## License
-[GPL-2](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE)
-
-[mutalisk]: http://mutalisk.org/
-[paper]: https://academic.oup.com/nar/article/46/W1/W102/5001159
+[MIT License](https://github.com/cgab-ncc/FIREVAT/LICENSE)
