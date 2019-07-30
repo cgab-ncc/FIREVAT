@@ -1,6 +1,4 @@
-[![HitCount](http://hits.dwyl.com/cgab-ncc/FIREVAT.svg)](http://hits.dwyl.com/cgab-ncc/FIREVAT)
-
-# FIREVAT
+# FIREVAT [![HitCount](http://hits.dwyl.com/cgab-ncc/FIREVAT.svg)](http://hits.dwyl.com/cgab-ncc/FIREVAT)
 
 ```FIREVAT``` (**FI**nding **RE**liable **V**ariants without **A**r**T**ifacts) is an R package that performs variant refinement on cancer sequencing data. ```FIREVAT``` uses mutational signatures to identify sequencing artifacts and low-quality variants.
 
