@@ -684,6 +684,8 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
 #' @param trinuc.min.y A numeric value (minimum y-axis value)
 #' @param mut.type.max.y A numeric value
 #' @param title A string value
+#' @param font.size.small A numeric value
+#' @param font.size.med A numeric value
 #'
 #' @return A ggplot object
 #'
@@ -705,7 +707,9 @@ PlotMutaliskResults <- function(mutalisk.results,
                                 trinuc.max.y,
                                 trinuc.min.y,
                                 mut.type.max.y,
-                                title) {
+                                title,
+                                font.size.small = 8,
+                                font.size.med = 14) {
     PrintLog("** Started plotting Mutalisk results")
 
     # 1. Plot contribution probabilities of identified signatures
@@ -725,7 +729,9 @@ PlotMutaliskResults <- function(mutalisk.results,
     df.identified.mut.sigs <- df.identified.mut.sigs[order(df.identified.mut.sigs$signature),]
     f1 <- PlotSignaturesContProbs(df.identified.mut.sigs,
                                   title = title,
-                                  df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
+                                  df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
+                                  font.size.small = font.size.small,
+                                  font.size.med = font.size.med)
 
     # 2. Plot trinucleotide spectrums (96 substitution subtypes)
     g1 <- PlotTriNucSpectrum(sub.types = mutalisk.results$sub.types,
@@ -739,9 +745,11 @@ PlotMutaliskResults <- function(mutalisk.results,
                              plot.margin.right = 0.5,
                              plot.margin.bottom = 0.05,
                              plot.margin.left = 0.5,
-                             title = title)
+                             title = title,
+                             font.size.small = font.size.small,
+                             font.size.med = font.size.med)
     g2 <- PlotTriNucSpectrum(sub.types = mutalisk.results$sub.types,
-                             spectrum = mutalisk.results$sub.types.spectrum,
+                             spectrum = mutalisk.results$identified.mut.sigs.spectrum,
                              max.y.val = trinuc.max.y,
                              min.y.val = 0,
                              draw.top.strip = T,
@@ -751,7 +759,9 @@ PlotMutaliskResults <- function(mutalisk.results,
                              plot.margin.right = 0.5,
                              plot.margin.bottom = 0.05,
                              plot.margin.left = 0.5,
-                             title = title)
+                             title = title,
+                             font.size.small = font.size.small,
+                             font.size.med = font.size.med)
     g3 <- PlotTriNucSpectrum(sub.types = mutalisk.results$sub.types,
                              spectrum = mutalisk.results$residuals,
                              max.y.val = trinuc.max.y,
@@ -763,7 +773,9 @@ PlotMutaliskResults <- function(mutalisk.results,
                              plot.margin.right = 0.5,
                              plot.margin.bottom = 0.05,
                              plot.margin.left = 0.5,
-                             title = title)
+                             title = title,
+                             font.size.small = font.size.small,
+                             font.size.med = font.size.med)
 
     # 3. Plot mutation types (6 substitution types)
     f3 <- PlotMutationTypes(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
@@ -773,7 +785,9 @@ PlotMutaliskResults <- function(mutalisk.results,
                             max.y.val = mut.type.max.y,
                             convert.to.percentage = T,
                             show.legend = F,
-                            title = title)
+                            title = title,
+                            font.size.small = font.size.small,
+                            font.size.med = font.size.med)
 
     PrintLog("** Finished plotting Mutalisk results")
     return(list(f1 = f1,

@@ -5,7 +5,8 @@
 \title{PlotMutaliskResults}
 \usage{
 PlotMutaliskResults(mutalisk.results, signatures, trinuc.max.y,
-  trinuc.min.y, mut.type.max.y, title)
+  trinuc.min.y, mut.type.max.y, title, font.size.small = 8,
+  font.size.med = 14)
 }
 \arguments{
 \item{mutalisk.results}{A list obtained from \code{\link{RunMutalisk}}}
@@ -19,6 +20,10 @@ PlotMutaliskResults(mutalisk.results, signatures, trinuc.max.y,
 \item{mut.type.max.y}{A numeric value}
 
 \item{title}{A string value}
+
+\item{font.size.small}{A numeric value}
+
+\item{font.size.med}{A numeric value}
 }
 \value{
 A ggplot object
