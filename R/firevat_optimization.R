@@ -139,7 +139,17 @@ GetParameterLowerUpperVector <- function(vcf.obj, config.obj, vcf.filter, multip
                 vcf.obj$data[[param]] <- multiplier * vcf.obj$data[[param]]
             }
             user.specified.range <- IRanges(start = c(param.range[[1]]), end = c(param.range[[2]]))
-            data.range <- IRanges(start = c(min(vcf.obj$data[[param]])), end = c(max(vcf.obj$data[[param]])))
+
+            data.min <- min(vcf.obj$data[[param]])
+            data.max <- max(vcf.obj$data[[param]])
+            if (data.min == -Inf) {
+                data.min <- param.range[[1]]
+            }
+            if (data.max == Inf) {
+                data.max <- param.range[[2]]
+            }
+            data.range <- IRanges(start = c(data.min), end = c(data.max))
+
             range.intersection <- intersect(user.specified.range, data.range)
             if (length(range.intersection) > 0) {
                 lower.vector[i] <- range.intersection@start

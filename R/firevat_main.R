@@ -800,6 +800,10 @@ RunFIREVAT <- function(vcf.file,
                               verbose = verbose)
     vcf.obj <- vcf.objs$vcf.obj.filtered
 
+    # Write the unidentifiable data
+    WriteVCF(vcf.obj = vcf.objs$vcf.obj.artifact,
+             save.file = paste0(output.dir, gsub("\\.vcf", "", basename(vcf.file)), "_Unknown.vcf"))
+
     # 05. Make filter from config file
     PrintLog("Step 01-5. Make VCF filter [firevat_filter::MakeFilter]")
     vcf.filter <- MakeFilter(config.obj)

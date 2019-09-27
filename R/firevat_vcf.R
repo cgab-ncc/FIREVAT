@@ -31,8 +31,12 @@ ReadVCF <- function(vcf.file,
                          split.info = split.info,
                          verbose = FALSE)
 
+    raw.data <- readLines(vcf.file)
+    raw.header <- raw.data[(1:grep("#CHROM*", raw.data) - 1)]
+
     vcf.obj <- list(data = vcf.temp$vcf,
                     header = vcf.temp$header,
+                    header.raw = raw.header,
                     genome = genome)
 
     if (check.chromosome.name == TRUE) {
@@ -71,7 +75,21 @@ WriteVCF <- function(vcf.obj, save.file) {
     vcf.obj.temp <- list(header = vcf.obj$header,
                          vcf = vcf.obj$data)
     attr(vcf.obj.temp, "vcf") <- TRUE
-    write.vcf(vcf.obj.temp, filename = save.file, verbose = FALSE)
+
+    result = tryCatch({
+        write.vcf(vcf.obj.temp, filename = save.file, verbose = FALSE)
+    }, error = function(error_condition) {
+        print("There appears to be a format issue with the VCF file. Writing the file header and data separately.")
+        # Write header and data separately
+        write(vcf.obj$header.raw, file = save.file)
+        write.table(vcf.obj$data,
+                    sep = "\t",
+                    col.names = F,
+                    row.names = F,
+                    quote = F,
+                    append = T,
+                    file = save.file)
+    })
 }
 
 

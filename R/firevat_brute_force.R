@@ -78,10 +78,21 @@ GetGASuggestedSolutions <- function(vcf.obj,
     for (curr.filter.param in vcf.filter.params) {
         curr.filter.param.min <- as.numeric(lower.vector[names(lower.vector) == curr.filter.param])
         curr.filter.param.max <- as.numeric(upper.vector[names(upper.vector) == curr.filter.param])
+
+        # Skip if min or max is either -Inf or Inf
+        if (curr.filter.param.min == -Inf || curr.filter.param.min == Inf) {
+            next
+        }
+
+        if (curr.filter.param.max == -Inf || curr.filter.param.max == Inf) {
+            next
+        }
+
         PrintLog(paste0("* Iterating through the filter parameter: ", curr.filter.param, " from ", curr.filter.param.min, " to ", curr.filter.param.max))
 
         df.suggested.solutions.temp <- data.frame()
         for (curr.filter.param.val in seq(curr.filter.param.min, curr.filter.param.max, by = 1)) {
+            print(paste0("Filter value ", curr.filter.param.val))
             param.values.list.temp <- param.values.list
             param.values.list.temp[[curr.filter.param]] <- curr.filter.param.val
             results.temp <- GAOptimizationObjFnHelper(params.x = as.numeric(unlist(param.values.list.temp)),
