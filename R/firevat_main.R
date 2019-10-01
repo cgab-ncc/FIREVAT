@@ -675,12 +675,12 @@ RunManualMode <- function(data) {
 #' @importFrom GA ga
 #' @export
 RunFIREVAT <- function(vcf.file,
-                       vcf.file.genome,
+                       vcf.file.genome = 'hg19',
                        config.file,
-                       df.ref.mut.sigs,
-                       target.mut.sigs,
-                       sequencing.artifact.mut.sigs,
-                       num.cores,
+                       df.ref.mut.sigs = GetPCAWGMutSigs(),
+                       target.mut.sigs = GetPCAWGMutSigsNames(),
+                       sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
+                       num.cores = 2,
                        output.dir,
                        mode = "ga",
                        init.artifact.stop = 0.05,
@@ -700,7 +700,7 @@ RunFIREVAT <- function(vcf.file,
                        mutalisk.random.sampling.count = 20,
                        mutalisk.random.sampling.max.iter = 10,
                        # Strand bias analysis parameters
-                       perform.strand.bias.analysis = TRUE,
+                       perform.strand.bias.analysis = FALSE,
                        filter.by.strand.bias.analysis = TRUE,
                        filter.by.strand.bias.analysis.cutoff = 0.25,
                        strand.bias.perform.fdr.correction = TRUE,
@@ -710,7 +710,7 @@ RunFIREVAT <- function(vcf.file,
                        alt.forward.strand.var = NULL,
                        alt.reverse.strand.var = NULL,
                        # Annotation parameters
-                       annotate = TRUE,
+                       annotate = FALSE,
                        df.annotation.db = NULL,
                        annotated.columns.to.display = NULL,
                        annotation.filter.key.value.pairs = NULL,
@@ -782,6 +782,15 @@ RunFIREVAT <- function(vcf.file,
         if (verbose == TRUE) {
             PrintLog(paste0("Step 01-1. Output directory ", output.dir, " already exists."))
         }
+    }
+
+    # Remove existing '*FIREVAT_Optimization_Logs.tsv'
+    existing.firevat.optimization.log.tsv.file <- list.files(output.dir, pattern = "*FIREVAT_Optimization_Logs.tsv")
+    if (identical(existing.firevat.optimization.log.tsv.file, character(0)) == FALSE) {
+        # Remove
+        PrintLog(paste0("Removing existing FIREVAT optimization logs (tsv) file: ",
+                        existing.firevat.optimization.log.tsv.file))
+        file.remove(paste0(output.dir, existing.firevat.optimization.log.tsv.file))
     }
 
     # 02. Read the vcf file

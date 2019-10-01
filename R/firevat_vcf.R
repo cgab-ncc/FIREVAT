@@ -131,8 +131,8 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     }
     # Parse INFO column
     INFO.vals <- sapply(strsplit(vcf.obj$data$INFO,";"), function(x){
-        return(strsplit(x, "="))})
-    INFO.vals <- sapply(INFO.vals, MatchINFOKeyValue)
+        return(strsplit(x, "="))}, simplify = FALSE)
+    INFO.vals <- sapply(INFO.vals, MatchINFOKeyValue, simplify = FALSE)
 
     if (verbose == TRUE) {
         PrintLog(paste0("** Parsing VCF column: ", colnames(vcf.obj$data)[10:ncol(vcf.obj$data)]))
@@ -141,7 +141,7 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
     # Parse FORMAT values
     # Return values as matrix
     FORMAT.vals <- mapply(function(x) strsplit(x,":"),
-                          vcf.obj$data[,10:ncol(vcf.obj$data)],SIMPLIFY = T)
+                          vcf.obj$data[,10:ncol(vcf.obj$data)], SIMPLIFY = T)
 
     for (col in colnames(FORMAT.vals)) {
         FORMAT.vals[,col] <- mapply(function(x, y){names(x) <- y; return(x)},
@@ -188,6 +188,8 @@ InitializeVCF <- function(vcf.obj, config.obj, verbose = TRUE) {
             key <- as.character(config.obj[[j]]$field$key)
             index <- as.integer(config.obj[[j]]$field$index)
             type <- as.character(config.obj[[j]]$type)
+
+
             vcf.obj$data[[name]] <- sapply(sapply(INFO.vals,
             function(x) return(strsplit(x[key],","))),
             function(y) return(y[index]))

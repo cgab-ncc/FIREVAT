@@ -92,7 +92,6 @@ GetGASuggestedSolutions <- function(vcf.obj,
 
         df.suggested.solutions.temp <- data.frame()
         for (curr.filter.param.val in seq(curr.filter.param.min, curr.filter.param.max, by = 1)) {
-            print(paste0("Filter value ", curr.filter.param.val))
             param.values.list.temp <- param.values.list
             param.values.list.temp[[curr.filter.param]] <- curr.filter.param.val
             results.temp <- GAOptimizationObjFnHelper(params.x = as.numeric(unlist(param.values.list.temp)),
