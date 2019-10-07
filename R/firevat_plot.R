@@ -253,6 +253,7 @@ PlotOptimizationIterations <- function(df,
                                        columns.to.plot,
                                        x.axis.var,
                                        x.axis.title,
+                                       x.min,
                                        x.max,
                                        save.file,
                                        title,
@@ -276,7 +277,6 @@ PlotOptimizationIterations <- function(df,
         ggtitle(title) +
         xlab(paste0("\n", x.axis.title)) +
         ylab(y.axis.title) +
-        theme_classic() +
         theme_minimal() +
         theme(panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
               axis.text.x = element_text(size = font.size.med),
@@ -288,7 +288,7 @@ PlotOptimizationIterations <- function(df,
               plot.margin = plot.margin,
               axis.ticks = element_line(colour = 'black', size = 0.5)) +
         scale_y_continuous(limits = c(0, y.max), expand = c(0, 0)) +
-        scale_x_continuous(limits = c(1, x.max), expand = c(0, 0))
+        scale_x_continuous(limits = c(x.min, x.max), expand = c(0, 0))
 
     if (plot.legend == FALSE) {
         g <- g + guides(fill = FALSE) +

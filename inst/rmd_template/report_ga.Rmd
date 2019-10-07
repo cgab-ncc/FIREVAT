@@ -105,7 +105,7 @@ print(report.items$observed.spectrums.plot)
 
 ***
 
-##### **2.2.2. Maximum-likelihood Estimaation (MLE) Reconstructed Spectrum**
+##### **2.2.2. Maximum-likelihood Estimation (MLE) Reconstructed Spectrum**
 
 ***
 

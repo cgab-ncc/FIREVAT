@@ -96,8 +96,40 @@ GetGASuggestedSolutions <- function(vcf.obj,
             param.values.list.temp[[curr.filter.param]] <- curr.filter.param.val
             results.temp <- GAOptimizationObjFnHelper(params.x = as.numeric(unlist(param.values.list.temp)),
                                                       data = data.temp)
-            param.values.list.temp[['objective.value']] <- as.numeric(results.temp$objective.val)
-            df.results.temp <- data.frame(param.values.list.temp,
+
+            if (results.temp$valid == FALSE) {
+                next
+            }
+
+            # Prepare log data
+            log.list <- list()
+            log.list[['iteration']] <- NA
+            log.list[['iteration.ran.successfully']] <- TRUE
+            log.list[['datetime']] <- Sys.time()
+            log.list[['original.mutations.count']] <- as.numeric(results.temp$original.muts.count)
+            log.list[['refined.mutations.count']] <- as.numeric(results.temp$refined.muts.count)
+            log.list[['artifact.mutations.count']] <- as.numeric(results.temp$artifactual.muts.count)
+            log.list[['refined.muts.cosine.similarity.score']] <- as.numeric(results.temp$refined.muts.cos.sim)
+            log.list[['refined.muts.sequencing.artifact.signatures']] <- paste(as.character(results.temp$refined.muts.seq.art.sigs), collapse = ",")
+            log.list[['refined.muts.sequencing.artifact.signatures.weights']] <- paste(as.character(results.temp$refined.muts.seq.art.sigs.weights), collapse = ",")
+            log.list[['refined.muts.sequencing.artifact.signatures.weights.sum']] <- as.numeric(results.temp$refined.muts.seq.art.weights.sum)
+            log.list[['refined.muts.proportion']] <- as.numeric(results.temp$refined.muts.proportion)
+            log.list[['refined.muts.target.signatures']] <- paste(as.character(results.temp$refined.muts.target.sigs), collapse = ",")
+            log.list[['refined.muts.target.signatures.weights']] <- paste(as.character(results.temp$refined.muts.target.sigs.weights), collapse = ",")
+            log.list[['artifactual.muts.cosine.similarity.score']] <- as.numeric(results.temp$artifactual.muts.cos.sim)
+            log.list[['artifactual.muts.sequencing.artifact.signatures']] <- paste(as.character(results.temp$artifactual.muts.seq.art.sigs), collapse = ",")
+            log.list[['artifactual.muts.sequencing.artifact.signatures.weights']] <- paste(as.character(results.temp$artifactual.muts.seq.art.sigs.weights), collapse = ",")
+            log.list[['artifactual.muts.sequencing.artifact.signatures.weights.sum']] <- as.numeric(results.temp$artifactual.muts.seq.art.weights.sum)
+            log.list[['artifactual.muts.proportion']] <- as.numeric(results.temp$artifactual.muts.proportion)
+            log.list[['artifactual.muts.target.signatures']] <- paste(as.character(results.temp$artifactual.muts.target.sigs), collapse = ",")
+            log.list[['artifactual.muts.target.signatures.weights']] <- paste(as.character(results.temp$artifactual.muts.target.sigs.weights), collapse = ",")
+            log.list[['objective.value']] <- as.numeric(results.temp$objective.val)
+
+            # Get filter values
+            log.list <- append(log.list, param.values.list.temp)
+
+            # Append data to df.suggested.solutions.temp
+            df.results.temp <- data.frame(log.list,
                                           stringsAsFactors = F)
             df.suggested.solutions.temp <- rbind(df.suggested.solutions.temp, df.results.temp)
         }
@@ -113,22 +145,13 @@ GetGASuggestedSolutions <- function(vcf.obj,
         }
     }
 
-    # Get default values
-    for (curr.filter.param in vcf.filter.params) {
-        if ("default" %in% names(config.obj[[curr.filter.param]])) {
-            param.values.list.temp <- param.values.list
-            param.values.list.temp[[curr.filter.param]] <- config.obj[[curr.filter.param]]$default
-            param.values.list.temp[['objective.value']] <- NA
-            df.results.temp <- data.frame(param.values.list.temp,
-                                          stringsAsFactors = F)
-            if (nrow(df.suggested.solutions) == 0) {
-                df.suggested.solutions <- df.results.temp
-            } else {
-                df.suggested.solutions <- rbind(df.suggested.solutions, df.results.temp)
-            }
-        }
-    }
-    suggested.solutions.matrix <- as.matrix.data.frame(df.suggested.solutions[, !(names(df.suggested.solutions) %in% c("objective.value"))])
+    # Assign iteration based on increasing objective value
+    df.suggested.solutions <- df.suggested.solutions[order(+df.suggested.solutions$objective.value),]
+    df.suggested.solutions$iteration <- (((-1) * nrow(df.suggested.solutions)) + 1):0
+
+    # Get a suggested solutions matrix with only the filter parameters
+    suggested.solutions.matrix <- as.matrix.data.frame(df.suggested.solutions[, vcf.filter.params])
+
     return(list(df.suggested.solutions = df.suggested.solutions,
                 suggested.solutions.matrix = suggested.solutions.matrix))
 }

@@ -755,6 +755,7 @@ PrepareRefinedMutsOptimizationIterationsPlot <- function(data) { # Optional_2
         y.axis.title = "Value",
         y.max = 1.3 * max.val,
         title = "Objective Function Optimization",
+        x.min = min(df.temp$iteration),
         x.max = max(df.temp$iteration),
         legend.ncol = 2,
         save.file = paste0(data$output.dir,
@@ -837,6 +838,8 @@ PrepareArtifactualMutsOptimizationIterationsPlot <- function(data) { # Optional_
         columns.to.plot = c(artifactual.muts.seq.artifact.sigs),
         x.axis.var = "iteration",
         x.axis.title = "Iteration",
+        y.axis.title = "Value",
+        x.min = min(df.plot.data$iteration),
         x.max = max(df.plot.data$iteration),
         y.max = max(df.plot.data[,artifactual.muts.seq.artifact.sigs]) * 1.3,
         title = paste0(

@@ -104,6 +104,10 @@ RunGAMode <- function(data) {
         data$df.suggested.solutions <- suggested.solutions$df.suggested.solutions
         data$suggested.solutions.matrix <- suggested.solutions$suggested.solutions.matrix
         suggestions <- data$suggested.solutions.matrix
+
+        # Write to log file
+        log.file <- paste0(data$output.dir, data$vcf.file.basename, "_FIREVAT_Optimization_Logs.tsv")
+        write.table(data$df.suggested.solutions, log.file, row.names = F, sep = "\t")
     } else {
         suggestions <- NULL
     }

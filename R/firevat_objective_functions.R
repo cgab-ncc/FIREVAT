@@ -370,4 +370,104 @@ Leaky.ReLU.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual
 }
 
 
+#' @title Leaky.ReLU.A.Ref.Obj.Fn
+#' @description
+#' Leaky ReLU objective function
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Leaky.ReLU.A.Ref.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    # if greater than 0.5:
+    #   y = 0.01(1-x)
+    # else:
+    #   y = 2((1-x) - 0.5) + 0.005
+    if (A.refined > 0.5) {
+        A.refined <- 0.01 * (1 - A.refined)
+    } else {
+        A.refined <- 2 * ((1 - A.refined) - 0.5) + 0.005
+    }
 
+    obj.val <- C.refined * A.refined * C.artifactual * A.artifactual
+    return(obj.val)
+}
+
+
+#' @title Leaky.ReLU.A.Art.Obj.Fn
+#' @description
+#' Leaky ReLU objective function
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Leaky.ReLU.A.Art.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    # if less than 0.5:
+    #   y = 0.01(1-x)
+    # else:
+    #   y = 2((1-x) - 0.5) + 0.005
+    if (A.artifactual < 0.5) {
+        A.artifactual <- 0.01 * A.artifactual
+    } else {
+        A.artifactual <- 2 * (A.artifactual - 0.5) + 0.005
+    }
+
+    A.refined <- (1 - A.refined)
+
+    obj.val <- C.refined * A.refined * C.artifactual * A.artifactual
+    return(obj.val)
+}
+
+
+#' @title Exp.Weighted.A.Ref.Obj.Fn
+#' @description
+#' Exponentially weighted objective function
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Exp.Weighted.A.Ref.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    # Exponentially weight A.refined
+    # y = 10^e((1-x) - 1)
+    A.refined <- 10 ** (exp(1)*((1 - A.refined) - 1))
+
+    obj.val <- C.refined * A.refined * C.artifactual * A.artifactual
+    return(obj.val)
+}
+
+
+#' @title Exp.Weighted.A.Art.Obj.Fn
+#' @description
+#' Exponentially weighted objective function
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Exp.Weighted.A.Art.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    # Exponentially weight A.artifactual
+    # y = 10^e((1-x) - 1)
+    A.artifactual <- 10 ** (exp(1)*(A.artifactual - 1))
+    A.refined <- (1 - A.refined)
+
+    obj.val <- C.refined * A.refined * C.artifactual * A.artifactual
+    return(obj.val)
+}
