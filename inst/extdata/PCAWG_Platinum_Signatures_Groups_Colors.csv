@@ -1,0 +1,49 @@
+signature,group,color
+SBS1,Age,#FCC201
+SBS5,Age,#FCC201
+SBS2,APOBEC Activity,#F99D4D
+SBS13,APOBEC Activity,#F99D4D
+SBS3,Homologous Recombination Deficiency,#FF555E
+SBS4,Tobacco Smoking/Chewing,#00C891
+SBS6,Defective DNA Mismatch Repair,#FF8650
+SBS14,Defective DNA Mismatch Repair,#FF8650
+SBS15,Defective DNA Mismatch Repair,#FF8650
+SBS20,Defective DNA Mismatch Repair,#FF8650
+SBS21,Defective DNA Mismatch Repair,#FF8650
+SBS26,Defective DNA Mismatch Repair,#FF8650
+SBS7a,Ultraviolet Light Exposure,#8BF18B
+SBS7b,Ultraviolet Light Exposure,#8BF18B
+SBS7c,Ultraviolet Light Exposure,#8BF18B
+SBS7d,Ultraviolet Light Exposure,#8BF18B
+SBS38,Possible Ultraviolet Light Exposure,#8BF18B
+SBS9,Somatic Hypermutation,#E98C1C
+SBS36,MUTYH Mutations,#B5EAD7
+SBS10a,POLE Mutations,#FFDAC1
+SBS10b,POLE Mutations,#FFDAC1
+SBS30,NTHL1 Mutations,#FFE981
+SBS11,Alkylating Agent Temozolomide,#DA9101
+SBS18,Damage by Reactive Oxygen Species,#ABE7F4
+SBS22,Exposure to Aristolochic Acid,#C7CEEA
+SBS24,Aflatoxin,#9B6EF3
+SBS35,Prior Treatment with Platinum Drugs,#CCCCCC
+SBS8,Unknown,#808080
+SBS12,Unknown,#808080
+SBS16,Unknown,#808080
+SBS17a,Unknown,#808080
+SBS17b,Unknown,#808080
+SBS19,Unknown,#808080
+SBS28,Unknown,#808080
+SBS33,Unknown,#808080
+SBS34,Unknown,#808080
+SBS37,Unknown,#808080
+SBS39,Unknown,#808080
+SBS40,Unknown,#808080
+SBSR1,Technology-related Artifact,#D10161
+SBSR2,Technology-related Artifact,#D10161
+SBSR3,Technology-related Artifact,#D10161
+SBSR4,Technology-related Artifact,#D10161
+SBSR5,Technology-related Artifact,#D10161
+SBSR6,Technology-related Artifact,#D10161
+SBSR7,Technology-related Artifact,#D10161
+SBSR8,Technology-related Artifact,#D10161
+SBSR9,Technology-related Artifact,#D10161

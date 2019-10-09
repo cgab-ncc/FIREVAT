@@ -51,6 +51,21 @@ PCAWG.All.Sequencing.Artifact.Signatures <- c(PCAWG.Known.Sequencing.Artifact.Si
 
 #' @title Constant
 #' @description
+#' PCAWG mutational signatures reported to be associated with sequencing artifacts
+#' @export
+PCAWG.Platinum.All.Technology.Related.Artifact.Signatures <- c("SBSR1",
+                                                               "SBSR2",
+                                                               "SBSR3",
+                                                               "SBSR4",
+                                                               "SBSR5",
+                                                               "SBSR6",
+                                                               "SBSR7",
+                                                               "SBSR8",
+                                                               "SBSR9")
+
+
+#' @title Constant
+#' @description
 #' Hex codes for the mutation types (for plotting purposes)
 #' @export
 TriNuc.Mutation.Type.Hex.Colors <- c("#029ACE", # C>A

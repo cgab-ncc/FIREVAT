@@ -52,6 +52,7 @@ results <- RunFIREVAT(
     config.file = config.file,
     df.ref.mut.sigs = GetPCAWGMutSigs(),
     target.mut.sigs = GetPCAWGMutSigsNames(),
+    df.ref.mut.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
     sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
     output.dir = output.dir,
     objective.fn = Default.Obj.Fn,
@@ -125,6 +126,7 @@ Subsequently, ```Mutalisk``` results can be plotted.
 g <- PlotMutaliskResults(
     mutalisk.results = mutalisk.results,
     signatures = unique(mutalisk.results$identified.mut.sigs),
+    df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
     trinuc.max.y = 1,
     trinuc.min.y = 0,
     mut.type.max.y = 1,

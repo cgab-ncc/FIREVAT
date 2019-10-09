@@ -70,6 +70,58 @@ GetPCAWGMutSigsEtiologiesColors <- function() {
 }
 
 
+#' @title GetPCAWGPlatinumMutSigs
+#' @description Returns the PCAWG platinum mutational signatures data
+#'
+#' @return a data.frame of the PCAWG platinum mutatioanl signatures
+#'
+#' @export
+#' @importFrom utils read.csv
+GetPCAWGPlatinumMutSigs <- function() {
+    f <- system.file("extdata", "PCAWG_Platinum_Signatures.csv", package = "FIREVAT")
+    df.pcawg.mut.sigs <- read.csv(f,
+                                  header = T,
+                                  check.names = F,
+                                  stringsAsFactors = F,
+                                  dec = ".")
+    colnames(df.pcawg.mut.sigs)[1] <- "Type"
+    colnames(df.pcawg.mut.sigs)[2] <- "SubType"
+    colnames(df.pcawg.mut.sigs)[3] <- "SomaticMutationType"
+    return(df.pcawg.mut.sigs)
+}
+
+
+
+#' @title GetPCAWGPlatinumMutSigsNames
+#' @description Returns the PCAWG platinum mutational signatures names
+#'
+#' @return a character vector of the PCAWG platinum mutational signatures names
+#'
+#' @export
+GetPCAWGPlatinumMutSigsNames <- function() {
+    df.pcawg.mut.sigs <- GetPCAWGPlatinumMutSigs()
+    pcawg.mut.sig.names <- as.character(colnames(df.pcawg.mut.sigs)[4:ncol(df.pcawg.mut.sigs)])
+    return(pcawg.mut.sig.names)
+}
+
+
+#' @title GetPCAWGPlatinumMutSigsEtiologiesColors
+#' @description Returns the PCAWG platinum mutational signatures etiologies and colors
+#'
+#' @return a data.frame with the columns 'signature', 'group', 'color'
+#'
+#' @export
+#' @importFrom utils read.csv
+GetPCAWGPlatinumMutSigsEtiologiesColors <- function() {
+    f <- system.file("extdata", "PCAWG_Platinum_Signatures_Groups_Colors.csv", package = "FIREVAT")
+    df.pcawg.mut.sigs <- read.csv(f,
+                                  header = T,
+                                  check.names = F,
+                                  stringsAsFactors = F)
+    return(df.pcawg.mut.sigs)
+}
+
+
 #' @title GetCOSMICMutSigs
 #' @description Returns a data.frame of the COSMIC mutational signature reference file
 #' from the data directory
@@ -341,4 +393,22 @@ WriteFIREVATResultsToTSV <- function(firevat.results) {
     write.table(df.save,
                 paste0(firevat.results$output.dir, firevat.results$vcf.file.basename, "_FIREVAT_data.tsv"),
                 sep = "\t", row.names = F)
+}
+
+
+#' @title GetSeedForVCF
+#' @description Returns a seed integer based on VCF file size
+#'
+#' @param vcf.file (full path of a .vcf file)
+#'
+#' @details
+#' Returns the same seed integer for the same VCF file (based on file size)
+#'
+#' @return an integer value
+#'
+#' @export
+GetSeedForVCF <- function(vcf.file) {
+    file.size <- file.info(vcf.file)$size
+    file.size <- round(file.size / 1000)
+    return(file.size)
 }

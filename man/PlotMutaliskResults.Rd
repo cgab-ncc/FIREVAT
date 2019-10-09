@@ -4,14 +4,16 @@
 \alias{PlotMutaliskResults}
 \title{PlotMutaliskResults}
 \usage{
-PlotMutaliskResults(mutalisk.results, signatures, trinuc.max.y,
-  trinuc.min.y, mut.type.max.y, title, font.size.small = 8,
-  font.size.med = 14)
+PlotMutaliskResults(mutalisk.results, signatures,
+  df.ref.sigs.groups.colors, trinuc.max.y, trinuc.min.y, mut.type.max.y,
+  title, font.size.small = 8, font.size.med = 14)
 }
 \arguments{
 \item{mutalisk.results}{A list obtained from \code{\link{RunMutalisk}}}
 
 \item{signatures}{A character vector of mutational signatures names}
+
+\item{df.ref.sigs.groups.colors}{A data.frame with signature groups and colors}
 
 \item{trinuc.max.y}{A numeric value (maximum y-axis value)}
 

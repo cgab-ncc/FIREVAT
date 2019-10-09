@@ -4,7 +4,8 @@
 \alias{PrepareIdentifiedSignaturesPlotHelper}
 \title{PrepareIdentifiedSignaturesPlotHelper}
 \usage{
-PrepareIdentifiedSignaturesPlotHelper(mutalisk.results, signatures, title)
+PrepareIdentifiedSignaturesPlotHelper(mutalisk.results, signatures, title,
+  df.ref.mut.sigs.groups.colors)
 }
 \arguments{
 \item{mutalisk.results}{A list of elements returned from \code{\link{RunMutalisk}}}
@@ -12,6 +13,8 @@ PrepareIdentifiedSignaturesPlotHelper(mutalisk.results, signatures, title)
 \item{signatures}{A character vector of signature names}
 
 \item{title}{String value}
+
+\item{df.ref.mut.sigs.groups.colors}{A data.frame with signature and color hex value}
 }
 \value{
 A ggplot object

@@ -147,13 +147,15 @@ PrepareFilterCutoffsTable <- function(data) { # COMMON_1
 #' @param mutalisk.results A list of elements returned from \code{\link{RunMutalisk}}
 #' @param signatures A character vector of signature names
 #' @param title String value
+#' @param df.ref.mut.sigs.groups.colors A data.frame with signature and color hex value
 #'
 #' @return A ggplot object
 #'
 #' @keywords internal
 PrepareIdentifiedSignaturesPlotHelper <- function(mutalisk.results,
                                                   signatures,
-                                                  title) {
+                                                  title,
+                                                  df.ref.mut.sigs.groups.colors) {
     # Prepare plot data
     df.identified.mut.sigs <- data.frame(
         list(signature = mutalisk.results$identified.mut.sigs,
@@ -173,7 +175,7 @@ PrepareIdentifiedSignaturesPlotHelper <- function(mutalisk.results,
     # Plot contribution probabilities
     fig <- PlotSignaturesContProbs(df.identified.mut.sigs,
                                    title = title,
-                                   df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors())
+                                   df.ref.sigs.groups.colors = df.ref.mut.sigs.groups.colors)
     return(fig)
 
 }
@@ -197,17 +199,20 @@ PrepareIdentifiedSignaturesPlot <- function(data) { # COMMON_2
     raw.vcf.mutalisk.plot <- PrepareIdentifiedSignaturesPlotHelper(
         mutalisk.results = data$raw.muts.mutalisk.results,
         signatures = all.signatures,
-        title = "Original VCF"
+        title = "Original VCF",
+        df.ref.mut.sigs.groups.colors = data$df.ref.mut.sigs.groups.colors
     )
     refined.vcf.mutalisk.plot <- PrepareIdentifiedSignaturesPlotHelper(
         mutalisk.results = data$refined.muts.mutalisk.results,
         signatures = all.signatures,
-        title = "Refined VCF"
+        title = "Refined VCF",
+        df.ref.mut.sigs.groups.colors = data$df.ref.mut.sigs.groups.colors
     )
     artifact.vcf.mutalisk.plot <- PrepareIdentifiedSignaturesPlotHelper(
         mutalisk.results = data$artifactual.muts.mutalisk.results,
         signatures = all.signatures,
-        title = "Artifactual VCF"
+        title = "Artifactual VCF",
+        df.ref.mut.sigs.groups.colors = data$df.ref.mut.sigs.groups.colors
     )
 
     # Merge the three plots into one

@@ -1,7 +1,7 @@
 # FIREVAT Main Functions
 #
 # Last revised date:
-#   May 08, 2019
+#   Oct 08, 2019
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -133,7 +133,8 @@ RunGAMode <- function(data) {
                          pmutation = data$ga.pmutation,
                          suggestions = NULL,
                          monitor = function(obj) GAMonitorFn(obj, data),
-                         keepBest = TRUE)
+                         keepBest = TRUE,
+                         seed = data$ga.seed)
 
     } else if (data$ga.type == "real-valued") {
         # Run GA with real-valued type
@@ -149,7 +150,8 @@ RunGAMode <- function(data) {
                              pmutation = data$ga.pmutation,
                              suggestions = suggestions,
                              monitor = function(obj) GAMonitorFn(obj, data),
-                             keepBest = TRUE)
+                             keepBest = TRUE,
+                             seed = data$ga.seed)
         } else {
             ga.results <- ga(type = "real-valued",
                              fitness =  function(cutoffs) GAOptimizationObjFn(cutoffs, data),
@@ -162,7 +164,8 @@ RunGAMode <- function(data) {
                              pmutation = data$ga.pmutation,
                              suggestions = suggestions,
                              monitor = function(obj) GAMonitorFn(obj, data),
-                             keepBest = TRUE)
+                             keepBest = TRUE,
+                             seed = data$ga.seed)
         }
     }
 
@@ -612,6 +615,7 @@ RunManualMode <- function(data) {
 #' @param config.file String value corresponding to input configuration file. For more details please refer to ...
 #' @param df.ref.mut.sigs A data.frame of the reference mutational signatures
 #' @param target.mut.sigs A character vector of the target mutational signatures from reference mutational signatures.
+#' @param df.ref.mut.sigs.groups.colors A data.frame of the reference mutational signatures groups and colors
 #' @param sequencing.artifact.mut.sigs A character vector of the sequencing artifact mutational signatures from reference mutational signatures.
 #' @param num.cores Number of cores to allocate
 #' @param output.dir String value of the desired output directory
@@ -629,13 +633,14 @@ RunManualMode <- function(data) {
 #' as a suggested solution.
 #' @param ga.pop.size Integer value of the Genetic Algorithm 'population size' parameter. Default: 100.
 #' This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.
-#' @param ga.max.iter Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 100.
+#' @param ga.max.iter Integer value of the Genetic Algorithm 'maximum iterations' parameter. Default: 100.
 #' This value should be set based on the number of filter parameters. Recommendation: same as 'ga.pop.size'.
 #' @param ga.run Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
 #' This value should be set based on the 'ga.max.iter' parameter. Recommendation: 25 percent of 'ga.max.iter'.
 #' @param ga.pmutation Float value of the Genetic Algorithm 'mutation probability' parameter. Default: 0.1.
 #' @param ga.preemptive.killing If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
 #' compared to the original mutatational signatures analysis
+#' @param ga.seed Integer value of the Genetic Algorithm 'seed' parameter. Default: NULL.
 #' @param mutalisk If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.
 #' @param mutalisk.method Mutalisk signature identification method. Default: 'random.sampling'.
 #' The value can be either 'all' or 'random.sampling'.
@@ -683,6 +688,7 @@ RunFIREVAT <- function(vcf.file,
                        config.file,
                        df.ref.mut.sigs = GetPCAWGMutSigs(),
                        target.mut.sigs = GetPCAWGMutSigsNames(),
+                       df.ref.mut.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
                        sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
                        num.cores = 2,
                        output.dir,
@@ -697,6 +703,7 @@ RunFIREVAT <- function(vcf.file,
                        ga.run = 50,
                        ga.pmutation = 0.1,
                        ga.preemptive.killing = FALSE,
+                       ga.seed = NULL,
                        # Mutalisk parameters
                        mutalisk = TRUE,
                        mutalisk.method = "all",
@@ -831,6 +838,7 @@ RunFIREVAT <- function(vcf.file,
                 config.obj = config.obj,
                 df.ref.mut.sigs = df.ref.mut.sigs,
                 target.mut.sigs = target.mut.sigs,
+                df.ref.mut.sigs.groups.colors = df.ref.mut.sigs.groups.colors,
                 sequencing.artifact.mut.sigs = sequencing.artifact.mut.sigs,
                 output.dir = output.dir,
                 mode = mode,
@@ -844,6 +852,7 @@ RunFIREVAT <- function(vcf.file,
                 ga.max.iter = ga.max.iter,
                 ga.run = ga.run,
                 ga.preemptive.killing = ga.preemptive.killing,
+                ga.seed = ga.seed,
                 use.suggested.soln = use.suggested.soln,
                 # Mutalisk parameters
                 mutalisk = mutalisk,

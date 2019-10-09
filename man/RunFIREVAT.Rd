@@ -7,12 +7,13 @@
 RunFIREVAT(vcf.file, vcf.file.genome = "hg19", config.file,
   df.ref.mut.sigs = GetPCAWGMutSigs(),
   target.mut.sigs = GetPCAWGMutSigsNames(),
+  df.ref.mut.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
   sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
   num.cores = 2, output.dir, mode = "ga", init.artifact.stop = 0.05,
   objective.fn = Default.Obj.Fn, use.suggested.soln = TRUE,
   ga.type = "real-valued", ga.pop.size = 100, ga.max.iter = 100,
   ga.run = 50, ga.pmutation = 0.1, ga.preemptive.killing = FALSE,
-  mutalisk = TRUE, mutalisk.method = "all",
+  ga.seed = NULL, mutalisk = TRUE, mutalisk.method = "all",
   mutalisk.must.include.sigs = NULL,
   mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
@@ -41,6 +42,8 @@ RunFIREVAT(vcf.file, vcf.file.genome = "hg19", config.file,
 
 \item{target.mut.sigs}{A character vector of the target mutational signatures from reference mutational signatures.}
 
+\item{df.ref.mut.sigs.groups.colors}{A data.frame of the reference mutational signatures groups and colors}
+
 \item{sequencing.artifact.mut.sigs}{A character vector of the sequencing artifact mutational signatures from reference mutational signatures.}
 
 \item{num.cores}{Number of cores to allocate}
@@ -66,7 +69,7 @@ as a suggested solution.}
 \item{ga.pop.size}{Integer value of the Genetic Algorithm 'population size' parameter. Default: 100.
 This value should be set based on the number of filter parameters. Recommendation: 40 per filter parameter.}
 
-\item{ga.max.iter}{Integer value of the Genetic Algorithm 'maximum iterations' parameter. Ddefault: 100.
+\item{ga.max.iter}{Integer value of the Genetic Algorithm 'maximum iterations' parameter. Default: 100.
 This value should be set based on the number of filter parameters. Recommendation: same as 'ga.pop.size'.}
 
 \item{ga.run}{Integer value of the Genetic Algorithm 'run' parameter. Default: 50.
@@ -76,6 +79,8 @@ This value should be set based on the 'ga.max.iter' parameter. Recommendation: 2
 
 \item{ga.preemptive.killing}{If TRUE, then preemptively kills populations that yield greater sequencing artifact weights sum
 compared to the original mutatational signatures analysis}
+
+\item{ga.seed}{Integer value of the Genetic Algorithm 'seed' parameter. Default: NULL.}
 
 \item{mutalisk}{If TRUE, confirm mutational signature analysis with Mutalisk. Default: TRUE.}
 

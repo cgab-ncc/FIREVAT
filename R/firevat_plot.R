@@ -680,6 +680,7 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
 #'
 #' @param mutalisk.results A list obtained from \code{\link{RunMutalisk}}
 #' @param signatures A character vector of mutational signatures names
+#' @param df.ref.sigs.groups.colors A data.frame with signature groups and colors
 #' @param trinuc.max.y A numeric value (maximum y-axis value)
 #' @param trinuc.min.y A numeric value (minimum y-axis value)
 #' @param mut.type.max.y A numeric value
@@ -704,6 +705,7 @@ PlotMutationTypes <- function(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>
 #' @export
 PlotMutaliskResults <- function(mutalisk.results,
                                 signatures,
+                                df.ref.sigs.groups.colors,
                                 trinuc.max.y,
                                 trinuc.min.y,
                                 mut.type.max.y,
@@ -729,7 +731,7 @@ PlotMutaliskResults <- function(mutalisk.results,
     df.identified.mut.sigs <- df.identified.mut.sigs[order(df.identified.mut.sigs$signature),]
     f1 <- PlotSignaturesContProbs(df.identified.mut.sigs,
                                   title = title,
-                                  df.ref.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
+                                  df.ref.sigs.groups.colors = df.ref.sigs.groups.colors,
                                   font.size.small = font.size.small,
                                   font.size.med = font.size.med)
 

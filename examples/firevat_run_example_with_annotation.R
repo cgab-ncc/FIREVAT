@@ -8,7 +8,7 @@ library(FIREVAT)
 # takes about 10 minutes to complete
 
 # Output directory
-output.dir <- "/home/jinseoklee/Documents/Projects/Temp/FIREVAT_TEMP_2/"
+output.dir <- ""
 
 # Sample VCF file
 sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", package = "FIREVAT")
@@ -17,7 +17,10 @@ sample.vcf.file <- system.file("extdata", "DCC_PCAWG_Cell_Lines_HCC1954.vcf", pa
 config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json", package = "FIREVAT")
 
 # Annotation DB
-clinvar.vcf.file <- system.file("extdata", "clinvar_hg19_20190212.vcf", package = "FIREVAT")
+# Download the ClinVar VCF file from
+# ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar.vcf.gz
+# Please remember to unzip the file first
+clinvar.vcf.file <- ""
 clinvar.vcf.obj <- ReadVCF(vcf.file = clinvar.vcf.file, genome = "hg19", split.info = TRUE)
 df.annotation.db <- PrepareAnnotationDB(annotation.vcf.obj = clinvar.vcf.obj)
 
