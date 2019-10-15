@@ -542,19 +542,23 @@ PrepareOptimizedVCFStatisticsPlot <- function(data) { # COMMON_8
     stat.y.max.vals <- c()
     stat.x.max.vals <- c()
 
+    original.vcf.stats.max <- max(original.vcf.stats[[param]][is.finite(original.vcf.stats[[param]])])
+    refined.vcf.stats.max <- max(refined.vcf.stats[[param]][is.finite(refined.vcf.stats[[param]])])
+    artifact.vcf.stats.max <- max(artifact.vcf.stats[[param]][is.finite(artifact.vcf.stats[[param]])])
+
     for (param in x.axis.labels) {
-        stat.x.max.vals <- c(stat.x.max.vals, max(max(original.vcf.stats[[param]]),
-                                                  max(refined.vcf.stats[[param]]),
-                                                  max(artifact.vcf.stats[[param]])))
-        orig.hist.data <- hist(original.vcf.stats[[param]],
+        stat.x.max.vals <- c(stat.x.max.vals, max(original.vcf.stats.max,
+                                                  refined.vcf.stats.max,
+                                                  artifact.vcf.stats.max))
+        orig.hist.data <- hist(original.vcf.stats[[param]][is.finite(original.vcf.stats[[param]])],
                                plot = F,
-                               breaks = seq(0, max(original.vcf.stats[[param]]) + 1, by = 1))$counts
-        refi.hist.data <- hist(refined.vcf.stats[[param]],
+                               breaks = seq(0, original.vcf.stats.max + 1, by = 1))$counts
+        refi.hist.data <- hist(refined.vcf.stats[[param]][is.finite(refined.vcf.stats[[param]])],
                                plot = F,
-                               breaks = seq(0, max(refined.vcf.stats[[param]]) + 1, by = 1))$counts
-        arti.hist.data <- hist(artifact.vcf.stats[[param]],
+                               breaks = seq(0, refined.vcf.stats.max + 1, by = 1))$counts
+        arti.hist.data <- hist(artifact.vcf.stats[[param]][is.finite(artifact.vcf.stats[[param]])],
                                plot = F,
-                               breaks = seq(0, max(artifact.vcf.stats[[param]]) + 1, by = 1))$counts
+                               breaks = seq(0, artifact.vcf.stats.max + 1, by = 1))$counts
         stat.y.max.vals <- c(stat.y.max.vals,
                              max(c(max(orig.hist.data),
                                    max(refi.hist.data),
