@@ -386,7 +386,9 @@ PlotTriNucSpectrum <- function(sub.types,
         axis.text.x <- element_text(size = font.size.small,
                                     family = "Arial",
                                     colour = "#888888",
-                                    angle = 90, hjust = 1)
+                                    angle = 90,
+                                    vjust = 0.5,
+                                    hjust = 0.5)
     } else {
         axis.text.x <- element_blank()
     }
@@ -434,14 +436,14 @@ PlotTriNucSpectrum <- function(sub.types,
                                                 plot.margin.left), "cm"))
         } else if(i == 6) {
             p <- p + theme(axis.text.y = element_text(size = font.size.med - 4,
-                                                      family = "Arial", colour = "#FFFFFF"),
+                                                      family = "Arial", colour = "#FFFFFF00"),
                            plot.margin = unit(c(plot.margin.top,
                                                 plot.margin.right,
                                                 plot.margin.bottom,
                                                 0), "cm"))
         } else {
             p <- p + theme(axis.text.y = element_text(size = font.size.med - 4,
-                                                      family = "Arial", colour = "#FFFFFF"),
+                                                      family = "Arial", colour = "#FFFFFF00"),
                            plot.margin = unit(c(plot.margin.top, 0,
                                                 plot.margin.bottom, 0), "cm"))
         }
