@@ -471,3 +471,20 @@ Exp.Weighted.A.Art.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.art
     obj.val <- C.refined * A.refined * C.artifactual * A.artifactual
     return(obj.val)
 }
+
+
+#' @title Sig.Extraction.Obj.Fn
+#' @description Calculates the default objective value for FIREVAT GA optimization.
+#'
+#' @param C.refined A numeric value between 0 and 1.
+#' @param A.refined A numeric value between 0 and 1.
+#' @param C.artifactual A numeric value between 0 and 1.
+#' @param A.artifactual A numeric value between 0 and 1.
+#'
+#' @return A numeric value between 0 and 1.
+#'
+#' @export
+Sig.Extraction.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.artifactual) {
+    obj.val <- C.refined * A.refined * C.artifactual * (1 - A.artifactual)
+    return(obj.val)
+}

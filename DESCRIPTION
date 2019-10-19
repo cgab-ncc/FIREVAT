@@ -4,7 +4,7 @@ Title: FIREVAT, FInding REliable Variants without ArTifacts
 Description: FIREVAT is a variant filtering tool for cancer sequencing data, 
     which uses mutational signatures to identify sequencing artifacts and 
     low-quality variants.
-Version: 0.5.6
+Version: 0.5.7
 Authors: Andy Jinseok Lee, Hyunbin Kim
 Maintainer: Andy Jinseok Lee <jinseok.lee@ncc.re.kr>, Hyunbin Kim <khb7840@ncc.re.kr>
 Depends:
