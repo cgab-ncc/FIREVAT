@@ -86,7 +86,7 @@ Running the code above will generate FIREVAT outputs, including ```HTML``` repor
   <img src="inst/img/FIREVAT_Sample_HTML_Report_Screenshots.png" width="100%"/>
 </p>
 
-Feel free to take a look at the sample [**HTML report**](). The sample ```FIREVAT``` output files are available [**here**]().
+Feel free to take a look at the sample [**HTML report**](https://cgab-ncc.github.io/FIREVAT/DCC_PCAWG_Cell_Lines_HCC1954_FIREVAT_Report.html). The sample ```FIREVAT``` output files (zipped) are available [**here**](https://cgab-ncc.github.io/FIREVAT/DCC_PCAWG_Cell_Lines_HCC1954.zip).
 
 For your convenience, we have prepared configuration (JSON) files for popularly used variant callers:
 ```r
@@ -105,7 +105,7 @@ varscan2.config.file <- system.file("config", "Varscan2_Filtering_Params.json", 
 
 ### Vignette
 
-In [**Introduction to FIREVAT**](https://cgab-ncc.github.io/FIREVAT/Introduction_to_FIREVAT.html), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
+In [**Introduction to FIREVAT**](https://cgab-ncc.github.io/FIREVAT/Introduction_to_FIREVAT.html    ), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
 
 ## Suggested workflow
     
