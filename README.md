@@ -105,7 +105,7 @@ varscan2.config.file <- system.file("config", "Varscan2_Filtering_Params.json", 
 
 ### Vignette
 
-In [**Introduction to FIREVAT**](https://github.com/cgab-ncc/FIREVAT/tree/master/vignettes/Introduction_to_FIREVAT.html), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
+In [**Introduction to FIREVAT**](https://cgab-ncc.github.io/FIREVAT/), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
 
 ## Suggested workflow
 
