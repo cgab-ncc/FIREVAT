@@ -4,8 +4,12 @@
 \alias{Euc.Exp.Weighted.Seq.Art.Only.Obj.Fn.1}
 \title{Euc.Exp.Weighted.Seq.Art.Only.Obj.Fn.1}
 \usage{
-Euc.Exp.Weighted.Seq.Art.Only.Obj.Fn.1(C.refined, A.refined, C.artifactual,
-  A.artifactual)
+Euc.Exp.Weighted.Seq.Art.Only.Obj.Fn.1(
+  C.refined,
+  A.refined,
+  C.artifactual,
+  A.artifactual
+)
 }
 \arguments{
 \item{C.refined}{A numeric value between 0 and 1.}

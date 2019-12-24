@@ -1,6 +1,6 @@
 ---
 title: "Introduction to FIREVAT"
-date: "May 14 2019"
+date: "December 24 2019"
 width: 
 author:
 - name: "Andy Jinseok Lee"
@@ -239,7 +239,7 @@ varscan2.config.file <- system.file("config",
 
 ### Preparing your own configuration file
 
-The JSON file must have the following information for each filter parameter:
+The JSON/YAML file must have the following information for each filter parameter:
 
 * name
 * direction         [POS or NEG]
@@ -255,6 +255,149 @@ The JSON file must have the following information for each filter parameter:
 * op
     * function_string   [R code that gets evaluated] 
     * args              [string vector]
+
+We developed FIREVAT to run with custom 'config' files to handle different kinds of VCF formats. Even if two vcfs were called with same variant caller, those files can have different formats due to differences in running options and post-calling steps.
+
+Here is an example of writing your own custom FIREVAT configuration file from scratch.
+
+Let's suppose that the following two variants were called using [Sequenza](http://www.cbs.dtu.dk/biotools/sequenza/) (obtained from the mutation text file).
+
+```
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+chr1	758859	.	T	C	.	.	GC=61;GOODREAD=76;F=0.132;RATIO=0.974028106944897;CNn=2;CNt=2;Mt=1;LPP=-23.5968475500134	.	.
+chr1	808496	.	T	C	.	.	GC=52;GOODREAD=88;F=0.102;RATIO=0.974028106944897;CNn=2;CNt=2;Mt=0;LPP=-24.4626670646139	.	.
+```
+
+To use the GC value in the format above as a parameter for FIREVAT, you should first create a JSON (or YAML) file like the following:
+
+```
+GC_example.json
+```
+
+The "name" of this desired GC quality metric is "MinGC" to imply that we wish to filter out variants that fail to meet this minimum threshold. The "direction" is "POS" because higher values indicate higher quality variants. The "field" parameter concerns how FIREVAT should extract the desired GC value from the VCF file. The GC value appears in the "INFO" column under the key "GC" in the first index (hence 1). The "default" GC value is 50 (set this as you see fit). You may wish to set the minimum and maximum "range" that FIREVAT will iterate to choose the optimized GC filtering value. In the example below, the "range" is commented out. The "use_in_filter" is an important parameter because FIREVAT will only use this as a filtering parameter if this is set to 'true'. Where "use_in_filter" should be set to 'false' is when you wish to derive intermediate values before calculating the final desired filtering parameter.
+
+```json
+[
+  {
+    "name": "MinGC", // variable name
+    "direction": "POS" /* filtering direction; refined > cutoff (POS),
+                           refined < cutoff (NEG) */,
+    "field": {
+      "field_type": "INFO", // "INFO" or "FORMAT"
+      "key": "GC", // key for the value
+      /* If "field_type" is "FORMAT", 
+           "column_header" value should be given here like:
+               "column_header": "SAMPLE" or 
+               "column_header": "$10" */
+      "index": 1 //index for the value (comma separated)
+    },
+    "default": 50, // default values for FIREVAT manual mode
+    // filtering ranges can be given
+    // "range": [min, max],
+    "type": "integer", // type of value in R session
+    "use_in_filter": true /* boolean whether given value is 
+                             used in filtering or not */
+  }
+]
+```
+
+Furthermore, you can use your own functions to add a filtering value which is not directly described in the VCF file.
+
+```json
+[
+  {
+    "name": "RATIO",
+    "direction": "POS",
+    "field": {
+      "field_type": "INFO",
+      "key": "RATIO",
+      "index": 1
+    },
+    "default": 0,
+    "type": "float",
+    "use_in_filter": false
+  }, // same format with GC_example.json
+  {
+    "name": "MinRATIO",
+    "direction": "POS",
+    "op": {
+      /* By adding custom functions in "op", you can add 
+                a new variable "MinRATIO" which is "RATIO"* 100. */
+      "function_string": "function(a){tryCatch({return(100*a)},error=function(e){return(0)})}",
+      //custom function, evaluated in R
+      "args": ["RATIO"] /* argument of custom function, variable 
+                                should be defined in the config file */
+    },
+    "type": "float",
+    "default": 0,
+    "use_in_filter": true
+  }
+]
+```
+
+Here is another example of config file:
+
+```json
+[
+  {
+    "name": "PrimaryDPAltReverse",
+    "direction": "POS",
+    "field": {
+      "field_type": "FORMAT",
+      "column_header": "PRIMARY",
+      "key": "DP4",
+      "index": 4
+    },
+    "type": "integer",
+    "default": 1,
+    "range": [0, 10],
+    "use_in_filter": false
+  },
+  {
+    "name": "TumorVAF",
+    "direction": "POS",
+    "op": {
+      "function_string": "function(a,b,c){tryCatch({return((b+c)/a)},error=function(e){return(0)})}",
+      "args": ["PrimaryDP", "PrimaryDPAltForward", "PrimaryDPAltReverse"]
+    },
+    "type": "float",
+    "default": 10,
+    "use_in_filter": true
+  }
+]
+```
+
+#### Configuration file 'Field'
+
+Shown below is a summary table of 'field' values (and corresponding descriptions) that FIREVAT config files can recognize.
+
+| NAME          | SUBFIELD      | DESCRIPTION                                                         |
+| ------------- | ------------- | ------------------------------------------------------------------- |
+| name          | -             | variable name used in R                                             |
+| direction     | -             | filtering direction; refined > cutoff (POS), refined < cutoff (NEG) |
+| field         | -             | information to access values in vcf                                 |
+| field         | field_type    | "INFO" or "FORMAT"                                                  |
+| field         | column_header | if field type is "FORMAT", the column header where wanted value is  |
+| field         | key           | key for the value (INFO: sep="=", FORMAT: sep=":")                  |
+| field         | index         | index for the value (comma separated)                               |
+| type          | -             | type of value (integer, string, double, boolean)                    |
+| range         | -             | filtering range of value ( [min, max])                              |
+| use_in_filter | -             | boolean whether given value is used in filtering or not             |
+
+#### Configuration file 'Operation'
+
+Shown below is a summary table of 'operation' values (and corresponding descriptions) that FIREVAT config file can recognize.
+
+| NAME          | SUBFIELD        | DESCRIPTION                                                         |
+| ------------- | --------------- | ------------------------------------------------------------------- |
+| name          | -               | variable name used in R                                             |
+| direction     | -               | filtering direction; refined > cutoff (POS), refined > cutoff (NEG) |
+| op            | -               | information to access values in vcf                                 |
+| op            | function_string | custom function, evaluated in R                                     |
+| op            | args            | args for custom function, variable should be defined in config file |
+| type          | -               | type of value (integer, string, double, boolean)                    |
+| range         | -               | filtering range of value ( [min, max])                              |
+| use_in_filter | -               | boolean whether given value is used in filtering or not             |
 
 ### Reference mutational signature matrix
 

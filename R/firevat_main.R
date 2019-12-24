@@ -49,12 +49,12 @@ RunGAMode <- function(data) {
     if (is.variant.refinement.necessary$judgment == TRUE) {
         PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
         PrintLog(paste0("** This value is greater than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
-        PrintLog("** FIREVAT will now begin performing varaint refinement.")
+        PrintLog("** FIREVAT will now begin performing variant refinement.")
         data$variant.refinement.performed <- TRUE
     } else {
         PrintLog(paste0("* Sum of sequencing artifact weights: ", is.variant.refinement.necessary$seq.art.sigs.weights.sum))
         PrintLog(paste0("** This value is equal to or smaller than 'init.artifact.stop' (", data$init.artifact.stop, ")"))
-        PrintLog("** FIREVAT will return without performing varaint refinement.", type = "WARNING")
+        PrintLog("** FIREVAT will return without performing variant refinement.", type = "WARNING")
         data$variant.refinement.performed <- FALSE
         data$end.datetime <- Sys.time()
         data$variant.refinement.terminiation.log <- "Initial sequencing artifact weights sum is less than or equal to init.artifact.stop"

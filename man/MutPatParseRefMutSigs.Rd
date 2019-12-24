@@ -4,9 +4,12 @@
 \alias{MutPatParseRefMutSigs}
 \title{MutPatParseRefMutSigs}
 \usage{
-MutPatParseRefMutSigs(df.ref.mut.sigs, target.mut.sigs,
+MutPatParseRefMutSigs(
+  df.ref.mut.sigs,
+  target.mut.sigs,
   signature.start.column.index = 4,
-  mutation.type.header = "SomaticMutationType")
+  mutation.type.header = "SomaticMutationType"
+)
 }
 \arguments{
 \item{df.ref.mut.sigs}{A data.frame of reference mutational signatures}

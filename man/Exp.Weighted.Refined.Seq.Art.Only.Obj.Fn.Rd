@@ -4,8 +4,12 @@
 \alias{Exp.Weighted.Refined.Seq.Art.Only.Obj.Fn}
 \title{Exp.Weighted.Refined.Seq.Art.Only.Obj.Fn}
 \usage{
-Exp.Weighted.Refined.Seq.Art.Only.Obj.Fn(C.refined, A.refined,
-  C.artifactual, A.artifactual)
+Exp.Weighted.Refined.Seq.Art.Only.Obj.Fn(
+  C.refined,
+  A.refined,
+  C.artifactual,
+  A.artifactual
+)
 }
 \arguments{
 \item{C.refined}{A numeric value between 0 and 1.}

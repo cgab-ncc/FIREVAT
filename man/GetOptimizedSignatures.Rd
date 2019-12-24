@@ -4,8 +4,7 @@
 \alias{GetOptimizedSignatures}
 \title{GetOptimizedSignatures}
 \usage{
-GetOptimizedSignatures(data, mutations.type = "refined",
-  signatures = "all")
+GetOptimizedSignatures(data, mutations.type = "refined", signatures = "all")
 }
 \arguments{
 \item{data}{A list of main data from \code{\link{RunFIREVAT}}}

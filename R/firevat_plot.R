@@ -76,7 +76,7 @@ PlotVCFStatsHistograms <- function(plot.values,
                   axis.title.x = element_text(size = font.size.large),
                   axis.title.y = element_text(size = font.size.med)) +
             scale_y_continuous(limits = c(0, stat.y.max.vals[i])) +
-            scale_x_continuous(limits = c(-0.5, stat.x.max.vals[i]),
+            scale_x_continuous(limits = c(-0.5, stat.x.max.vals[i] + 1),
                                expand = c(0.1, 0.1))
 
         if (plot.cutoff.value.lines) {

@@ -4,8 +4,7 @@
 \alias{GetParameterLowerUpperVector}
 \title{GetParameterLowerUpperVector}
 \usage{
-GetParameterLowerUpperVector(vcf.obj, config.obj, vcf.filter,
-  multiplier = 100)
+GetParameterLowerUpperVector(vcf.obj, config.obj, vcf.filter, multiplier = 100)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}

@@ -3,5 +3,3 @@ inst/doc
 .Rhistory
 .RData
 .Ruserdata
-inst/extdata/clinvar*.vcf
-scripts/firevat_mc3*.R

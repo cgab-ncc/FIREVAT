@@ -4,8 +4,12 @@
 \alias{ReadVCF}
 \title{ReadVCF}
 \usage{
-ReadVCF(vcf.file, genome = "hg19", split.info = FALSE,
-  check.chromosome.name = TRUE)
+ReadVCF(
+  vcf.file,
+  genome = "hg19",
+  split.info = FALSE,
+  check.chromosome.name = TRUE
+)
 }
 \arguments{
 \item{vcf.file}{(full path of a .vcf file)}

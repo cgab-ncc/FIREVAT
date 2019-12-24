@@ -105,7 +105,7 @@ varscan2.config.file <- system.file("config", "Varscan2_Filtering_Params.json", 
 
 ### Vignette
 
-In [**Introduction to FIREVAT**](https://github.com/cgab-ncc/FIREVAT/tree/master/vignettes/intro_to_firevat.html), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
+In [**Introduction to FIREVAT**](https://github.com/cgab-ncc/FIREVAT/tree/master/vignettes/Introduction_to_FIREVAT.html), you can find advanced examples and detailed tutorials on how to use ```FIREVAT```.
 
 ## Suggested workflow
 
@@ -117,7 +117,7 @@ Based on our validation studies, we suggest using ```FIREVAT``` in the following
 
 ## Paper
 
-[]()
+[Kim, H., Lee, A.J., Lee, J. et al. FIREVAT: finding reliable variants without artifacts in human cancer samples using etiologically relevant mutational signatures. Genome Med 11, 81 (2019) doi:10.1186/s13073-019-0695-x](https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-019-0695-x)
 
 ## Authors
 * Andy Jinseok Lee, Bioinformatics Analysis Team, National Cancer Center Korea.
@@ -128,4 +128,4 @@ Based on our validation studies, we suggest using ```FIREVAT``` in the following
 FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@ncc.re.kr).
 
 ## License
-[MIT License](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE)
+[MIT License](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE.md)

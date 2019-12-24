@@ -4,8 +4,14 @@
 \alias{FilterVCF}
 \title{FilterVCF}
 \usage{
-FilterVCF(vcf.obj, vcf.filter, config.obj, include.array = NULL,
-  force.include = FALSE, verbose = TRUE)
+FilterVCF(
+  vcf.obj,
+  vcf.filter,
+  config.obj,
+  include.array = NULL,
+  force.include = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}

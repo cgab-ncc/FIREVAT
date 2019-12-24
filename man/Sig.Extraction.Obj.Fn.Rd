@@ -19,5 +19,5 @@ Sig.Extraction.Obj.Fn(C.refined, A.refined, C.artifactual, A.artifactual)
 A numeric value between 0 and 1.
 }
 \description{
-Calculates the default objective value for FIREVAT GA optimization.
+Calculates the signature extraction objective value for FIREVAT GA optimization.
 }

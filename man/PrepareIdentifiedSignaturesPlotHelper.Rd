@@ -4,8 +4,12 @@
 \alias{PrepareIdentifiedSignaturesPlotHelper}
 \title{PrepareIdentifiedSignaturesPlotHelper}
 \usage{
-PrepareIdentifiedSignaturesPlotHelper(mutalisk.results, signatures, title,
-  df.ref.mut.sigs.groups.colors)
+PrepareIdentifiedSignaturesPlotHelper(
+  mutalisk.results,
+  signatures,
+  title,
+  df.ref.mut.sigs.groups.colors
+)
 }
 \arguments{
 \item{mutalisk.results}{A list of elements returned from \code{\link{RunMutalisk}}}

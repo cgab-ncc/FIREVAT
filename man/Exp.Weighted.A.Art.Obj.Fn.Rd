@@ -4,8 +4,7 @@
 \alias{Exp.Weighted.A.Art.Obj.Fn}
 \title{Exp.Weighted.A.Art.Obj.Fn}
 \usage{
-Exp.Weighted.A.Art.Obj.Fn(C.refined, A.refined, C.artifactual,
-  A.artifactual)
+Exp.Weighted.A.Art.Obj.Fn(C.refined, A.refined, C.artifactual, A.artifactual)
 }
 \arguments{
 \item{C.refined}{A numeric value between 0 and 1.}

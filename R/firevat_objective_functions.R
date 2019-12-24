@@ -474,7 +474,7 @@ Exp.Weighted.A.Art.Obj.Fn <- function(C.refined, A.refined, C.artifactual, A.art
 
 
 #' @title Sig.Extraction.Obj.Fn
-#' @description Calculates the default objective value for FIREVAT GA optimization.
+#' @description Calculates the signature extraction objective value for FIREVAT GA optimization.
 #'
 #' @param C.refined A numeric value between 0 and 1.
 #' @param A.refined A numeric value between 0 and 1.
