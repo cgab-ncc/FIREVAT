@@ -1,0 +1,324 @@
+[{
+        "name": "NormalDPRefForward",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "DP4",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalDPRefReverse",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "DP4",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalDPAltForward",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "DP4",
+            "index": 3
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 10],
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalDPAltReverse",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "DP4",
+            "index": 4
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 10],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryDPRefForward",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "DP4",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryDPRefReverse",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "DP4",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 5,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryDPAltForward",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "DP4",
+            "index": 3
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 10],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryDPAltReverse",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "DP4",
+            "index": 4
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 10],
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalRefBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "BQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryRefBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "BQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryAltBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "BQ",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalDP",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "DP",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 30],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryDP",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "DP",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryDPAlt",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["PrimaryDPAltForward", "PrimaryDPAltReverse"]
+        },
+        "type": "integer",
+        "default": 3,
+        "range": [3, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalDPAlt",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["NormalDPAltForward", "NormalDPAltReverse"]
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 5],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalDPRef",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["NormalDPRefForward", "NormalDPRefReverse"]
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryDPRef",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a+b)},error=function(e){return(0)})}",
+            "args": ["PrimaryDPRefForward", "PrimaryDPRefReverse"]
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorVAF",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b,c){tryCatch({return((b+c)/a)},error=function(e){return(0)})}",
+            "args": ["PrimaryDP", "PrimaryDPAltForward", "PrimaryDPAltReverse"]
+        },
+        "type": "float",
+        "default": 0,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalGQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "GQ",
+            "index": 1
+        },
+        "type": "integer",
+        "range": [0, 20],
+        "use_in_filter": false
+    },
+    {
+        "name": "PrimaryGQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "GQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryVAQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "VAQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalRefAMQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AMQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 40],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryRefAMQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "AMQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 40],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryAltAMQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "AMQ",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 40],
+        "use_in_filter": true
+    }
+]

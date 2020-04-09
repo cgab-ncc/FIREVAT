@@ -230,6 +230,7 @@ PlotVCFStatsBoxPlots <- function(original.vcf.stat.values,
 #' @param columns.to.plot A character vector (of column names to plot)
 #' @param x.axis.var x axis variable
 #' @param x.axis.title x axis title
+#' @param x.min x axis minimum value
 #' @param x.max x axis maximum value
 #' @param save.file Filename (including full path) to which the plot will be saved
 #' @param title Plot title

@@ -4,16 +4,9 @@
 \alias{RunMutalisk}
 \title{RunMutalisk}
 \usage{
-RunMutalisk(
-  vcf.obj,
-  df.ref.mut.sigs,
-  target.mut.sigs,
-  random.sampling.candidate.mut.sigs = c(),
-  method = "random.sampling",
-  n.sample = 20,
-  n.iter = 10,
-  verbose = TRUE
-)
+RunMutalisk(vcf.obj, df.ref.mut.sigs, target.mut.sigs,
+  random.sampling.candidate.mut.sigs = c(), method = "random.sampling",
+  n.sample = 20, n.iter = 10, verbose = TRUE)
 }
 \arguments{
 \item{vcf.obj}{A list (from firevat_vcf::ReadVCF)}

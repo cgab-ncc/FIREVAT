@@ -1,0 +1,253 @@
+[{
+        "name": "NormalDP",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "DP",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorDP",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "DP",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorQSS",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "QSS",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 60],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalQSS",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "QSS_NT",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 60],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalAU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "AU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorAU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "AU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalCU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "CU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorCU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "CU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalGU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "GU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorGU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "GU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalTU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "TU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorTU",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "TU",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalRefAD",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(base,au,cu,gu,tu){tryCatch({a<-au*(base=='A');c<-cu*(base=='C');g<-gu*(base=='G');t<-tu*(base=='T');return(a+c+g+t)},error=function(e){return(0)})}",
+            "args": [
+                "REF",
+                "NormalAU",
+                "NormalCU",
+                "NormalGU",
+                "NormalTU"
+            ]
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "NormalAltAD",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(base,au,cu,gu,tu){tryCatch({a<-au*(base=='A');c<-cu*(base=='C');g<-gu*(base=='G');t<-tu*(base=='T');return(a+c+g+t)},error=function(e){return(0)})}",
+            "args": [
+                "ALT",
+                "NormalAU",
+                "NormalCU",
+                "NormalGU",
+                "NormalTU"
+            ]
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorRefAD",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(base,au,cu,gu,tu){tryCatch({a<-au*(base=='A');c<-cu*(base=='C');g<-gu*(base=='G');t<-tu*(base=='T');return(a+c+g+t)},error=function(e){return(0)})}",
+            "args": [
+                "REF",
+                "TumorAU",
+                "TumorCU",
+                "TumorGU",
+                "TumorTU"
+            ]
+        },
+        "type": "integer",
+        "default": 10,
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorAltAD",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(base,au,cu,gu,tu){tryCatch({a<-au*(base=='A');c<-cu*(base=='C');g<-gu*(base=='G');t<-tu*(base=='T');return(a+c+g+t)},error=function(e){return(0)})}",
+            "args": [
+                "ALT",
+                "TumorAU",
+                "TumorCU",
+                "TumorGU",
+                "TumorTU"
+            ]
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalVAF",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a/(a+b))},error=function(e){return(0)})}",
+            "args": ["NormalAltAD", "NormalRefAD"]
+        },
+        "type": "float",
+        "default": 0,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorVAF",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(a/(a+b))},error=function(e){return(0)})}",
+            "args": ["TumorAltAD", "TumorRefAD"]
+        },
+        "type": "float",
+        "default": 0,
+        "range": [0, 10],
+        "use_in_filter": true
+    }
+]

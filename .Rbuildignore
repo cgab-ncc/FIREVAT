@@ -6,3 +6,5 @@ scripts/
 examples/
 inst/docs/
 ^LICENSE\.md$
+^doc$
+^Meta$

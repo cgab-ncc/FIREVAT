@@ -4,15 +4,9 @@
 \alias{PerformStrandBiasAnalysis}
 \title{PerformStrandBiasAnalysis}
 \usage{
-PerformStrandBiasAnalysis(
-  vcf.obj,
-  ref.forward.strand.var,
-  ref.reverse.strand.var,
-  alt.forward.strand.var,
-  alt.reverse.strand.var,
-  perform.fdr.correction = TRUE,
-  fdr.correction.method = "BH"
-)
+PerformStrandBiasAnalysis(vcf.obj, ref.forward.strand.var,
+  ref.reverse.strand.var, alt.forward.strand.var, alt.reverse.strand.var,
+  perform.fdr.correction = TRUE, fdr.correction.method = "BH")
 }
 \arguments{
 \item{vcf.obj}{\code{\link{ReadVCF}}}

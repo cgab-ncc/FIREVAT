@@ -9,8 +9,7 @@ MutPatParseVCFObj(vcf.obj, bsg, sample.id = "sample")
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}
 
-\item{bsg}{BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19 or
-BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38}
+\item{bsg}{A BSgenome object}
 
 \item{sample.id}{A string value}
 }

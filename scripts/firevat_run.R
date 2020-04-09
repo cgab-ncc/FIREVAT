@@ -21,22 +21,22 @@ suppressPackageStartupMessages(library(FIREVAT))
 # Specify necessary FIREVAT options in firevat.run.option.list
 firevat.run.option.list <- list(
     # vcf file
-    make_option(c("-v", "--vcf"), 
+    make_option(c("-v", "--vcf"),
                 type="character",
                 help="Input vcf file for FIREVAT pipeline"),
     # config file
-    make_option(c("-c", "--config"), 
+    make_option(c("-c", "--config"),
                 type="character",
                 help="Configuration JSON/YAML for FIREVAT pipeline"),
     # output directory
-    make_option(c("-o", "--output"), 
+    make_option(c("-o", "--output"),
                 type="character",
                 default=paste0("../experiment/",format(Sys.time(), "%Y%m%d_%H%M%S/")),
                 help="Output directory [default \"%default\"]"),
     # reference genome version
-    make_option(c("-g","--genome"), 
+    make_option(c("-g","--genome"),
                 type="character",
-                help="Genome version of input vcf (hg19/hg38)"),
+                help="Genome version of input vcf"),
     # running mode of firevat: v0.1.2 - manual / ga
     make_option(c("-m","--mode"),
                 type="character",
@@ -51,13 +51,13 @@ firevat.run.option.list <- list(
                 default= FALSE,
                 help="Perform strand bias analysis [default: FALSE]"),
     # number of cores
-    make_option(c("-n","--numcores"), 
-                type="integer", 
-                default=1, 
+    make_option(c("-n","--numcores"),
+                type="integer",
+                default=1,
                 dest="num.cores",
                 help="Number of cores using in FIREVAT pipeline [default\"%default\"]"),
     # GA: population size
-    make_option(c("-p","--popsize"), 
+    make_option(c("-p","--popsize"),
                 type="integer",
                 default= 200,
                 dest="pop.size",
@@ -109,7 +109,7 @@ if (!interactive()){
 
         # Annotation parameters
         cols.to.display = c("GENEINFO", "CLNSIG")
-        filter.key.value.pairs <- list("CLNSIG" = c("Pathogenic", "Pathogenic/Likely_pathogenic", "Likely_pathogenic"))    
+        filter.key.value.pairs <- list("CLNSIG" = c("Pathogenic", "Pathogenic/Likely_pathogenic", "Likely_pathogenic"))
     } else {
         df.annotation.db <- NULL
         cols.to.display <- c()

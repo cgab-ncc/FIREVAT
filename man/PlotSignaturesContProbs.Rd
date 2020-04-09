@@ -4,15 +4,9 @@
 \alias{PlotSignaturesContProbs}
 \title{PlotSignaturesContProbs}
 \usage{
-PlotSignaturesContProbs(
-  df.identified.mut.sigs,
-  df.ref.sigs.groups.colors,
-  title,
-  convert.to.percentage = T,
-  font.size.small = 8,
-  font.size.med = 14,
-  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")
-)
+PlotSignaturesContProbs(df.identified.mut.sigs, df.ref.sigs.groups.colors,
+  title, convert.to.percentage = T, font.size.small = 8,
+  font.size.med = 14, plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))
 }
 \arguments{
 \item{df.identified.mut.sigs}{A data.frame of identified mutational signatures}

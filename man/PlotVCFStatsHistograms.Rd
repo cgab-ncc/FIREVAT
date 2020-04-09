@@ -4,25 +4,12 @@
 \alias{PlotVCFStatsHistograms}
 \title{PlotVCFStatsHistograms}
 \usage{
-PlotVCFStatsHistograms(
-  plot.values,
-  x.axis.labels,
-  stat.y.max.vals,
-  stat.x.max.vals,
-  sample.id,
-  save.file,
-  title,
-  cutoff.values,
-  plot.boxplot = F,
-  plot.cutoff.line.color = "#D4012E",
-  plot.cutoff.value.lines = F,
-  bin.width = 1,
-  ncol = 4,
-  nrow = 3,
-  font.size.med = 10,
-  font.size.large = 12,
-  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")
-)
+PlotVCFStatsHistograms(plot.values, x.axis.labels, stat.y.max.vals,
+  stat.x.max.vals, sample.id, save.file, title, cutoff.values,
+  plot.boxplot = F, plot.cutoff.line.color = "#D4012E",
+  plot.cutoff.value.lines = F, bin.width = 1, ncol = 4, nrow = 3,
+  font.size.med = 10, font.size.large = 12, plot.margin = unit(c(0.5,
+  0.5, 0.5, 0.5), "cm"))
 }
 \arguments{
 \item{plot.values}{A list of multiple numeric vectors}

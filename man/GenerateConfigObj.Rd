@@ -4,11 +4,8 @@
 \alias{GenerateConfigObj}
 \title{Generate config.obj by checking vcf header}
 \usage{
-GenerateConfigObj(
-  vcf.obj,
-  save.config = TRUE,
-  config.path = "../temp/FIREVAT_configure.json"
-)
+GenerateConfigObj(vcf.obj, save.config = TRUE,
+  config.path = "../temp/FIREVAT_configure.json")
 }
 \arguments{
 \item{vcf.obj}{A list from \code{\link{ReadVCF}}}

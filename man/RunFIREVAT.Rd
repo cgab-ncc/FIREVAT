@@ -4,29 +4,17 @@
 \alias{RunFIREVAT}
 \title{RunFIREVAT}
 \usage{
-RunFIREVAT(
-  vcf.file,
-  vcf.file.genome = "hg19",
-  config.file,
+RunFIREVAT(vcf.file, vcf.file.genome = "hg19",
+  check.chromosome.name = TRUE, config.file,
   df.ref.mut.sigs = GetPCAWGMutSigs(),
   target.mut.sigs = GetPCAWGMutSigsNames(),
   df.ref.mut.sigs.groups.colors = GetPCAWGMutSigsEtiologiesColors(),
   sequencing.artifact.mut.sigs = PCAWG.All.Sequencing.Artifact.Signatures,
-  num.cores = 2,
-  output.dir,
-  mode = "ga",
-  init.artifact.stop = 0.05,
-  objective.fn = Default.Obj.Fn,
-  use.suggested.soln = TRUE,
-  ga.type = "real-valued",
-  ga.pop.size = 100,
-  ga.max.iter = 100,
-  ga.run = 50,
-  ga.pmutation = 0.1,
-  ga.preemptive.killing = FALSE,
-  ga.seed = NULL,
-  mutalisk = TRUE,
-  mutalisk.method = "all",
+  num.cores = 2, output.dir, mode = "ga", init.artifact.stop = 0.05,
+  objective.fn = Default.Obj.Fn, use.suggested.soln = TRUE,
+  ga.type = "real-valued", ga.pop.size = 100, ga.max.iter = 100,
+  ga.run = 50, ga.pmutation = 0.1, ga.preemptive.killing = FALSE,
+  ga.seed = NULL, mutalisk = TRUE, mutalisk.method = "all",
   mutalisk.must.include.sigs = NULL,
   mutalisk.random.sampling.count = 20,
   mutalisk.random.sampling.max.iter = 10,
@@ -35,27 +23,21 @@ RunFIREVAT(
   filter.by.strand.bias.analysis.cutoff = 0.25,
   strand.bias.perform.fdr.correction = TRUE,
   strand.bias.fdr.correction.method = "BH",
-  ref.forward.strand.var = NULL,
-  ref.reverse.strand.var = NULL,
-  alt.forward.strand.var = NULL,
-  alt.reverse.strand.var = NULL,
-  annotate = FALSE,
-  df.annotation.db = NULL,
+  ref.forward.strand.var = NULL, ref.reverse.strand.var = NULL,
+  alt.forward.strand.var = NULL, alt.reverse.strand.var = NULL,
+  annotate = FALSE, df.annotation.db = NULL,
   annotated.columns.to.display = NULL,
   annotation.filter.key.value.pairs = NULL,
-  annotation.filter.condition = "AND",
-  write.vcf = TRUE,
-  report = TRUE,
-  save.rdata = TRUE,
-  save.tsv = TRUE,
-  report.format = "html",
-  verbose = TRUE
-)
+  annotation.filter.condition = "AND", write.vcf = TRUE,
+  report = TRUE, save.rdata = TRUE, save.tsv = TRUE,
+  report.format = "html", verbose = TRUE)
 }
 \arguments{
 \item{vcf.file}{String value corresponding to input .vcf file. Please provide the full path.}
 
-\item{vcf.file.genome}{Genome assembly of the input .vcf file. The value should be eitehr 'hg19' or 'hg38'.}
+\item{vcf.file.genome}{Genome assembly of the input .vcf file. The genome should be supported by BSgenome.}
+
+\item{check.chromosome.name}{Boolean value. If TRUE, FIREVAT checks chromosome names}
 
 \item{config.file}{String value corresponding to input configuration file. For more details please refer to ...}
 

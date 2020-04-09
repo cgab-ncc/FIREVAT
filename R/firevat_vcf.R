@@ -13,10 +13,11 @@
 #' @description Reads a .vcf file
 #'
 #' @param vcf.file (full path of a .vcf file)
-#' @param genome ('hg19' or 'hg38')
+#' @param genome A genome name for BSgenome (default: hg19)
 #' @param split.info A boolean value. If TRUE, then makes the INFO column in the vcf
 #' as a separate column. Default value is FALSE.
 #' @param check.chromosome.name A boolean value. If TRUE, then check whether converts
+#' @param match.bsg A boolean value. If TRUE, check whether chromosome matches with those in BSgenome
 #' 'MT' to 'M' and adds 'chr' to the CHROM column. Default value is TRUE.
 #'
 #' @return A list with elements 'data', 'header', 'genome'
@@ -26,7 +27,8 @@
 ReadVCF <- function(vcf.file,
                     genome = "hg19",
                     split.info = FALSE,
-                    check.chromosome.name = TRUE) {
+                    check.chromosome.name = TRUE,
+                    match.bsg = FALSE) {
     vcf.temp <- read.vcf(x = vcf.file,
                          split.info = split.info,
                          verbose = FALSE)
@@ -43,19 +45,23 @@ ReadVCF <- function(vcf.file,
         # Check "CHROM" column.
         # If name of mitochondrial chromosome is given as "MT",
         # change it into "M"
-        chrom.MT.check <- grepl("MT",vcf.obj$data$CHROM)
+        chrom.MT.check <- grepl("MT", vcf.obj$data$CHROM)
         vcf.obj$data$CHROM[chrom.MT.check] <- "M"
 
         # Check if chromosome names start with "chr"
         # If not, paste "chr"
-        chrom.chr.check <- grepl("chr",vcf.obj$data$CHROM)
+        chrom.chr.check <- grepl("chr", vcf.obj$data$CHROM)
 
-        vcf.obj$data$CHROM[chrom.chr.check==F] <- paste0(
-            "chr", vcf.obj$data$CHROM[chrom.chr.check==F]
+        vcf.obj$data$CHROM[chrom.chr.check == FALSE] <- paste0(
+            "chr", vcf.obj$data$CHROM[chrom.chr.check == FALSE]
         )
+    }
 
-        # Finally, compare chromosome names of vcf with names in firevat_constants
-        chrom.name.match <- vcf.obj$data$CHROM %in% Chromosome.Names
+    if (match.bsg == TRUE) {
+        # If match.bsg is TRUE,
+        # compare chromosome names of vcf with names in BSgenome
+        bsg <- BSgenome::getBSgenome(genome)
+        chrom.name.match <- vcf.obj$data$CHROM %in% bsg@seqinfo@seqnames
         vcf.obj$data <- vcf.obj$data[chrom.name.match,]
     }
 

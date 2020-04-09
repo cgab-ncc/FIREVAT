@@ -4,15 +4,9 @@
 \alias{CheckIfVariantRefinementIsNecessary}
 \title{CheckIfVariantRefinementIsNecessary}
 \usage{
-CheckIfVariantRefinementIsNecessary(
-  vcf.obj,
-  bsg,
-  df.mut.pat.ref.sigs,
-  target.mut.sigs,
-  sequencing.artifact.mut.sigs,
-  init.artifact.stop = 0.05,
-  verbose = TRUE
-)
+CheckIfVariantRefinementIsNecessary(vcf.obj, bsg, df.mut.pat.ref.sigs,
+  target.mut.sigs, sequencing.artifact.mut.sigs,
+  init.artifact.stop = 0.05, verbose = TRUE)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}

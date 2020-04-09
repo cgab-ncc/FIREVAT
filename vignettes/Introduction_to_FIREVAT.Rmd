@@ -141,19 +141,19 @@ print(g$f1)
 
 ### Observed spectrum
 
-```{r}
+```{r, warning=FALSE}
 print(g$f2.1)
 ```
 
 ### Reconstructed spectrum
 
-```{r}
+```{r, warning=FALSE}
 print(g$f2.2)
 ```
 
 ### Residual spectrum
 
-```{r}
+```{r, warning=FALSE}
 print(g$f2.3)
 ```
 

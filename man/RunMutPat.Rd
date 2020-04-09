@@ -4,7 +4,8 @@
 \alias{RunMutPat}
 \title{RunMutPat}
 \usage{
-RunMutPat(mut.pat.input, df.mut.pat.ref.sigs, target.mut.sigs, verbose = TRUE)
+RunMutPat(mut.pat.input, df.mut.pat.ref.sigs, target.mut.sigs,
+  verbose = TRUE)
 }
 \arguments{
 \item{mut.pat.input}{A list from \code{\link{MutPatParseVCFObj}}}

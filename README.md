@@ -24,8 +24,14 @@ devtools::install_github("cgab-ncc/FIREVAT", dependencies = TRUE)
 To install the above packages:
 ```r
 install.packages("BiocManager")
+# The default input genome for FIREVAT is human genomes (hg19, hg38)
 BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
 BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+# If you want to apply FIREVAT to another species, you can use other BSgenomes
+# ex) mm10
+BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
+
+
 
 # If you are using R < 3.6.0
 package.url <- "http://cran.r-project.org/src/contrib/Archive/rngtools/rngtools_1.3.1.tar.gz"
@@ -61,7 +67,7 @@ config.file <- system.file("config", "PCAWG_DKFZ_Cell_Line_Filtering_Params.json
 
 # Run FIREVAT
 results <- RunFIREVAT(vcf.file = sample.vcf.file,
-                      vcf.file.genome = 'hg19',
+                      vcf.file.genome = 'hg19', # for mouse variants: 'mm10'
                       config.file = config.file,
                       df.ref.mut.sigs = GetPCAWGMutSigs(),
                       target.mut.sigs = GetPCAWGMutSigsNames(),
@@ -101,6 +107,9 @@ somaticsniper.config.file <- system.file("config", "SomaticSniper_Filtering_Para
 
 # Varscan2
 varscan2.config.file <- system.file("config", "Varscan2_Filtering_Params.json", package = "FIREVAT")
+
+# Strelka
+strelka.config.file <- system.file("config", "Strelka_Filtering_Params.json", package = "FIREVAT")
 ```
 
 ### Vignette
@@ -125,7 +134,7 @@ Based on our validation studies, we suggest using ```FIREVAT``` in the following
 
 ## Attributions
 
-FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@ncc.re.kr).
+FIREVAT is developed and maintained by Andy Jinseok Lee (jinseok.lee@ncc.re.kr) and Hyunbin Kim (khb7840@gmail.com).
 
 ## License
 [MIT License](https://github.com/cgab-ncc/FIREVAT/blob/master/LICENSE.md)

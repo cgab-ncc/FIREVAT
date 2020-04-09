@@ -4,25 +4,11 @@
 \alias{PlotOptimizationIterations}
 \title{PlotOptimizationIterations}
 \usage{
-PlotOptimizationIterations(
-  df,
-  columns.to.plot,
-  x.axis.var,
-  x.axis.title,
-  x.min,
-  x.max,
-  save.file,
-  title,
-  y.axis.title = "",
-  y.max = 1,
-  point.size = 1,
-  connect.dots = T,
-  plot.legend = T,
-  legend.ncol = 1,
-  font.size.med = 14,
-  font.size.large = 16,
-  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")
-)
+PlotOptimizationIterations(df, columns.to.plot, x.axis.var, x.axis.title,
+  x.min, x.max, save.file, title, y.axis.title = "", y.max = 1,
+  point.size = 1, connect.dots = T, plot.legend = T,
+  legend.ncol = 1, font.size.med = 14, font.size.large = 16,
+  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))
 }
 \arguments{
 \item{df}{A data.frame (from reading "FIREVAT_Optimization_Logs.tsv")}
@@ -32,6 +18,8 @@ PlotOptimizationIterations(
 \item{x.axis.var}{x axis variable}
 
 \item{x.axis.title}{x axis title}
+
+\item{x.min}{x axis minimum value}
 
 \item{x.max}{x axis maximum value}
 

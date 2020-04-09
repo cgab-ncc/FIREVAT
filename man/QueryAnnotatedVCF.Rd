@@ -4,11 +4,8 @@
 \alias{QueryAnnotatedVCF}
 \title{FilterAnnotatedVCF}
 \usage{
-QueryAnnotatedVCF(
-  vcf.obj.annotated,
-  filter.key.value.pairs,
-  filter.condition = "AND"
-)
+QueryAnnotatedVCF(vcf.obj.annotated, filter.key.value.pairs,
+  filter.condition = "AND")
 }
 \arguments{
 \item{vcf.obj.annotated}{\code{\link{AnnotateVCFObj}}}

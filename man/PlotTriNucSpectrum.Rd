@@ -4,24 +4,11 @@
 \alias{PlotTriNucSpectrum}
 \title{PlotTriNucSpectrum}
 \usage{
-PlotTriNucSpectrum(
-  sub.types,
-  spectrum,
-  max.y.val,
-  min.y.val,
-  y.axis.title,
-  draw.top.strip = T,
-  draw.x.axis.labels = T,
-  draw.y.axis.labels = T,
-  draw.y.axis.title = T,
-  font.size.small = 8,
-  font.size.med = 14,
-  plot.margin.top = 0.5,
-  plot.margin.bottom = 0.5,
-  plot.margin.left = 0.5,
-  plot.margin.right = 0.5,
-  title
-)
+PlotTriNucSpectrum(sub.types, spectrum, max.y.val, min.y.val, y.axis.title,
+  draw.top.strip = T, draw.x.axis.labels = T, draw.y.axis.labels = T,
+  draw.y.axis.title = T, font.size.small = 8, font.size.med = 14,
+  plot.margin.top = 0.5, plot.margin.bottom = 0.5,
+  plot.margin.left = 0.5, plot.margin.right = 0.5, title)
 }
 \arguments{
 \item{sub.types}{A character vector (types of 96 trinucleotide substitutions)}

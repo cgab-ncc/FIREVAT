@@ -16,6 +16,7 @@
 #'
 #' @return A list
 #'
+#' @importFrom BSgenome getBSgenome
 #' @export
 RunGAMode <- function(data) {
     if (data$verbose == TRUE) {
@@ -25,12 +26,8 @@ RunGAMode <- function(data) {
     # Prepare data for Mutational Patterns (memoization)
     data$df.mut.pat.ref.sigs <- MutPatParseRefMutSigs(df.ref.mut.sigs = data$df.ref.mut.sigs,
                                                       target.mut.sigs = data$target.mut.sigs)
-    if (data$vcf.obj$genome == "hg19") {
-        data$bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
-    }
-    if (data$vcf.obj$genome == "hg38") {
-        data$bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
-    }
+
+    data$bsg <- BSgenome::getBSgenome(data$vcf.obj$genome)
 
     # 02-1. Check if refinement is necessary based on the sum of sequencing artifact weights in the original VCF file
     if (data$verbose == TRUE) {
@@ -611,7 +608,8 @@ RunManualMode <- function(data) {
 #' identification and outputs the refined and artifact vcf files as well as metadata related to the refinement process.
 #'
 #' @param vcf.file String value corresponding to input .vcf file. Please provide the full path.
-#' @param vcf.file.genome Genome assembly of the input .vcf file. The value should be eitehr 'hg19' or 'hg38'.
+#' @param vcf.file.genome Genome assembly of the input .vcf file. The genome should be supported by BSgenome.
+#' @param check.chromosome.name Boolean value. If TRUE, FIREVAT checks chromosome names
 #' @param config.file String value corresponding to input configuration file. For more details please refer to ...
 #' @param df.ref.mut.sigs A data.frame of the reference mutational signatures
 #' @param target.mut.sigs A character vector of the target mutational signatures from reference mutational signatures.
@@ -682,9 +680,11 @@ RunManualMode <- function(data) {
 #' }
 #'
 #' @importFrom GA ga
+#' @importFrom BSgenome available.genomes
 #' @export
 RunFIREVAT <- function(vcf.file,
                        vcf.file.genome = 'hg19',
+                       check.chromosome.name = TRUE,
                        config.file,
                        df.ref.mut.sigs = GetPCAWGMutSigs(),
                        target.mut.sigs = GetPCAWGMutSigsNames(),
@@ -736,8 +736,9 @@ RunFIREVAT <- function(vcf.file,
     if (is.character(vcf.file) == FALSE) {
         stop("The parameter 'vcf.file' must be a string.")
     }
-    if (vcf.file.genome != 'hg19' && vcf.file.genome != 'hg38') {
-        stop("The parameter 'vcf.file.genome' must be either 'hg19' or 'hg38'.")
+    bsg.available <- BSgenome::available.genomes(splitNameParts = TRUE)
+    if (!(vcf.file.genome %in% c(bsg.available$pkgname, bsg.available$provider_version))) {
+        stop("The parameter 'vcf.file.genome' should be supported by BSgenome.")
     }
     if (is.character(config.file) == FALSE) {
         stop("The parameter 'config.file' must be a string.")
@@ -806,7 +807,8 @@ RunFIREVAT <- function(vcf.file,
 
     # 02. Read the vcf file
     PrintLog("Step 01-2. Read VCF file [firevat_vcf::ReadVCF].")
-    vcf.obj <- ReadVCF(vcf.file = vcf.file, genome = vcf.file.genome)
+    vcf.obj <- ReadVCF(vcf.file = vcf.file, genome = vcf.file.genome,
+                       check.chromosome.name = check.chromosome.name)
 
     # 03. Read the config file
     PrintLog("Step 01-3. Read config file [firevat_config::ParseConfigFile]")

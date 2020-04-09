@@ -4,9 +4,9 @@ Title: FIREVAT, FInding REliable Variants without ArTifacts
 Description: FIREVAT is a variant filtering tool for cancer sequencing data, 
     which uses mutational signatures to identify sequencing artifacts and 
     low-quality variants.
-Version: 0.5.9
+Version: 0.6.0
 Authors: Andy Jinseok Lee, Hyunbin Kim
-Maintainer: Andy Jinseok Lee <jinseok.lee@ncc.re.kr>, Hyunbin Kim <khb7840@ncc.re.kr>
+Maintainer: Andy Jinseok Lee <jinseok.lee@ncc.re.kr>, Hyunbin Kim <khb7840@gmail.com>
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -29,6 +29,7 @@ Imports:
     dplyr,
     extrafont,
     IRanges,
+    BSgenome,
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38,
     MutationalPatterns,
@@ -42,7 +43,7 @@ biocViews:
 Authors@R: c(
     person("Andy Jinseok", "Lee", email="jinseok.lee@ncc.re.kr",
     role=c("aut","cre")),
-    person("Hyunbin", "Kim", email="khb7840@ncc.re.kr",
+    person("Hyunbin", "Kim", email="khb7840@gmail.com",
     role="aut")
     )
 URL: https://github.com/cgab-ncc/FIREVAT

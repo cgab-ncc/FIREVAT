@@ -17,15 +17,12 @@
 #'
 #' @return A data.frame
 #'
-#' @export
 #' @importFrom deconstructSigs mut.to.sigs.input
+#' @importFrom BSgenome getBSgenome
+#' @export
 MutaliskParseVCFObj <- function(vcf.obj)  {
-    if (vcf.obj$genome == "hg19")  {
-        bsg <- BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19
-    }
-    if (vcf.obj$genome == "hg38")  {
-        bsg <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
-    }
+
+    bsg <- BSgenome::getBSgenome(vcf.obj$genome)
 
     vcf.obj$data$Sample <- rep("sample", nrow(vcf.obj$data))
     df.deconstructsigs.sigs.input <- mut.to.sigs.input(mut.ref = vcf.obj$data,

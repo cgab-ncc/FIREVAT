@@ -4,12 +4,8 @@
 \alias{AnnotateVCFObj}
 \title{AnnotateVCFObj}
 \usage{
-AnnotateVCFObj(
-  vcf.obj,
-  df.annotation.db,
-  columns.to.include,
-  include.all.columns = FALSE
-)
+AnnotateVCFObj(vcf.obj, df.annotation.db, columns.to.include,
+  include.all.columns = FALSE)
 }
 \arguments{
 \item{vcf.obj}{\code{\link{ReadVCF}}}

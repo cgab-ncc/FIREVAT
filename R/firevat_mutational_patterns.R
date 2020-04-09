@@ -14,9 +14,7 @@
 #' @description Parses a vcf.obj and prepares it to run Mutational Patterns.
 #'
 #' @param vcf.obj A list from ReadVCF
-#' @param bsg
-#' BSgenome.Hsapiens.UCSC.hg19::BSgenome.Hsapiens.UCSC.hg19 or
-#' BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+#' @param bsg A BSgenome object
 #' @param sample.id A string value
 #'
 #' @return A data.frame with the column sample.id and

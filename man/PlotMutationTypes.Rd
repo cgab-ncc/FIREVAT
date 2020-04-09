@@ -4,18 +4,10 @@
 \alias{PlotMutationTypes}
 \title{PlotMutationTypes}
 \usage{
-PlotMutationTypes(
-  mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G"),
-  mutation.types.values,
-  mutation.types.colors,
-  max.y.val,
-  title,
-  convert.to.percentage = T,
-  show.legend = T,
-  font.size.small = 8,
-  font.size.med = 14,
-  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm")
-)
+PlotMutationTypes(mutation.types = c("C>A", "C>G", "C>T", "T>A", "T>C",
+  "T>G"), mutation.types.values, mutation.types.colors, max.y.val, title,
+  convert.to.percentage = T, show.legend = T, font.size.small = 8,
+  font.size.med = 14, plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"))
 }
 \arguments{
 \item{mutation.types}{Mutation types; Default = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")}

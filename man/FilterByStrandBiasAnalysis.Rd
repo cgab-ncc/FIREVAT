@@ -4,12 +4,8 @@
 \alias{FilterByStrandBiasAnalysis}
 \title{FilterByStrandBiasAnalysis}
 \usage{
-FilterByStrandBiasAnalysis(
-  refined.vcf.obj,
-  artifactual.vcf.obj,
-  perform.fdr.correction,
-  filter.by.strand.bias.analysis.cutoff
-)
+FilterByStrandBiasAnalysis(refined.vcf.obj, artifactual.vcf.obj,
+  perform.fdr.correction, filter.by.strand.bias.analysis.cutoff)
 }
 \arguments{
 \item{refined.vcf.obj}{A list of vcf data}

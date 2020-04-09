@@ -1,0 +1,123 @@
+[{
+        "name": "NormalRefBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "BQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryRefBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "BQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryAltBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "BQ",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 20,
+        "range": [0, 30],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalRefAD",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalAltAD",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "NORMAL",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 5],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryRefAD",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "PrimaryAltAD",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "PRIMARY",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 3,
+        "range": [3, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalVAF",
+        "direction": "NEG",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(b/(a+b))},error=function(e){return(0)})}",
+            "args": ["NormalRefAD", "NormalAltAD"]
+        },
+        "type": "float",
+        "default": 1,
+        "range": [0, 10],
+        "use_in_filter": false
+    },
+    {
+        "name": "TumorVAF",
+        "direction": "POS",
+        "op": {
+            "function_string": "function(a,b){tryCatch({return(b/(a+b))},error=function(e){return(0)})}",
+            "args": ["PrimaryRefAD", "PrimaryAltAD"]
+        },
+        "type": "float",
+        "default": 0,
+        "range": [0, 10],
+        "use_in_filter": true
+    }
+]

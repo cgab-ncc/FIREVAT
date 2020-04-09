@@ -4,15 +4,9 @@
 \alias{PlotVCFStatsBoxPlots}
 \title{PlotVCFStatsBoxPlots}
 \usage{
-PlotVCFStatsBoxPlots(
-  original.vcf.stat.values,
-  refined.vcf.stat.values,
-  artifact.vcf.stat.values,
-  xlab,
-  axis.font.size = 10,
-  label.font.size = 10,
-  title.font.size = 12
-)
+PlotVCFStatsBoxPlots(original.vcf.stat.values, refined.vcf.stat.values,
+  artifact.vcf.stat.values, xlab, axis.font.size = 10,
+  label.font.size = 10, title.font.size = 12)
 }
 \arguments{
 \item{original.vcf.stat.values}{A numeric vector corresponding to the original vcf.obj values of single filter parameter}
