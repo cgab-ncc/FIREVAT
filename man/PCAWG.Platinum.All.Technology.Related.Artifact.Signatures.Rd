@@ -4,7 +4,9 @@
 \name{PCAWG.Platinum.All.Technology.Related.Artifact.Signatures}
 \alias{PCAWG.Platinum.All.Technology.Related.Artifact.Signatures}
 \title{Constant}
-\format{An object of class \code{character} of length 9.}
+\format{
+An object of class \code{character} of length 9.
+}
 \usage{
 PCAWG.Platinum.All.Technology.Related.Artifact.Signatures
 }

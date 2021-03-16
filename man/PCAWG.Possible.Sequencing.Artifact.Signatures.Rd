@@ -4,7 +4,9 @@
 \name{PCAWG.Possible.Sequencing.Artifact.Signatures}
 \alias{PCAWG.Possible.Sequencing.Artifact.Signatures}
 \title{Constant}
-\format{An object of class \code{character} of length 17.}
+\format{
+An object of class \code{character} of length 17.
+}
 \usage{
 PCAWG.Possible.Sequencing.Artifact.Signatures
 }

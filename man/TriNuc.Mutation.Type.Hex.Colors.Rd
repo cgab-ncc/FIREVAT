@@ -4,7 +4,9 @@
 \name{TriNuc.Mutation.Type.Hex.Colors}
 \alias{TriNuc.Mutation.Type.Hex.Colors}
 \title{Constant}
-\format{An object of class \code{character} of length 6.}
+\format{
+An object of class \code{character} of length 6.
+}
 \usage{
 TriNuc.Mutation.Type.Hex.Colors
 }

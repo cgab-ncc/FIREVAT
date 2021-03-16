@@ -4,7 +4,9 @@
 \name{Chromosome.Names}
 \alias{Chromosome.Names}
 \title{Constant}
-\format{An object of class \code{character} of length 25.}
+\format{
+An object of class \code{character} of length 25.
+}
 \usage{
 Chromosome.Names
 }

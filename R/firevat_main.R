@@ -1,7 +1,7 @@
 # FIREVAT Main Functions
 #
 # Last revised date:
-#   Oct 08, 2019
+#   Mar 16, 2021
 #
 # Authors:
 #   Andy Jinseok Lee (jinseok.lee@ncc.re.kr)
@@ -735,10 +735,6 @@ RunFIREVAT <- function(vcf.file,
     # 00. Check input parameters
     if (is.character(vcf.file) == FALSE) {
         stop("The parameter 'vcf.file' must be a string.")
-    }
-    bsg.available <- BSgenome::available.genomes(splitNameParts = TRUE)
-    if (!(vcf.file.genome %in% c(bsg.available$pkgname, bsg.available$provider_version))) {
-        stop("The parameter 'vcf.file.genome' should be supported by BSgenome.")
     }
     if (is.character(config.file) == FALSE) {
         stop("The parameter 'config.file' must be a string.")

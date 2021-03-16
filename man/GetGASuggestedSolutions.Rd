@@ -4,10 +4,19 @@
 \alias{GetGASuggestedSolutions}
 \title{GetGASuggestedSolutions}
 \usage{
-GetGASuggestedSolutions(vcf.obj, bsg, config.obj, lower.upper.list,
-  df.mut.pat.ref.sigs, target.mut.sigs, sequencing.artifact.mut.sigs,
-  objective.fn, original.muts.seq.art.weights.sum, ga.preemptive.killing,
-  verbose = TRUE)
+GetGASuggestedSolutions(
+  vcf.obj,
+  bsg,
+  config.obj,
+  lower.upper.list,
+  df.mut.pat.ref.sigs,
+  target.mut.sigs,
+  sequencing.artifact.mut.sigs,
+  objective.fn,
+  original.muts.seq.art.weights.sum,
+  ga.preemptive.killing,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{vcf.obj}{A list from ReadVCF}
