@@ -1,0 +1,178 @@
+[{
+        "name": "NormalADRef",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalADAlt",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 1,
+        "range": [0, 5],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorADRef",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "AD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 10,
+        "range": [0, 20],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorADAlt",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "AD",
+            "index": 2
+        },
+        "type": "integer",
+        "default": 3,
+        "range": [3, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "NormalVAF",
+        "direction": "NEG",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$10",
+            "key": "AF",
+            "index": 1
+        },
+        "type": "float",
+        "default": 1,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorVAF",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "AF",
+            "index": 1
+        },
+        "type": "float",
+        "default": 0,
+        "range": [0, 10],
+        "use_in_filter": true
+    },
+    {
+        "name": "TLOD",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "TLOD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 6,
+        "use_in_filter": false
+    },
+    {
+        "name": "NLOD",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "NLOD",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 2,
+        "use_in_filter": false
+    },
+    {
+        "name": "MBQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "MBQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 30,
+        "use_in_filter": true
+    },
+    {
+        "name": "MMQ",
+        "direction": "POS",
+        "field": {
+            "field_type": "INFO",
+            "key": "MMQ",
+            "index": 1
+        },
+        "type": "integer",
+        "default": 30,
+        "use_in_filter": true
+    },
+    {
+        "name": "TumorRefF1R2",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "F1R2",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    }, {
+        "name": "TumorRefF2R1",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "F2R1",
+            "index": 1
+        },
+        "type": "integer",
+        "use_in_filter": false
+    }, {
+        "name": "TumorAltF1R2",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "F1R2",
+            "index": 2
+        },
+        "type": "integer",
+        "use_in_filter": false
+    }, {
+        "name": "TumorAltF2R1",
+        "direction": "POS",
+        "field": {
+            "field_type": "FORMAT",
+            "column_header": "$11",
+            "key": "F2R1",
+            "index": 2
+        },
+        "type": "integer",
+        "use_in_filter": false
+    }
+]
